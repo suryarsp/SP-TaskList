@@ -15,13 +15,20 @@
   "supportedHosts": ["SharePointWebPart", "SharePointFullPage"],
 
   "preconfiguredEntries": [{
-    "groupId": "5c03119e-3074-46fd-976b-c60198311f70", // Other
+    "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
     "group": { "default": "Other" },
     "title": { "default": "TaskList" },
     "description": { "default": "Task List" },
     "officeFabricIconFontName": "Page",
     "properties": {
-      "description": "TaskList"
+      "taskListName": "Matter Tasks",
+      "commentsListName": "Comments",
+      "defaultTaskCategory": "LOAN DOCUMENTS",
+      "alwaysDownloadAllDocuments": false,
+      "itemsPerPage": 10,
+      "isGroupingEnabled": false,
+      "isCategoryUniqueEnabled": false,
+      "selectedViewType": "list"
     }
   }]
 }

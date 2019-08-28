@@ -37,3 +37,11 @@ export * from './components/bulkEditDialog/IBulkEditDialogState';
 // Services
 
 export * from './services/IDataProvider';
+
+
+// Property Pane
+export * from './propertyPane/ICategory';
+export * from './propertyPane/taskGroupingControl/ITaskGroupingControlComponentProps';
+export * from './propertyPane/taskGroupingControl/ITaskGroupingControlInternalProps';
+export * from './propertyPane/taskGroupingControl/groupingCustomization/IGroupingCustomizationProps';
+export * from './propertyPane/taskGroupingControl/groupingCustomization/IGroupingCustomizationState';
