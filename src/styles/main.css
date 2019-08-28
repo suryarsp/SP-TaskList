@@ -1,0 +1,7 @@
+#workbenchPageContent, .CanvasZone {
+  max-width: 100% !important;
+}
+
+.ms-Grid.hidden .gridContentHide {
+  display: none;
+}

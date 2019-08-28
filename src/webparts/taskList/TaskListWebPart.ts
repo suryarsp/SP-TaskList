@@ -17,7 +17,7 @@ import TaskList from './components/TaskList';
 import { ITaskListProps } from '../../interfaces/index';
 import { TaskListConstants } from '../../common/defaults/taskList-constants';
 import { TaskGroupingControlComponent } from '../../propertyPanelCustomControls/taskGroupingControl/TaskGroupingControl';
-
+require('../../styles/main.css');
 export interface ITaskListWebPartProps {
   taskListName: string;
   commentsListName: string;
