@@ -3,7 +3,6 @@ import {
      ITaskCommandBarProps,
      ITaskCommandBarState} from "../../../../interfaces/index";
 import { CommandBar, ICommandBarItemProps } from "office-ui-fabric-react/lib/CommandBar";
-import { PermissionKind } from "sp-pnp-js";
 import styles from './TaskCommandBar.module.scss';
 
 
@@ -24,7 +23,7 @@ export  class TaskCommandBar extends React.Component<
                key: "NewTask",
                name: "New Task",
                onClick: () => {
-                    this.props.onClickNew();
+
                },
                iconProps: {
                     iconName: "Add"
@@ -49,7 +48,7 @@ export  class TaskCommandBar extends React.Component<
                name: "Upload Tasklist",
               //  disabled: this.props.selectedItem ? !(this.props.selectedItem.Documents.length > 0) : true,
                onClick: () => {
-                    this.props.onClickUploadTaskList();
+
                },
                iconProps: {
                     iconName: "Upload"
@@ -60,7 +59,7 @@ export  class TaskCommandBar extends React.Component<
                key: "ExporToPdf",
                name: "Export To PDF",
                onClick: () => {
-                    this.props.onClickExportToPdf();
+
                },
                iconProps: {
                     iconName: "PDF"
@@ -70,7 +69,7 @@ export  class TaskCommandBar extends React.Component<
           let alertMe = {
                key: "AlertMe",
                name: "Alert Me",
-               onClick: () => this.props.onClickAlertMe(),
+               onClick: () => null,
                iconProps: {
                     iconName: "Ringer"
                }
@@ -79,7 +78,7 @@ export  class TaskCommandBar extends React.Component<
           let manageAlerts = {
                key: "ManageMyAlerts",
                name: "Manage my Alerts",
-               onClick: () => this.props.onClickManageMyAlerts(),
+               onClick: () => null,
                iconProps: {
                     iconName: "EditNote"
                }
