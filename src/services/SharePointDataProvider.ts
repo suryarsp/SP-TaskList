@@ -4,14 +4,15 @@ import { IWebPartContext } from "@microsoft/sp-webpart-base";
 
 import { Utilties } from "../common/helper/Utilities";
 import { Web, util, ConfigOptions, ODataBatch, PermissionKind, ListItemFormUpdateValue } from "sp-pnp-js";
+import { IPermissions } from "./permissions/IPermissions";
 
 export class SharePointDataProvider implements IDataProvider {
 
   private _absoluteUrl: string;
-  private _context: IWebPartContext;
-  private _relativeUrl: string;
-  private web: Web;
-  private utility = new Utilties();
+  public _context: IWebPartContext;
+  public _relativeUrl: string;
+  public web: Web;
+  public utility = new Utilties();
   public DocumentsColumnTitle: string = "Documents";
   public static globalFileDownloadIndex: number = 1;
 
@@ -30,7 +31,7 @@ export class SharePointDataProvider implements IDataProvider {
 
 
   public getPermissions(listTitle: string): Promise<{ permission: import("sp-pnp-js").PermissionKind; allowed: boolean; }[]> {
-    return new Promise<Array<{ permission: PermissionKind, allowed: boolean }>>((resolve) => {
+    return new Promise<IPermissions[]>((resolve) => {
       let web = new Web(this._absoluteUrl);
       let output: Array<{ permission: PermissionKind, allowed: boolean }> = [];
       web.lists

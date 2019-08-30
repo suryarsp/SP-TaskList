@@ -2,15 +2,31 @@ import * as React from 'react';
 import styles from './TaskList.module.scss';
 import { ITaskListProps } from '../../../interfaces/components/ITaskListProps';
 import { escape } from '@microsoft/sp-lodash-subset';
-import { ITaskListState } from '../../../interfaces/index';
+import { ITaskListState, IDataProvider } from '../../../interfaces/index';
 import { TaskCommandBar}  from './taskListPanelContainer/taskCommandBar/TaskCommandBar';
+import TaskDataProvider from '../../../services/TaskDataProvider';
 
 export default class TaskList extends React.Component<ITaskListProps, ITaskListState> {
+  private dataProvider: IDataProvider;
 
+
+  constructor(props) {
+    super(props);
+  }
 
   public componentDidMount() {
+      this.dataProvider = TaskDataProvider.Instance;
 
+  }
 
+  public getListAndLibraryPermissions() {
+    this.dataProvider.getPermissions(TaskDataProvider.listName).then((permissions) => {
+      TaskDataProvider.listPermissions = permissions;
+    }).catch((error) => console.log('Get Permsssion Error ', error));
+
+    this.dataProvider.getPermissions(TaskDataProvider.librarayName).then((permissions) => {
+      TaskDataProvider.libraryPermissions = permissions;
+    }).catch((error) => console.log('Get Permsssion Error ', error));
   }
 
   public onClickDelete() {

@@ -39,7 +39,12 @@ export * from './components/taskListPanelConatiner/taskList/ITaskListDetailsStat
 // Services
 
 export * from './services/IDataProvider';
-
+// export * from './services/response/ICategory';
+export * from './services/response/IComment';
+export * from './services/response/IDocument';
+export * from './services/response/IGroup';
+export * from './services/response/IResponsibleParty';
+export * from './services/response/IStatus';
 
 // Property Pane
 export * from './propertyPane/ICategory';
@@ -47,3 +52,4 @@ export * from './propertyPane/taskGroupingControl/ITaskGroupingControlComponentP
 export * from './propertyPane/taskGroupingControl/ITaskGroupingControlInternalProps';
 export * from './propertyPane/taskGroupingControl/groupingCustomization/IGroupingCustomizationProps';
 export * from './propertyPane/taskGroupingControl/groupingCustomization/IGroupingCustomizationState';
+export * from './propertyPane/IColumn';

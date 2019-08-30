@@ -1,20 +1,60 @@
 import * as React from "react";
 import {
      ITaskCommandBarProps,
-     ITaskCommandBarState} from "../../../../interfaces/index";
+     ITaskCommandBarState } from "../../../../../interfaces/index";
 import { CommandBar, ICommandBarItemProps } from "office-ui-fabric-react/lib/CommandBar";
 import styles from './TaskCommandBar.module.scss';
+import { IPermissions } from "../../../../../services/index";
+import TaskDataProvider from "../../../../../services/TaskDataProvider";
+import { PermissionKind } from "sp-pnp-js";
+import { IContextualMenuItem } from "office-ui-fabric-react/lib/ContextualMenu";
 
 
 export  class TaskCommandBar extends React.Component<
      ITaskCommandBarProps,
      ITaskCommandBarState
      > {
+
+    private listPermissions: IPermissions[] = [];
+    private libraryPermissions: IPermissions[]= [];
+
      constructor(props) {
           super(props);
      }
 
      public componentDidMount() {
+       this.listPermissions = TaskDataProvider.listPermissions;
+       this.libraryPermissions = TaskDataProvider.libraryPermissions;
+     }
+
+     public onCLickNewTask() {
+     }
+
+     public onClickEditTask() {
+     }
+
+     public uploadTaskList() {
+     }
+
+     public exportToPDF() {
+     }
+
+     public onClickAlertMe() {
+     }
+
+     public onClickManageMyAlerts() {
+     }
+
+     public onClickGroupSettings() {
+     }
+
+     public onClickCategorySettings() {
+     }
+
+     public onClickStatusSettings() {
+     }
+
+     public onClickPartySetings() {
      }
 
      public getItems(): ICommandBarItemProps[] {
@@ -23,23 +63,23 @@ export  class TaskCommandBar extends React.Component<
                key: "NewTask",
                name: "New Task",
                onClick: () => {
-
+                  this.onCLickNewTask();
                },
                iconProps: {
                     iconName: "Add"
                }
           };
 
-          // let editTask = {
-          //      key: "EditTask",
-          //      name: "Edit Task",
-          //      onClick: () => {
-          //           this.props.onClickEdit();
-          //      },
-          //      iconProps: {
-          //           iconName: "Edit"
-          //      }
-          // };
+          let editTask = {
+               key: "EditTask",
+               name: "Edit Task",
+               onClick: () => {
+                    this.onClickEditTask();
+               },
+               iconProps: {
+                    iconName: "Edit"
+               }
+          };
 
 
 
@@ -48,7 +88,7 @@ export  class TaskCommandBar extends React.Component<
                name: "Upload Tasklist",
               //  disabled: this.props.selectedItem ? !(this.props.selectedItem.Documents.length > 0) : true,
                onClick: () => {
-
+                    this.uploadTaskList();
                },
                iconProps: {
                     iconName: "Upload"
@@ -69,7 +109,7 @@ export  class TaskCommandBar extends React.Component<
           let alertMe = {
                key: "AlertMe",
                name: "Alert Me",
-               onClick: () => null,
+               onClick: () => {{ this.onClickAlertMe();}},
                iconProps: {
                     iconName: "Ringer"
                }
@@ -78,7 +118,7 @@ export  class TaskCommandBar extends React.Component<
           let manageAlerts = {
                key: "ManageMyAlerts",
                name: "Manage my Alerts",
-               onClick: () => null,
+               onClick: () => {{ this.onClickManageMyAlerts();}},
                iconProps: {
                     iconName: "EditNote"
                }
@@ -95,15 +135,69 @@ export  class TaskCommandBar extends React.Component<
                }
           };
 
-          // if (this.props.listPermissions.length === 0)
-          //      return [];
+          let groupSettings = {
+            key: 'groups',
+            onClick: () => {{this.onClickGroupSettings();}},
+            text: "Groups",
+            iconProps: {
+              iconName: 'RowsGroup'
+            },
+          };
 
-          // let canManageList = this.props.listPermissions.filter(item => item.permission == PermissionKind.ManageLists)[0].allowed;
-          // let canAddItem = this.props.listPermissions.filter(item => item.permission == PermissionKind.AddListItems)[0].allowed;
-          // let canEditItem = this.props.listPermissions.filter(item => item.permission == PermissionKind.EditListItems)[0].allowed;
-          // let canApproveItem = this.props.listPermissions.filter(item => item.permission == PermissionKind.ApproveItems)[0].allowed;
-          // let canDeleteItem = this.props.listPermissions.filter(item => item.permission == PermissionKind.DeleteListItems)[0].allowed;
-          // let canViewItem = this.props.listPermissions.filter(item => item.permission == PermissionKind.ViewListItems)[0].allowed;
+          let categorySettings = {
+            key: 'category',
+            onClick: () => {{this.onClickCategorySettings();}},
+            text: "Categories",
+            iconProps: {
+              iconName: 'ViewListGroup'
+            },
+          };
+
+          let statusSettings = {
+            key: 'status',
+            onClick: () => {{this.onClickStatusSettings();}},
+            text: "Statuses",
+            iconProps: {
+              iconName: 'CheckMark'
+            },
+          };
+
+          let partySettings = {
+            key: 'parties',
+            onClick: () => {{ this.onClickPartySetings();}},
+            text: "Responsible Party",
+            iconProps: {
+              iconName: 'ContactInfo'
+            },
+          };
+
+
+          let adminSettings: IContextualMenuItem  = {
+            key: "adminSettings",
+            name: "Admin Settings",
+            onClick: () => {{}},
+            iconProps: {
+                 iconName: "PlayerSettings"
+            },
+            subMenuProps: {
+                items : [
+                  groupSettings, categorySettings, statusSettings, partySettings
+                ]
+            }
+
+       };
+
+          // if (this.listPermissions.length === 0 || this.libraryPermissions.length === 0) {
+          //   return [];
+          // }
+
+
+          // let canManageList = this.listPermissions.filter(item => item.permission == PermissionKind.ManageLists)[0].allowed;
+          // let canAddItem = this.listPermissions.filter(item => item.permission == PermissionKind.AddListItems)[0].allowed;
+          // let canEditItem = this.listPermissions.filter(item => item.permission == PermissionKind.EditListItems)[0].allowed;
+          // let canApproveItem = this.listPermissions.filter(item => item.permission == PermissionKind.ApproveItems)[0].allowed;
+          // let canDeleteItem = this.listPermissions.filter(item => item.permission == PermissionKind.DeleteListItems)[0].allowed;
+          // let canViewItem = this.listPermissions.filter(item => item.permission == PermissionKind.ViewListItems)[0].allowed;
           // if ((this.props.isAllItemsSelected ||
           //      this.props.selectedCount > 1) &&
           //      this.props.totalItemCount !== 1
@@ -174,7 +268,7 @@ export  class TaskCommandBar extends React.Component<
           //      }
           //      commands.push(alertMe, manageAlerts);
           // }
-          commands.push( newTask, exportToPdf, uploadTaskList, alertMe, manageAlerts);
+          commands.push( newTask, editTask, deleteCommand, exportToPdf, uploadTaskList, alertMe, manageAlerts, adminSettings);
           return commands;
      }
 
