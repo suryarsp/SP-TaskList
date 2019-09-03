@@ -6,7 +6,10 @@ import styles from './GroupSettingsPanel.module.scss';
 import { TextField } from 'office-ui-fabric-react/lib/TextField';
 import { Checkbox } from 'office-ui-fabric-react/lib/Checkbox';
 import { IconButton, PrimaryButton } from 'office-ui-fabric-react/lib/Button';
+import { Dialog, DialogType, DialogFooter } from 'office-ui-fabric-react/lib/Dialog';
 import * as _ from 'lodash';
+import { TaskListConstants } from '../../../../../../../common/defaults/taskList-constants';
+
 
 
 export default class GroupSettingsPanel extends React.Component<IGroupSettingsPanelProps, IGroupSettingsPanelState> {
@@ -20,7 +23,9 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
     this.state = {
       currentGroup: null,
       groups: TaskDataProvider.groups,
-      isAddClicked: false
+      isAddClicked: false,
+      preventDelete : false,
+      statusMessage: ''
     };
   }
 
@@ -57,6 +62,9 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
         this.onUpdateGroup(group, newValue);
       } else {
         // add new group to the list
+        this.setState({
+          statusMessage: TaskListConstants.saveProgressMessage
+        });
         this.onAddGroup(group, newValue);
       }
     }
@@ -91,14 +99,38 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
       let groups = _.cloneDeep(this.state.groups);
       groups = groups.map(g => !g.ID ? group : g);
       this.setState({
-        groups: groups
+        groups: groups,
+        statusMessage: TaskListConstants.successMessage
       }, () => TaskDataProvider.groups = groups);
 
     }, 1000);
+    this.clearTimeoutvalue = setTimeout(() => {
+        this.setState({
+          statusMessage: ''
+        });
+    }, 2000);
   }
 
   public onDeleteGroup(group: IGroup) {
+    let categories = [...TaskDataProvider.categories];
+    let groups = _.cloneDeep(this.state.groups);
+    if(categories.filter(c => c.Group.Title.toLowerCase() === group.Title.toLowerCase()).length > 0) {
+      this.setState({
+        preventDelete: true
+      });
+    } else{
+        let filterdGroups = groups.filter(g => g.ID !== group.ID);
+        this.setState({
+          groups: filterdGroups
+        }, () => TaskDataProvider.groups = filterdGroups);
+    }
+  }
 
+  public onClosePreventDeleteDialog() {
+    this.setState({
+      isAddClicked: false,
+      preventDelete: false
+    });
   }
 
   public onClickAdd() {
@@ -118,7 +150,24 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
   }
 
   public render(): React.ReactElement<IGroupSettingsPanelProps> {
-    const  { groups } = this.state;
+    const  { groups, preventDelete, statusMessage } = this.state;
+    const preventDeletionDialog =  preventDelete ? (<Dialog
+    hidden={false}
+    onDismiss={() => this.onClosePreventDeleteDialog.bind(this)}
+    dialogContentProps={{
+      type: DialogType.normal,
+      title: 'Delete not allowed',
+      subText: TaskListConstants.preventGroupDeletionText
+    }}
+    modalProps={{
+      isBlocking: false,
+      styles: { main: { maxWidth: 450 } },
+    }}
+  >
+    <DialogFooter>
+      <PrimaryButton onClick={this.onClosePreventDeleteDialog.bind(this)} text="OK" />
+    </DialogFooter>
+    </Dialog>) :  null;
     return (
          <Panel
           isOpen={true}
@@ -127,6 +176,10 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
           headerText="Group settings"
           closeButtonAriaLabel="Close"
         >
+          <span>
+            { statusMessage }
+          </span>
+          { preventDeletionDialog }
         {/* Disclaimer */}
           <div className= { styles.disclaimer}>
             <p>
@@ -139,11 +192,9 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
             groups.map((group) => {
               return (
                 <div className={styles.groupContainer}>
-                  {
-                    !group.IsDefault ? (<IconButton
+                  <IconButton
                                           iconProps={{ iconName: 'Move' }}
-                                          disabled={ group.Title.trim().length === 0 }/>) : null
-                  }
+                                          disabled={ group.Title.trim().length === 0 }/>);
 
                 <TextField
                    value={ group.Title}

@@ -4,4 +4,6 @@ export interface IGroupSettingsPanelState {
   groups: IGroup[];
   currentGroup: IGroup;
   isAddClicked : boolean;
+  preventDelete: boolean;
+  statusMessage: string;
 }

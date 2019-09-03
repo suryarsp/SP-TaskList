@@ -247,7 +247,7 @@ export class SharePointDataProvider implements IDataProvider {
       }).catch(error=>{
         console.log("Insert Group Item Error :",error);
         response(false);
-      })
+      });
     });
   }
 
@@ -263,8 +263,8 @@ export class SharePointDataProvider implements IDataProvider {
       }).catch(error=>{
         console.log("Update group item error : ",error);
         response(false);
-      })
-    })
+      });
+    });
   }
 
   public deleteGroupItem(listname:string,itemId:number):Promise<boolean>{
@@ -275,7 +275,7 @@ export class SharePointDataProvider implements IDataProvider {
       }).catch(error=>{
         console.log("Delete group item error : ",error);
         response(false);
-      })
+      });
     });
   }
 
