@@ -1,4 +1,4 @@
-import { IDataProvider } from "../interfaces/index";
+import { IDataProvider, IGroup, IResponsible, IStatus, ICategory, IColumn } from "../interfaces/index";
 
 import { IWebPartContext } from "@microsoft/sp-webpart-base";
 
@@ -119,4 +119,111 @@ export class SharePointDataProvider implements IDataProvider {
            });
  });
   }
+
+  
+  public getGroup(listname: string): Promise<IGroup[]> {
+     let web: Web = new Web(this._absoluteUrl);
+     let GroupListColl: IGroup[] = [];
+     return new Promise<IGroup[]>(resolve => {
+       web.lists.getByTitle(listname).items.select("Title", "ID", "GroupSort", "IsDefault").get().then((groupitems: IGroup[]) => {
+         console.log("Group : ", groupitems);
+         console.log("Group JSON : ", JSON.stringify(groupitems));
+         groupitems.forEach(element => {
+           let items: IGroup = {
+             ID: element.ID,
+             IsDefault: element.IsDefault,
+             Title: element.Title,
+             GroupSort: element.GroupSort
+           }
+           GroupListColl.push(items);
+           resolve(GroupListColl);
+         });
+       });
+     });
+   }
+ 
+   public getResponsible(listname: string): Promise<IResponsible[]> {
+     let web: Web = new Web(this._absoluteUrl);
+     let ResponsibleListColl: IResponsible[] = [];
+     return new Promise<IResponsible[]>(resolve => {
+       web.lists.getByTitle(listname).items.select("Title", "ID", "FontColor", "FillColor").get().then((responsibleitems: IResponsible[]) => {
+         console.log("responsibleitems : ", responsibleitems);
+         console.log("responsibleitems JSON : ", JSON.stringify(responsibleitems));
+         responsibleitems.forEach(element => {
+           let items: IResponsible = {
+             ID: element.ID,
+             Title: element.Title,
+             FontColor: element.FontColor,
+             FillColor: element.FillColor
+           }
+           ResponsibleListColl.push(items);
+           resolve(ResponsibleListColl);
+         });
+       });
+     });
+   }
+ 
+   public getStatus(listname: string): Promise<IStatus[]> {
+     let web: Web = new Web(this._absoluteUrl);
+     let StatusitemsListColl: IStatus[] = [];
+     return new Promise<IStatus[]>(resolve => {
+       web.lists.getByTitle(listname).items.select("Title", "ID", "StatusSort", "FontColor", "FillColor").get().then((Statusitems: IStatus[]) => {
+         console.log("Status : ", Statusitems);
+         console.log("Status JSON : ", JSON.stringify(Statusitems));
+         Statusitems.forEach(element => {
+           let items: IStatus = {
+             ID: element.ID,
+             FontColor: element.FontColor,
+             Title: element.Title,
+             FillColor: element.FillColor,
+             StatusSort: element.StatusSort
+           }
+           StatusitemsListColl.push(items);
+           resolve(StatusitemsListColl);
+         });
+       });
+     });
+   }
+ 
+   public getCategory(listname: string): Promise<ICategory[]> {
+     let web: Web = new Web(this._absoluteUrl);
+     let CategoryListColl: ICategory[] = [];
+     return new Promise<ICategory[]>(resolve => {
+       web.lists.getByTitle(listname).items.select("Title", "ID", "CategorySort", "Parent/Title", "Parent/Id", "Group/Title", "Group/Id").expand("Parent", "Group").get().then((categoryitems: ICategory[]) => {
+         console.log("category : ", categoryitems);
+         console.log("category JSON : ", JSON.stringify(categoryitems));
+         categoryitems.forEach(element => {
+           let items: ICategory = {
+             ID: element.ID,
+             Title: element.Title,
+             CategorySort: element.CategorySort,
+             Group: element.Group,
+             Parent: element.Parent,
+             children: []
+           }
+           CategoryListColl.push(items);
+           resolve(CategoryListColl);
+         });
+       });
+     });
+   }
+ 
+   public getTaskListFields(listname: string): Promise<IColumn[]> {
+     let web: Web = new Web(this._absoluteUrl);
+     let taskFieldsColl: IColumn[] = [];
+     return new Promise<IColumn[]>(resolve => {
+       web.lists.getByTitle(listname).fields.get().then((taskField: IColumn[]) => {
+         console.log("Task List Field : ", taskField);
+         console.log("Task List Field JSON : ", JSON.stringify(taskField));
+         taskField.forEach(element => {
+           let fields: IColumn = {
+             key: element["InternalName"],
+             text: element["Title"]
+           }
+           taskFieldsColl.push(fields);
+           resolve(taskFieldsColl);
+         })
+       });
+     });
+   }
 }

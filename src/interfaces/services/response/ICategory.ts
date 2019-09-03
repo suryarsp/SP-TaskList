@@ -3,7 +3,7 @@ export interface ICategory {
   Title: string;
   CategorySort: number;
   ID: number;
-  children: ICategory[];
+  children : ICategory[];
   Parent?: GroupOrParentCaetgory;
 }
 
