@@ -235,7 +235,7 @@ export class SharePointDataProvider implements IDataProvider {
 
 
   //Group List Methods start
-  public insertGroupItem(listName:string):Promise<boolean>{
+  public insertGroupItem(listName:string,Items:IGroup):Promise<boolean>{
     return new Promise<boolean>((response)=>{
       this.web.lists.getByTitle(listName).items.add({
         Title:"Title",
@@ -251,7 +251,7 @@ export class SharePointDataProvider implements IDataProvider {
     });
   }
 
-  public updateGroupItem(listname:string,itemId:number):Promise<boolean>{
+  public updateGroupItem(listname:string,itemId:number,Items:IGroup):Promise<boolean>{
     return new Promise<boolean>((response)=>{
       this.web.lists.getByTitle(listname).items.getById(itemId).update({
         Title:"Group 2",
