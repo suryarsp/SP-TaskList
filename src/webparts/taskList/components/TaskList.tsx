@@ -8,7 +8,7 @@ import TaskDataProvider from '../../../services/TaskDataProvider';
 
 export default class TaskList extends React.Component<ITaskListProps, ITaskListState> {
   private dataProvider: IDataProvider;
-
+  private listName: string;
 
   constructor(props) {
     super(props);
@@ -16,6 +16,20 @@ export default class TaskList extends React.Component<ITaskListProps, ITaskListS
 
   public componentDidMount() {
       this.dataProvider = TaskDataProvider.Instance;
+      this.listName = "";
+      this.getAdminSettings();
+  }
+
+
+  public getAdminSettings() {
+      this.dataProvider.getGroups(this.listName).then((groups) => {
+          TaskDataProvider.groups = groups;
+          console.log(groups);
+      }).
+      catch((error) => {
+        console.log("Get Categories", error);
+
+      });
 
   }
 

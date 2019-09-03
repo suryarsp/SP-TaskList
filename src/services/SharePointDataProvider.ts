@@ -1,4 +1,4 @@
-import { IDataProvider, IGroup, IResponsible, IStatus, ICategory, IColumn } from "../interfaces/index";
+import { IDataProvider, IGroup, IStatus, ICategory, IColumn, IResponsibleParty } from "../interfaces/index";
 
 import { IWebPartContext } from "@microsoft/sp-webpart-base";
 
@@ -120,8 +120,8 @@ export class SharePointDataProvider implements IDataProvider {
  });
   }
 
-  
-  public getGroup(listname: string): Promise<IGroup[]> {
+
+  public getGroups(listname: string): Promise<IGroup[]> {
      let web: Web = new Web(this._absoluteUrl);
      let GroupListColl: IGroup[] = [];
      return new Promise<IGroup[]>(resolve => {
@@ -134,36 +134,36 @@ export class SharePointDataProvider implements IDataProvider {
              IsDefault: element.IsDefault,
              Title: element.Title,
              GroupSort: element.GroupSort
-           }
+           };
            GroupListColl.push(items);
            resolve(GroupListColl);
          });
        });
      });
    }
- 
-   public getResponsible(listname: string): Promise<IResponsible[]> {
+
+   public getResponsibleParties(listname: string): Promise<IResponsibleParty[]> {
      let web: Web = new Web(this._absoluteUrl);
-     let ResponsibleListColl: IResponsible[] = [];
-     return new Promise<IResponsible[]>(resolve => {
-       web.lists.getByTitle(listname).items.select("Title", "ID", "FontColor", "FillColor").get().then((responsibleitems: IResponsible[]) => {
+     let ResponsibleListColl: IResponsibleParty[] = [];
+     return new Promise<IResponsibleParty[]>(resolve => {
+       web.lists.getByTitle(listname).items.select("Title", "ID", "FontColor", "FillColor").get().then((responsibleitems: IResponsibleParty[]) => {
          console.log("responsibleitems : ", responsibleitems);
          console.log("responsibleitems JSON : ", JSON.stringify(responsibleitems));
          responsibleitems.forEach(element => {
-           let items: IResponsible = {
+           let items: IResponsibleParty = {
              ID: element.ID,
              Title: element.Title,
              FontColor: element.FontColor,
              FillColor: element.FillColor
-           }
+           };
            ResponsibleListColl.push(items);
            resolve(ResponsibleListColl);
          });
        });
      });
    }
- 
-   public getStatus(listname: string): Promise<IStatus[]> {
+
+   public getStatuses(listname: string): Promise<IStatus[]> {
      let web: Web = new Web(this._absoluteUrl);
      let StatusitemsListColl: IStatus[] = [];
      return new Promise<IStatus[]>(resolve => {
@@ -177,15 +177,15 @@ export class SharePointDataProvider implements IDataProvider {
              Title: element.Title,
              FillColor: element.FillColor,
              StatusSort: element.StatusSort
-           }
+           };
            StatusitemsListColl.push(items);
            resolve(StatusitemsListColl);
          });
        });
      });
    }
- 
-   public getCategory(listname: string): Promise<ICategory[]> {
+
+   public getCategories(listname: string): Promise<ICategory[]> {
      let web: Web = new Web(this._absoluteUrl);
      let CategoryListColl: ICategory[] = [];
      return new Promise<ICategory[]>(resolve => {
@@ -199,15 +199,17 @@ export class SharePointDataProvider implements IDataProvider {
              CategorySort: element.CategorySort,
              Group: element.Group,
              Parent: element.Parent,
-             children: []
-           }
+             children: [],
+             key: element.ID.toString(),
+             text: element.Title
+           };
            CategoryListColl.push(items);
            resolve(CategoryListColl);
          });
        });
      });
    }
- 
+
    public getTaskListFields(listname: string): Promise<IColumn[]> {
      let web: Web = new Web(this._absoluteUrl);
      let taskFieldsColl: IColumn[] = [];
@@ -219,10 +221,10 @@ export class SharePointDataProvider implements IDataProvider {
            let fields: IColumn = {
              key: element["InternalName"],
              text: element["Title"]
-           }
+           };
            taskFieldsColl.push(fields);
            resolve(taskFieldsColl);
-         })
+         });
        });
      });
    }

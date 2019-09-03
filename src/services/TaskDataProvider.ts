@@ -2,7 +2,7 @@
 import { Environment, EnvironmentType } from "@microsoft/sp-core-library";
 import { MockupDataProvider } from "./MockupDataProvider";
 import { SharePointDataProvider } from "./SharePointDataProvider";
-import { IDataProvider } from "../interfaces/index";
+import { IDataProvider, ICategory, IGroup, IResponsibleParty, IStatus } from "../interfaces/index";
 import { IWebPartContext } from "@microsoft/sp-webpart-base";
 import { IPermissions } from "./permissions/IPermissions";
 // import { ICategoryExpandPosition } from "../interfaces/ICategoryExpandPosition";
@@ -14,13 +14,17 @@ export default class TaskDataProvider  {
   public static listName: string;
   public static librarayName: string;
   public static documentLibraryUniqueID: string;
+  public static categories: ICategory[] = [];
+  public static groups: IGroup[] = [];
+  public static responsibleParties: IResponsibleParty[] = [];
+  public static statuses: IStatus[] = [];
 
   // public static categoryExpandPosition: ICategoryExpandPosition[] = [];
   public static context : IWebPartContext;
 
   public static get Instance() {
     if(!this._instance){
-        if (DEBUG && Environment.type === EnvironmentType.Local) {
+        if (DEBUG && Environment.type === EnvironmentType.SharePoint) {
              this._instance = new MockupDataProvider();
         } else {
              this._instance = new SharePointDataProvider(this.context);

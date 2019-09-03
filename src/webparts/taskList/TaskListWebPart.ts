@@ -17,6 +17,7 @@ import TaskList from './components/TaskList';
 import { ITaskListProps } from '../../interfaces/index';
 import { TaskListConstants } from '../../common/defaults/taskList-constants';
 import { TaskGroupingControlComponent } from '../../propertyPanelCustomControls/taskGroupingControl/TaskGroupingControl';
+import TaskDataProvider from '../../services/TaskDataProvider';
 require('../../styles/main.css');
 export interface ITaskListWebPartProps {
   taskListName: string;
@@ -32,6 +33,7 @@ export interface ITaskListWebPartProps {
 export default class TaskListWebPart extends BaseClientSideWebPart<ITaskListWebPartProps> {
 
   public render(): void {
+    TaskDataProvider.context = this.context;
     const element: React.ReactElement<ITaskListProps> = React.createElement(
       TaskList, {
         taskListName: this.properties.taskListName,

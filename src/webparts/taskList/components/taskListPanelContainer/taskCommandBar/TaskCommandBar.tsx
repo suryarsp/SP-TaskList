@@ -8,8 +8,24 @@ import { IPermissions } from "../../../../../services/index";
 import TaskDataProvider from "../../../../../services/TaskDataProvider";
 import { PermissionKind } from "sp-pnp-js";
 import { IContextualMenuItem } from "office-ui-fabric-react/lib/ContextualMenu";
+import  NewTaskPanel  from './slideOutPanels/newTaskPanel/NewTaskPanel';
+import  EditTaskPanel  from './slideOutPanels/editTaskPanel/EditTaskPanel';
+import  GroupSettingsPanel  from './slideOutPanels/groupSettingsPanel/GroupSettingsPanel';
+import  CategorySettingsPanel  from './slideOutPanels/categorySettingsPanel/CategorySettingsPanel';
+import  ResponsiblePartySettingsPanel  from './slideOutPanels/responsiblePartySettingsPanel/ResponsiblePartySettingsPanel';
+import  StatusSettingsPanel  from './slideOutPanels/statusSettingsPanel/StatusSettingsPanel';
 
-
+const CommandTypes = {
+     NewTask: "NewTask",
+     EditTask: "EditTask",
+     DeleteTaskConfirmation : "DeleteTaskConfirmation",
+     PdfExportInProgress: "PdfExportInProgress",
+     GroupSettings: "GroupSettings",
+     CategorySettings: "CategorySettings",
+     StatusSettings: "StatusSettings",
+     ResponsiblePartySettings: "ResponsiblePartySettings",
+     None: "None"
+};
 export  class TaskCommandBar extends React.Component<
      ITaskCommandBarProps,
      ITaskCommandBarState
@@ -20,6 +36,9 @@ export  class TaskCommandBar extends React.Component<
 
      constructor(props) {
           super(props);
+          this.state = {
+            currentCommandType : CommandTypes.None
+          };
      }
 
      public componentDidMount() {
@@ -28,9 +47,15 @@ export  class TaskCommandBar extends React.Component<
      }
 
      public onCLickNewTask() {
+       this.setState({
+         currentCommandType: CommandTypes.NewTask
+       });
      }
 
      public onClickEditTask() {
+       this.setState({
+         currentCommandType: CommandTypes.EditTask
+       });
      }
 
      public uploadTaskList() {
@@ -46,15 +71,27 @@ export  class TaskCommandBar extends React.Component<
      }
 
      public onClickGroupSettings() {
+       this.setState({
+         currentCommandType: CommandTypes.GroupSettings
+       });
      }
 
      public onClickCategorySettings() {
+      this.setState({
+        currentCommandType: CommandTypes.CategorySettings
+      });
      }
 
      public onClickStatusSettings() {
+      this.setState({
+        currentCommandType: CommandTypes.StatusSettings
+      });
      }
 
      public onClickPartySetings() {
+      this.setState({
+        currentCommandType: CommandTypes.ResponsiblePartySettings
+      });
      }
 
      public getItems(): ICommandBarItemProps[] {
@@ -301,13 +338,77 @@ export  class TaskCommandBar extends React.Component<
           return farItems;
      }
 
+     private hidePanel(isDirty: boolean) {
+       console.log(isDirty);
+       this.setState({
+         currentCommandType: CommandTypes.None
+       });
+     }
+
      public render(): React.ReactElement<ITaskCommandBarProps> {
+       let commands: JSX.Element = null;
+       let { currentCommandType} = this.state;
+       switch(currentCommandType) {
+
+        case CommandTypes.NewTask : {
+           commands=  <NewTaskPanel
+                        hidePanel = { this.hidePanel.bind(this).bind(this)}
+                       />;
+          break;
+        }
+
+        case CommandTypes.EditTask: {
+           commands = <EditTaskPanel
+                       hidePanel = { this.hidePanel.bind(this)}
+                      />;
+          break;
+        }
+
+        case CommandTypes.DeleteTaskConfirmation: {
+          break;
+        }
+
+        case CommandTypes.PdfExportInProgress : {
+          break;
+        }
+
+        case CommandTypes.GroupSettings : {
+          commands = <GroupSettingsPanel
+                      hidePanel = { this.hidePanel.bind(this)}
+                     />;
+          break;
+
+        }
+
+        case CommandTypes.CategorySettings: {
+          commands = <CategorySettingsPanel
+                       hidePanel = { this.hidePanel.bind(this)}
+                      />;
+          break;
+        }
+
+        case CommandTypes.StatusSettings: {
+          commands = <StatusSettingsPanel
+                      hidePanel = { this.hidePanel.bind(this)}
+                     />;
+          break;
+        }
+
+        case CommandTypes.ResponsiblePartySettings : {
+          commands = <ResponsiblePartySettingsPanel
+                     hidePanel = { this.hidePanel.bind(this)}
+                     />;
+          break;
+        }
+       }
           return (
                <div className={styles.commandbarWrapper}>
                     <CommandBar
                          items={this.getItems()}
                          farItems={this.getFarItems()} />
+                         { commands }
                </div>
+
           );
      }
 }

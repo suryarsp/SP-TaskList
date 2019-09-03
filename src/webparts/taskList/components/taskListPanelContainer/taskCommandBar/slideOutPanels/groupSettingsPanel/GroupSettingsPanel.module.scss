@@ -1,0 +1,29 @@
+.disclaimer {
+  background-color: lightgray;
+  padding: 2px 0px 4px 16px;
+  border-radius: 5px;
+  p {
+    color: black;
+  }
+}
+
+.groupField {
+  margin: 10px;
+}
+
+.groupContainer {
+  display: flex;
+  align-items: center;
+  margin: 10px 0px;
+  & > div {
+    margin-left: 10px;
+  }
+}
+
+.groupContainer > div {
+  margin-left: 10px;
+}
+
+.addBtn {
+    margin-top: 10px;
+}

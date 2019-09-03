@@ -1,15 +1,17 @@
 export interface ICategory {
-  Group: GroupOrParentCaetgory;
+  Group: GroupOrParentCategory;
   Title: string;
   CategorySort: number;
   ID: number;
   children : ICategory[];
-  Parent?: GroupOrParentCaetgory;
+  Parent?: GroupOrParentCategory;
+  key : string;
+  text : string;
 }
 
 
 
-export interface GroupOrParentCaetgory {
+export interface GroupOrParentCategory {
   Title: string;
   Id: number;
 }

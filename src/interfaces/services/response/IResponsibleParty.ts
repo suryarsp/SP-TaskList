@@ -1,4 +1,4 @@
-export interface IResponsible {
+export interface IResponsibleParty {
   Title: string;
   FontColor: string;
   FillColor: string;

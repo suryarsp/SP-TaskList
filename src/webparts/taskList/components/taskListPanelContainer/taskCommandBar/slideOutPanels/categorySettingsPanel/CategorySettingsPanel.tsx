@@ -1,10 +1,35 @@
 import * as React from 'react';
 import styles from './CategorySettingsPanel.module.scss';
-import { ,  } from '../../../../../../interfaces/index';
+import { ICategorySettingsPanelProps,  ICategorySettingsPanelState} from '../../../../../../../interfaces/index';
+import { Panel, PanelType } from 'office-ui-fabric-react/lib/Panel';
 export default class CategorySettingsPanel extends React.Component< ICategorySettingsPanelProps, ICategorySettingsPanelState> {
+  private isDirty: boolean;
+
+  constructor(props) {
+    super(props);
+    this.isDirty = false;
+  }
+
   public render(): React.ReactElement<ICategorySettingsPanelProps> {
     return (
-        <h4> CategorySettingsPanel</h4>
+      <div>
+      <Panel
+       isOpen={true}
+       type={PanelType.medium}
+       onDismiss={ () => this.props.hidePanel(this.isDirty)}
+       headerText="Category settings "
+       closeButtonAriaLabel="Close"
+     >
+       </Panel>
+    </div>
+    );
+  }
+
+  private _onRenderFooterContent = () => {
+    return (
+      <div>
+
+      </div>
     );
   }
 }
