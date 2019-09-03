@@ -125,7 +125,7 @@ export class SharePointDataProvider implements IDataProvider {
      let web: Web = new Web(this._absoluteUrl);
      let GroupListColl: IGroup[] = [];
      return new Promise<IGroup[]>(resolve => {
-       web.lists.getByTitle(listname).items.select("Title", "ID", "GroupSort", "IsDefault").get().then((groupitems: IGroup[]) => {
+       web.lists.getByTitle(listname).items.select("Title", "ID", "GroupSort", "IsDefault","GUID").get().then((groupitems: IGroup[]) => {
          console.log("Group : ", groupitems);
          console.log("Group JSON : ", JSON.stringify(groupitems));
          groupitems.forEach(element => {
@@ -133,7 +133,8 @@ export class SharePointDataProvider implements IDataProvider {
              ID: element.ID,
              IsDefault: element.IsDefault,
              Title: element.Title,
-             GroupSort: element.GroupSort
+             GroupSort: element.GroupSort,
+             GUID:element.GUID
            };
            GroupListColl.push(items);
            resolve(GroupListColl);
@@ -146,7 +147,7 @@ export class SharePointDataProvider implements IDataProvider {
      let web: Web = new Web(this._absoluteUrl);
      let ResponsibleListColl: IResponsibleParty[] = [];
      return new Promise<IResponsibleParty[]>(resolve => {
-       web.lists.getByTitle(listname).items.select("Title", "ID", "FontColor", "FillColor").get().then((responsibleitems: IResponsibleParty[]) => {
+       web.lists.getByTitle(listname).items.select("Title", "ID", "FontColor", "FillColor","GUID").get().then((responsibleitems: IResponsibleParty[]) => {
          console.log("responsibleitems : ", responsibleitems);
          console.log("responsibleitems JSON : ", JSON.stringify(responsibleitems));
          responsibleitems.forEach(element => {
@@ -154,7 +155,8 @@ export class SharePointDataProvider implements IDataProvider {
              ID: element.ID,
              Title: element.Title,
              FontColor: element.FontColor,
-             FillColor: element.FillColor
+             FillColor: element.FillColor,
+             GUID:element.GUID
            };
            ResponsibleListColl.push(items);
            resolve(ResponsibleListColl);
@@ -167,7 +169,7 @@ export class SharePointDataProvider implements IDataProvider {
      let web: Web = new Web(this._absoluteUrl);
      let StatusitemsListColl: IStatus[] = [];
      return new Promise<IStatus[]>(resolve => {
-       web.lists.getByTitle(listname).items.select("Title", "ID", "StatusSort", "FontColor", "FillColor").get().then((Statusitems: IStatus[]) => {
+       web.lists.getByTitle(listname).items.select("Title", "ID", "StatusSort", "FontColor", "FillColor","GUID").get().then((Statusitems: IStatus[]) => {
          console.log("Status : ", Statusitems);
          console.log("Status JSON : ", JSON.stringify(Statusitems));
          Statusitems.forEach(element => {
@@ -176,7 +178,8 @@ export class SharePointDataProvider implements IDataProvider {
              FontColor: element.FontColor,
              Title: element.Title,
              FillColor: element.FillColor,
-             StatusSort: element.StatusSort
+             StatusSort: element.StatusSort,
+             GUID:element.GUID
            };
            StatusitemsListColl.push(items);
            resolve(StatusitemsListColl);
@@ -189,7 +192,7 @@ export class SharePointDataProvider implements IDataProvider {
      let web: Web = new Web(this._absoluteUrl);
      let CategoryListColl: ICategory[] = [];
      return new Promise<ICategory[]>(resolve => {
-       web.lists.getByTitle(listname).items.select("Title", "ID", "CategorySort", "Parent/Title", "Parent/Id", "Group/Title", "Group/Id").expand("Parent", "Group").get().then((categoryitems: ICategory[]) => {
+       web.lists.getByTitle(listname).items.select("Title", "ID", "CategorySort", "Parent/Title", "Parent/Id", "Group/Title", "Group/Id","GUID").expand("Parent", "Group").get().then((categoryitems: ICategory[]) => {
          console.log("category : ", categoryitems);
          console.log("category JSON : ", JSON.stringify(categoryitems));
          categoryitems.forEach(element => {
@@ -201,7 +204,8 @@ export class SharePointDataProvider implements IDataProvider {
              Parent: element.Parent,
              children: [],
              key: element.ID.toString(),
-             text: element.Title
+             text: element.Title,
+             GUID:element.GUID
            };
            CategoryListColl.push(items);
            resolve(CategoryListColl);
@@ -228,4 +232,52 @@ export class SharePointDataProvider implements IDataProvider {
        });
      });
    }
+
+
+  //Group List Methods start
+  public insertGroupItem(listName:string):Promise<boolean>{
+    return new Promise<boolean>((response)=>{
+      this.web.lists.getByTitle(listName).items.add({
+        Title:"Title",
+        GroupSort:1,
+        IsDefault:true
+      }).then(inserttask=>{
+        console.log("Insert group item : ",inserttask);
+        response(true);
+      }).catch(error=>{
+        console.log("Insert Group Item Error :",error);
+        response(false);
+      })
+    });
+  }
+
+  public updateGroupItem(listname:string,itemId:number):Promise<boolean>{
+    return new Promise<boolean>((response)=>{
+      this.web.lists.getByTitle(listname).items.getById(itemId).update({
+        Title:"Group 2",
+        GroupSort:1,
+        IsDefault:false
+      }).then(updategroup=>{
+        console.log("Update group item : ",updategroup);
+        response(true);
+      }).catch(error=>{
+        console.log("Update group item error : ",error);
+        response(false);
+      })
+    })
+  }
+
+  public deleteGroupItem(listname:string,itemId:number):Promise<boolean>{
+    return new Promise<boolean>((response)=>{
+      this.web.lists.getByTitle(listname).items.getById(itemId).delete().then(deletegroup=>{
+        console.log("Delete group item : ",deletegroup);
+        response(true);
+      }).catch(error=>{
+        console.log("Delete group item error : ",error);
+        response(false);
+      })
+    });
+  }
+
+  //Group List Methods end
 }

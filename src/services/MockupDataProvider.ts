@@ -56,6 +56,18 @@ export class MockupDataProvider implements IDataProvider {
     return null;
   }
 
+  public insertGroupItem(listName:string):Promise<boolean>{
+    return null;
+  }
+
+  public updateGroupItem(listname:string,itemId:number):Promise<boolean>{
+    return null;
+  }
+
+  public deleteGroupItem(listname:string,itemId:number):Promise<boolean>{
+
+    return null;
+  }
   constructor() {
   }
 }

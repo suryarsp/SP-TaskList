@@ -8,4 +8,7 @@ export interface IDataProvider {
   getStatuses(listname: string): Promise<IStatus[]>;
   getCategories(listname: string): Promise<ICategory[]>;
   getTaskListFields(listname: string): Promise<IColumn[]>;
+  insertGroupItem(listName:string):Promise<boolean>;
+  updateGroupItem(listname:string,itemId:number):Promise<boolean>;
+  deleteGroupItem(listname:string,itemId:number):Promise<boolean>;
 }

@@ -3,5 +3,6 @@ export interface IStatus {
   StatusSort: number;
   FontColor: string;
   FillColor: string;
-  ID: number;
+  ID?: number;
+  GUID?:string;
 }
