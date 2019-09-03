@@ -68,6 +68,18 @@ export class MockupDataProvider implements IDataProvider {
 
     return null;
   }
+
+  public insertStatusItem(listName:string,items:IStatus):Promise<boolean>{
+    return null;
+  }
+
+  public updateStatusItem(listname:string,itemId:number,items:IStatus):Promise<boolean>{
+    return null;
+  }
+
+  public deleteStatusItem(listname:string,itemId:number):Promise<boolean>{
+    return null
+  }
   constructor() {
   }
 }

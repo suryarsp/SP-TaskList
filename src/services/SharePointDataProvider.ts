@@ -280,4 +280,53 @@ export class SharePointDataProvider implements IDataProvider {
   }
 
   //Group List Methods end
+
+  //Status list methods start
+  public insertStatusItem(listName:string,items:IStatus):Promise<boolean>{
+    return new Promise<boolean>((response)=>{
+      this.web.lists.getByTitle(listName).items.add({
+        Title:items.Title,
+        StatusSort:items.StatusSort,
+        FontColor:items.FontColor,        
+        FillColor:items.FillColor
+      }).then(insertstatus=>{
+        console.log("Insert status item : ",insertstatus);
+        response(true);
+      }).catch(error=>{
+        console.log("Insert status Item Error :",error);
+        response(false);
+      })
+    });
+  }
+
+  public updateStatusItem(listname:string,itemId:number,items:IStatus):Promise<boolean>{
+    return new Promise<boolean>((response)=>{
+      this.web.lists.getByTitle(listname).items.getById(itemId).update({
+        Title:items.Title,
+        StatusSort:items.StatusSort,
+        FontColor:items.FontColor,        
+        FillColor:items.FillColor
+      }).then(updategroup=>{
+        console.log("Update status item : ",updategroup);
+        response(true);
+      }).catch(error=>{
+        console.log("Update status item error : ",error);
+        response(false);
+      })
+    })
+  }
+
+  public deleteStatusItem(listname:string,itemId:number):Promise<boolean>{
+    return new Promise<boolean>((response)=>{
+      this.web.lists.getByTitle(listname).items.getById(itemId).delete().then(deletestatus=>{
+        console.log("Delete status item : ",deletestatus);
+        response(true);
+      }).catch(error=>{
+        console.log("Delete status item error : ",error);
+        response(false);
+      })
+    });
+  }
+
+  //Status list method end
 }

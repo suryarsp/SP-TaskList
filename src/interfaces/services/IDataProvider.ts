@@ -11,4 +11,7 @@ export interface IDataProvider {
   insertGroupItem(listName:string,Items:IGroup):Promise<boolean>;
   updateGroupItem(listname:string,itemId:number,Items:IGroup):Promise<boolean>;
   deleteGroupItem(listname:string,itemId:number):Promise<boolean>;
+  insertStatusItem(listName:string,items:IStatus):Promise<boolean>;
+  updateStatusItem(listname:string,itemId:number,items:IStatus):Promise<boolean>;
+  deleteStatusItem(listname:string,itemId:number):Promise<boolean>;
 }
