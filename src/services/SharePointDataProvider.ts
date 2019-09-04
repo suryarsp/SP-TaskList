@@ -1,4 +1,4 @@
-import { IDataProvider, IGroup, IStatus, ICategory, IColumn, IResponsibleParty } from "../interfaces/index";
+import { IDataProvider, IGroup, IStatus, ICategory, IColumn, IResponsibleParty, IComment } from "../interfaces/index";
 
 import { IWebPartContext } from "@microsoft/sp-webpart-base";
 
@@ -273,20 +273,22 @@ export class SharePointDataProvider implements IDataProvider {
       });
     });
   }
+//Group List Methods end
 
-  public deleteGroupItem(listname:string,itemId:number):Promise<boolean>{
-    return new Promise<boolean>((response)=>{
-      this.web.lists.configure(this.configOptions).getByTitle(listname).items.getById(itemId).delete().then(deletegroup=>{
-        console.log("Delete group item : ",deletegroup);
-        response(true);
-      }).catch(error=>{
-        console.log("Delete group item error : ",error);
-        response(false);
-      });
+//Common delete method for Group, Responaible, Status, Category, Comment, Task and Document.
+public deleteItem(listname:string,itemId:number):Promise<boolean>{
+  return new Promise<boolean>((response)=>{
+    this.web.lists.configure(this.configOptions).getByTitle(listname).items.getById(itemId).delete().then(deletegroup=>{
+      console.log("Delete group item : ",deletegroup);
+      response(true);
+    }).catch(error=>{
+      console.log("Delete group item error : ",error);
+      response(false);
     });
-  }
+  });
+}
 
-  //Group List Methods end
+  
 
   //Status list methods start
   public insertStatusItem(listName:string,items:IStatus):Promise<boolean>{
@@ -322,19 +324,6 @@ export class SharePointDataProvider implements IDataProvider {
       })
     })
   }
-
-  public deleteStatusItem(listname:string,itemId:number):Promise<boolean>{
-    return new Promise<boolean>((response)=>{
-      this.web.lists.configure(this.configOptions).getByTitle(listname).items.getById(itemId).delete().then(deletestatus=>{
-        console.log("Delete status item : ",deletestatus);
-        response(true);
-      }).catch(error=>{
-        console.log("Delete status item error : ",error);
-        response(false);
-      })
-    });
-  }
-
   //Status list method end
 
 //Responsible list method start
@@ -368,18 +357,6 @@ public updateResponsibleItem(listName:string,itemId:number,items:IResponsiblePar
       response(false);
     });
   })
-}
-
-public deleteResponsibleItem(listName:string,itemId:number):Promise<boolean>{
-  return new Promise<boolean>((response)=>{
-    this.web.lists.configure(this.configOptions).getByTitle(listName).items.getById(itemId).delete().then(deleteResponsible=>{
-      console.log("Delete status item : ",deleteResponsible);
-      response(true);
-    }).catch(error=>{
-      console.log("Delete status item error : ",error);
-      response(false);
-    });
-  });
 }
 
 //Responsible list method end
@@ -420,20 +397,40 @@ public updateCategoryItem(listName:string,itemId:number,items:ICategory):Promise
   });
 }
 
-public deleteCategoryItem(listName:string,itemId:number):Promise<boolean>{
+//Category list method end
+
+//Comment list method start
+public insertCommentItem(listName:string,items:IComment):Promise<boolean>{
   return new Promise<boolean>((response)=>{
-    this.web.lists.configure(this.configOptions).getByTitle(listName).items.getById(itemId).delete().then(deleteCategory=>{
-      console.log("Delete status item : ",deleteCategory);
+    this.web.lists.configure(this.configOptions).getByTitle(listName).items.add({
+      Comment: items.Comment,
+      TaskId: items.Task.ID
+    }).then(insertComments=>{
+      console.log("Insert comment list item : ",insertComments);
       response(true);
     }).catch(error=>{
-      console.log("Delete status item error : ",error);
+      console.log("Insert comment list item error : ",error);
       response(false);
     });
   });
 }
-//Category list method end
 
 
+public updateCommentItem(listName:string,itemId:number,items:IComment):Promise<boolean>{
+  return new Promise<boolean>((response)=>{
+    this.web.lists.configure(this.configOptions).getByTitle(listName).items.getById(itemId).update({
+      Comment: items.Comment,
+      TaskId: items.Task.ID
+    }).then(updateComments=>{
+      console.log("Update comment list item : ",updateComments);
+      response(true);
+    }).catch(error=>{
+      console.log("Update comment list item error : ",error);
+      response(false);
+    });
+  });
+}
+//comment list method end
 
 
 

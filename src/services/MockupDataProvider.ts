@@ -64,7 +64,7 @@ export class MockupDataProvider implements IDataProvider {
     return null;
   }
 
-  public deleteGroupItem(listname:string,itemId:number):Promise<boolean>{
+  public deleteItem(listname:string,itemId:number):Promise<boolean>{
 
     return null;
   }
@@ -76,10 +76,7 @@ export class MockupDataProvider implements IDataProvider {
   public updateStatusItem(listname:string,itemId:number,items:IStatus):Promise<boolean>{
     return null;
   }
-
-  public deleteStatusItem(listname:string,itemId:number):Promise<boolean>{
-    return null
-  }
+ 
   constructor() {
   }
 }
