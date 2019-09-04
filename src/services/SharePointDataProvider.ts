@@ -15,6 +15,13 @@ export class SharePointDataProvider implements IDataProvider {
   public utility = new Utilties();
   public DocumentsColumnTitle: string = "Documents";
   public static globalFileDownloadIndex: number = 1;
+  private groupListGUID: string;
+  private responsibleListGUID: string;
+  private statusListGUID: string;
+  private categoryListGUID: string;
+  private documentLibraryGUID: string;
+  private taskListGUID: string;
+  private commentListGUID: string;
 
   private configOptions: ConfigOptions = {
        headers: {
@@ -125,7 +132,7 @@ export class SharePointDataProvider implements IDataProvider {
      let web: Web = new Web(this._absoluteUrl);
      let GroupListColl: IGroup[] = [];
      return new Promise<IGroup[]>(resolve => {
-       web.lists.getByTitle(listname).items.select("Title", "ID", "GroupSort", "IsDefault","GUID").get().then((groupitems: IGroup[]) => {
+       web.lists.configure(this.configOptions).getByTitle(listname).items.select("Title", "ID", "GroupSort", "IsDefault","GUID").get().then((groupitems: IGroup[]) => {
          console.log("Group : ", groupitems);
          console.log("Group JSON : ", JSON.stringify(groupitems));
          groupitems.forEach(element => {
@@ -147,7 +154,7 @@ export class SharePointDataProvider implements IDataProvider {
      let web: Web = new Web(this._absoluteUrl);
      let ResponsibleListColl: IResponsibleParty[] = [];
      return new Promise<IResponsibleParty[]>(resolve => {
-       web.lists.getByTitle(listname).items.select("Title", "ID", "FontColor", "FillColor","GUID").get().then((responsibleitems: IResponsibleParty[]) => {
+       web.lists.configure(this.configOptions).getByTitle(listname).items.select("Title", "ID", "FontColor", "FillColor","GUID").get().then((responsibleitems: IResponsibleParty[]) => {
          console.log("responsibleitems : ", responsibleitems);
          console.log("responsibleitems JSON : ", JSON.stringify(responsibleitems));
          responsibleitems.forEach(element => {
@@ -169,7 +176,7 @@ export class SharePointDataProvider implements IDataProvider {
      let web: Web = new Web(this._absoluteUrl);
      let StatusitemsListColl: IStatus[] = [];
      return new Promise<IStatus[]>(resolve => {
-       web.lists.getByTitle(listname).items.select("Title", "ID", "StatusSort", "FontColor", "FillColor","GUID").get().then((Statusitems: IStatus[]) => {
+       web.lists.configure(this.configOptions).getByTitle(listname).items.select("Title", "ID", "StatusSort", "FontColor", "FillColor","GUID").get().then((Statusitems: IStatus[]) => {
          console.log("Status : ", Statusitems);
          console.log("Status JSON : ", JSON.stringify(Statusitems));
          Statusitems.forEach(element => {
@@ -192,7 +199,7 @@ export class SharePointDataProvider implements IDataProvider {
      let web: Web = new Web(this._absoluteUrl);
      let CategoryListColl: ICategory[] = [];
      return new Promise<ICategory[]>(resolve => {
-       web.lists.getByTitle(listname).items.select("Title", "ID", "CategorySort", "Parent/Title", "Parent/Id", "Group/Title", "Group/Id","GUID").expand("Parent", "Group").get().then((categoryitems: ICategory[]) => {
+       web.lists.configure(this.configOptions).getByTitle(listname).items.select("Title", "ID", "CategorySort", "Parent/Title", "Parent/Id", "Group/Title", "Group/Id","GUID").expand("Parent", "Group").get().then((categoryitems: ICategory[]) => {
          console.log("category : ", categoryitems);
          console.log("category JSON : ", JSON.stringify(categoryitems));
          categoryitems.forEach(element => {
@@ -218,7 +225,7 @@ export class SharePointDataProvider implements IDataProvider {
      let web: Web = new Web(this._absoluteUrl);
      let taskFieldsColl: IColumn[] = [];
      return new Promise<IColumn[]>(resolve => {
-       web.lists.getByTitle(listname).fields.get().then((taskField: IColumn[]) => {
+       web.lists.configure(this.configOptions).getByTitle(listname).fields.get().then((taskField: IColumn[]) => {
          console.log("Task List Field : ", taskField);
          console.log("Task List Field JSON : ", JSON.stringify(taskField));
          taskField.forEach(element => {
@@ -237,7 +244,7 @@ export class SharePointDataProvider implements IDataProvider {
   //Group List Methods start
   public insertGroupItem(listName:string,Items:IGroup):Promise<boolean>{
     return new Promise<boolean>((response)=>{
-      this.web.lists.getByTitle(listName).items.add({
+      this.web.lists.configure(this.configOptions).getByTitle(listName).items.add({
         Title:"Title",
         GroupSort:1,
         IsDefault:true
@@ -253,7 +260,7 @@ export class SharePointDataProvider implements IDataProvider {
 
   public updateGroupItem(listname:string,itemId:number,Items:IGroup):Promise<boolean>{
     return new Promise<boolean>((response)=>{
-      this.web.lists.getByTitle(listname).items.getById(itemId).update({
+      this.web.lists.configure(this.configOptions).getByTitle(listname).items.getById(itemId).update({
         Title:"Group 2",
         GroupSort:1,
         IsDefault:false
@@ -269,7 +276,7 @@ export class SharePointDataProvider implements IDataProvider {
 
   public deleteGroupItem(listname:string,itemId:number):Promise<boolean>{
     return new Promise<boolean>((response)=>{
-      this.web.lists.getByTitle(listname).items.getById(itemId).delete().then(deletegroup=>{
+      this.web.lists.configure(this.configOptions).getByTitle(listname).items.getById(itemId).delete().then(deletegroup=>{
         console.log("Delete group item : ",deletegroup);
         response(true);
       }).catch(error=>{
@@ -284,7 +291,7 @@ export class SharePointDataProvider implements IDataProvider {
   //Status list methods start
   public insertStatusItem(listName:string,items:IStatus):Promise<boolean>{
     return new Promise<boolean>((response)=>{
-      this.web.lists.getByTitle(listName).items.add({
+      this.web.lists.configure(this.configOptions).getByTitle(listName).items.add({
         Title:items.Title,
         StatusSort:items.StatusSort,
         FontColor:items.FontColor,        
@@ -301,7 +308,7 @@ export class SharePointDataProvider implements IDataProvider {
 
   public updateStatusItem(listname:string,itemId:number,items:IStatus):Promise<boolean>{
     return new Promise<boolean>((response)=>{
-      this.web.lists.getByTitle(listname).items.getById(itemId).update({
+      this.web.lists.configure(this.configOptions).getByTitle(listname).items.getById(itemId).update({
         Title:items.Title,
         StatusSort:items.StatusSort,
         FontColor:items.FontColor,        
@@ -318,7 +325,7 @@ export class SharePointDataProvider implements IDataProvider {
 
   public deleteStatusItem(listname:string,itemId:number):Promise<boolean>{
     return new Promise<boolean>((response)=>{
-      this.web.lists.getByTitle(listname).items.getById(itemId).delete().then(deletestatus=>{
+      this.web.lists.configure(this.configOptions).getByTitle(listname).items.getById(itemId).delete().then(deletestatus=>{
         console.log("Delete status item : ",deletestatus);
         response(true);
       }).catch(error=>{
@@ -329,4 +336,608 @@ export class SharePointDataProvider implements IDataProvider {
   }
 
   //Status list method end
+
+//Responsible list method start
+public insertResponsibleItem(listName:string,items:IResponsibleParty):Promise<boolean>{
+  return new Promise<boolean>((response)=>{
+    this.web.lists.configure(this.configOptions).getByTitle(listName).items.add({        
+      Title: items.Title,
+      FontColor: items.FontColor,
+      FillColor: items.FillColor
+    }).then(insertResponsible=>{
+      console.log("Insert status item : ",insertResponsible);
+      response(true);
+    }).catch(error=>{
+      console.log("Insert status Item Error :",error);
+      response(false);
+    });
+  });
+}
+
+public updateResponsibleItem(listName:string,itemId:number,items:IResponsibleParty):Promise<boolean>{
+  return new Promise<boolean>((response)=>{
+    this.web.lists.configure(this.configOptions).getByTitle(listName).items.getById(itemId).update({
+      Title:items.Title,        
+      FontColor:items.FontColor,        
+      FillColor:items.FillColor
+    }).then(updateResponsible=>{
+      console.log("Update status item : ",updateResponsible);
+      response(true);
+    }).catch(error=>{
+      console.log("Update status item error : ",error);
+      response(false);
+    });
+  })
+}
+
+public deleteResponsibleItem(listName:string,itemId:number):Promise<boolean>{
+  return new Promise<boolean>((response)=>{
+    this.web.lists.configure(this.configOptions).getByTitle(listName).items.getById(itemId).delete().then(deleteResponsible=>{
+      console.log("Delete status item : ",deleteResponsible);
+      response(true);
+    }).catch(error=>{
+      console.log("Delete status item error : ",error);
+      response(false);
+    });
+  });
+}
+
+//Responsible list method end
+
+//Category list method start
+
+public insertCategoryItem(listName:string,items:ICategory):Promise<boolean>{
+  return new Promise<boolean>((response)=>{
+    this.web.lists.configure(this.configOptions).getByTitle(listName).items.add({
+      Title:items.Title,
+      CategorySort: items.CategorySort,
+      GroupId: items.Group.Id,
+      ParentId: items.Parent.Id
+    }).then(insertCategory=>{
+      console.log("Insert category item : ",insertCategory);
+      response(true);
+    }).catch(error=>{
+      console.log("Insert category item error message :",error);
+      response(false);
+    });
+  });
+}
+
+public updateCategoryItem(listName:string,itemId:number,items:ICategory):Promise<boolean>{
+  return new Promise<boolean>((response)=>{
+    this.web.lists.configure(this.configOptions).getByTitle(listName).items.getById(itemId).update({
+      Title:items.Title,
+      CategorySort: items.CategorySort,
+      GroupId: items.Group.Id,
+      ParentId: items.Parent.Id
+    }).then(updateCategory=>{
+      console.log("Update category item : ",updateCategory);
+      response(true);
+    }).catch(error=>{
+      console.log("Update category item error message :",error);
+      response(false);
+    });
+  });
+}
+
+public deleteCategoryItem(listName:string,itemId:number):Promise<boolean>{
+  return new Promise<boolean>((response)=>{
+    this.web.lists.configure(this.configOptions).getByTitle(listName).items.getById(itemId).delete().then(deleteCategory=>{
+      console.log("Delete status item : ",deleteCategory);
+      response(true);
+    }).catch(error=>{
+      console.log("Delete status item error : ",error);
+      response(false);
+    });
+  });
+}
+//Category list method end
+
+
+
+
+
+  //List Creation start
+  public async groupListCreation(listName: string): Promise<boolean> {
+
+    return new Promise<boolean>((resolve) => {
+      const batch = this.web.createBatch();
+      this.web.lists.configure(this.configOptions).ensure(listName, "", 100, true).then(async groupresult => {
+        if (groupresult.created) {
+          console.log(groupresult.data.Id);
+          this.groupListGUID = groupresult.data.Id;
+
+          await this.web.lists.configure(this.configOptions)
+            .getByTitle(listName)
+            .fields.getByInternalNameOrTitle("Item")
+            .get()
+            .then(isItem => {
+            })
+            .catch(error => {
+              console.log("isisItem Error : ", error);
+              this.web.lists.configure(this.configOptions)
+                .getByTitle(listName)
+                .fields.inBatch(batch)
+                .createFieldAsXml(
+                  '<Field Type="Number" DisplayName="GroupSort" Name="GroupSort" Required="TRUE"/>'
+                );
+            });
+
+            await this.web.lists.configure(this.configOptions)
+            .getByTitle(listName)
+            .fields.getByInternalNameOrTitle("Item")
+            .get()
+            .then(isItem => {
+            })
+            .catch(error => {
+              console.log("isisItem Error : ", error);
+              this.web.lists.configure(this.configOptions)
+                .getByTitle(listName)
+                .fields.inBatch(batch)
+                .createFieldAsXml(
+                  '<Field Type="Boolean" DisplayName="IsDefault" Name="IsDefault" Required="FALSE"/>'
+                );
+            });
+
+            batch.execute().then(() => {
+              resolve(true);
+           });
+        }
+        else {
+          console.log(groupresult);
+          resolve(false);
+        }
+      }).catch(error => {
+        console.log("Group List Exists Or Not : ", error);
+        resolve(false);
+      });
+    });
+  }
+
+  public async commonlistViewCreation(listName: string,items:any): Promise<boolean> {
+    const batch = this.web.createBatch();
+    //const fields = ['Item', 'Group', 'ResponsibleParty', 'Status', 'SortOrder', 'Comments', this.DocumentsColumnTitle, 'ID', 'Created', 'Editor', 'Modified'];
+    const fields =items;
+    const view = this.web.lists.configure(this.configOptions).getByTitle(listName).defaultView;
+    view.fields.inBatch(batch).removeAll();
+    return new Promise<boolean>(async (resolve) => {
+         fields.forEach(fieldName => {
+              view.fields.inBatch(batch).add(fieldName);
+         });
+         batch.execute().then(() => {
+              resolve(true);
+         });
+    });
+  }
+
+  public async responsibleListCreation(listName: string): Promise<boolean> {
+
+    return new Promise<boolean>((resolve) => {
+      const batch = this.web.createBatch();
+      this.web.lists.configure(this.configOptions).ensure(listName, "", 100, true).then(async responsibleresult => {
+        if (responsibleresult.created) {
+          console.log(responsibleresult.data.Id);
+          this.responsibleListGUID = responsibleresult.data.Id;
+          
+          await this.web.lists.configure(this.configOptions)
+            .getByTitle(listName)
+            .fields.getByInternalNameOrTitle("Item")
+            .get()
+            .then(isItem => {
+            })
+            .catch(error => {
+              console.log("isisItem Error : ", error);
+              this.web.lists.configure(this.configOptions)
+                .getByTitle(listName)
+                .fields.inBatch(batch)
+                .createFieldAsXml(
+                  '<Field Type="Text" DisplayName="FontColor" Name="FontColor" Required="TRUE"> <Default>#000000</Default></Field>'
+                );
+            });
+
+            await this.web.lists.configure(this.configOptions)
+            .getByTitle(listName)
+            .fields.getByInternalNameOrTitle("Item")
+            .get()
+            .then(isItem => {
+            })
+            .catch(error => {
+              console.log("isisItem Error : ", error);
+              this.web.lists.configure(this.configOptions)
+                .getByTitle(listName)
+                .fields.inBatch(batch)
+                .createFieldAsXml(
+                  '<Field Type="Text" DisplayName="FillColor" Name="FillColor" Required="TRUE"> <Default>#ffffff</Default></Field>'
+                );
+            });
+
+            batch.execute().then(() => {
+              resolve(true);
+           });
+        }
+        else {
+          console.log(responsibleresult);
+          resolve(false);
+        }
+      }).catch(error => {
+        console.log("Responsible List Exists Or Not : ", error);
+        resolve(false);
+      });
+    });
+  }
+
+  public async statusListCreation(listName: string): Promise<boolean> {
+
+    return new Promise<boolean>((resolve) => {
+      const batch = this.web.createBatch();
+      this.web.lists.configure(this.configOptions).ensure(listName, "", 100, true).then(async statusresult => {
+        if (statusresult.created) {
+          console.log(statusresult.data.Id);
+          this.statusListGUID = statusresult.data.Id;
+
+          await this.web.lists.configure(this.configOptions)
+            .getByTitle(listName)
+            .fields.getByInternalNameOrTitle("Item")
+            .get()
+            .then(isItem => {
+            })
+            .catch(error => {
+              console.log("isisItem Error : ", error);
+              this.web.lists.configure(this.configOptions)
+                .getByTitle(listName)
+                .fields.inBatch(batch)
+                .createFieldAsXml(
+                  '<Field Type="Number" DisplayName="StatusSort" Name="StatusSort" Required="TRUE"/>'
+                );
+            });
+          
+          await this.web.lists.configure(this.configOptions)
+            .getByTitle(listName)
+            .fields.getByInternalNameOrTitle("Item")
+            .get()
+            .then(isItem => {
+            })
+            .catch(error => {
+              console.log("isisItem Error : ", error);
+              this.web.lists.configure(this.configOptions)
+                .getByTitle(listName)
+                .fields.inBatch(batch)
+                .createFieldAsXml(
+                  '<Field Type="Text" DisplayName="FontColor" Name="FontColor" Required="FALSE"/>'
+                );
+            });
+
+            await this.web.lists.configure(this.configOptions)
+            .getByTitle(listName)
+            .fields.getByInternalNameOrTitle("Item")
+            .get()
+            .then(isItem => {
+            })
+            .catch(error => {
+              console.log("isisItem Error : ", error);
+              this.web.lists.configure(this.configOptions)
+                .getByTitle(listName)
+                .fields.inBatch(batch)
+                .createFieldAsXml(
+                  '<Field Type="Text" DisplayName="FillColor" Name="FillColor" Required="FALSE"/>'
+                );
+            });
+
+            batch.execute().then(() => {
+              resolve(true);
+           });
+        }
+        else {
+          console.log(statusresult);
+          resolve(false);
+        }
+      }).catch(error => {
+        console.log("Status List Exists Or Not : ", error);
+        resolve(false);
+      });
+    });
+  }
+
+  public async categoryListCreation(listName: string): Promise<boolean> {
+
+    return new Promise<boolean>((resolve) => {
+      const batch = this.web.createBatch();
+      this.web.lists.configure(this.configOptions).ensure(listName, "", 100, true).then(async categoryresult => {
+        if (categoryresult.created) {
+          console.log(categoryresult.data.Id);
+          this.categoryListGUID = categoryresult.data.Id;
+
+          await this.web.lists.configure(this.configOptions)
+            .getByTitle(listName)
+            .fields.getByInternalNameOrTitle("Item")
+            .get()
+            .then(isItem => {
+            })
+            .catch(error => {
+              console.log("isisItem Error : ", error);
+              this.web.lists.configure(this.configOptions)
+                .getByTitle(listName)
+                .fields.inBatch(batch)
+                .createFieldAsXml(
+                  '<Field Type="Number" DisplayName="CategorySort" Name="CategorySort" Required="TRUE"/>'
+                );
+            });
+          
+          await this.web.lists.configure(this.configOptions)
+            .getByTitle(listName)
+            .fields.getByInternalNameOrTitle("Item")
+            .get()
+            .then(isItem => {
+            })
+            .catch(error => {
+              console.log("isisItem Error : ", error);
+              this.web.lists.configure(this.configOptions)
+                .getByTitle(listName)
+                .fields.inBatch(batch)
+                .createFieldAsXml(
+                  '<Field Type="Lookup" DisplayName="Parent" Name="Parent" Required="FALSE" List="' +
+                  this.categoryListGUID +
+                  '" ShowField="Title" RelationshipDeleteBehavior="None"/>'
+                );
+            });
+
+            await this.web.lists.configure(this.configOptions)
+            .getByTitle(listName)
+            .fields.getByInternalNameOrTitle("Item")
+            .get()
+            .then(isItem => {
+            })
+            .catch(error => {
+              console.log("isisItem Error : ", error);
+              this.web.lists.configure(this.configOptions)
+                .getByTitle(listName)
+                .fields.inBatch(batch)
+                .createFieldAsXml(
+                  '<Field Type="Lookup" DisplayName="Group" Name="Group" Required="FALSE" List="' +
+                  this.groupListGUID +
+                  '" ShowField="Title" RelationshipDeleteBehavior="None"/>'
+                );
+            });
+
+            batch.execute().then(() => {
+              resolve(true);
+           });
+        }
+        else {
+          console.log(categoryresult);
+          resolve(false);
+        }
+      }).catch(error => {
+        console.log("Category List Exists Or Not : ", error);
+        resolve(false);
+      });
+    });
+  }
+
+  public async documentLibraryCreation(libraryName:string):Promise<boolean>{
+    return new Promise<boolean>((resolve) => {
+      this.web.lists.configure(this.configOptions).ensure(libraryName, "", 101, true)
+      .then((documentresult) => {
+           if (documentresult.created) {
+             this.documentLibraryGUID = documentresult.data.Id;
+              resolve(true);
+           }
+           else {
+              resolve(false);
+           }
+      }).catch(error => {
+           console.log("Document Library Exists Or Not : ", error);
+           resolve(false);
+      });
+    });
+  }
+
+  public async taskListCreation(listName: string): Promise<boolean> {
+
+    return new Promise<boolean>((resolve) => {
+      const batch = this.web.createBatch();
+      this.web.lists.configure(this.configOptions).ensure(listName, "", 107, true).then(async taskresult => {
+        if (taskresult.created) {
+          console.log(taskresult.data.Id);
+          this.taskListGUID =taskresult.data.Id;
+
+          await this.web.lists.configure(this.configOptions)
+            .getByTitle(listName)
+            .fields.getByInternalNameOrTitle("Item")
+            .get()
+            .then(isItem => {
+            })
+            .catch(error => {
+              console.log("isisItem Error : ", error);
+              this.web.lists.configure(this.configOptions)
+                .getByTitle(listName)
+                .fields.inBatch(batch)
+                .createFieldAsXml(
+                  '<Field Type="Number" DisplayName="TaskSort" Name="TaskSort" Required="TRUE"/>'
+                );
+            });
+          
+          await this.web.lists.configure(this.configOptions)
+            .getByTitle(listName)
+            .fields.getByInternalNameOrTitle("Item")
+            .get()
+            .then(isItem => {
+            })
+            .catch(error => {
+              console.log("isisItem Error : ", error);
+              this.web.lists.configure(this.configOptions)
+                .getByTitle(listName)
+                .fields.inBatch(batch)
+                .createFieldAsXml(
+                  '<Field Type="Lookup" DisplayName="Parent" Name="Parent" Required="FALSE" List="' +
+                  this.taskListGUID +
+                  '" ShowField="Title" RelationshipDeleteBehavior="None"/>'
+                );
+            });
+
+            await this.web.lists.configure(this.configOptions)
+            .getByTitle(listName)
+            .fields.getByInternalNameOrTitle("Item")
+            .get()
+            .then(isItem => {
+            })
+            .catch(error => {
+              console.log("isisItem Error : ", error);
+              this.web.lists.configure(this.configOptions)
+                .getByTitle(listName)
+                .fields.inBatch(batch)
+                .createFieldAsXml(
+                  '<Field Type="Lookup" DisplayName="Group" Name="Group" Required="TRUE" List="' +
+                  this.groupListGUID +
+                  '" ShowField="Title" RelationshipDeleteBehavior="None"/>'
+                );
+            });
+
+            await this.web.lists.configure(this.configOptions)
+            .getByTitle(listName)
+            .fields.getByInternalNameOrTitle("Item")
+            .get()
+            .then(isItem => {
+            })
+            .catch(error => {
+              console.log("isisItem Error : ", error);
+              this.web.lists.configure(this.configOptions)
+                .getByTitle(listName)
+                .fields.inBatch(batch)
+                .createFieldAsXml(
+                  '<Field Type="Lookup" DisplayName="Category" Name="Category" Required="TRUE" List="' +
+                  this.categoryListGUID +
+                  '" ShowField="Title" RelationshipDeleteBehavior="None"/>'
+                );
+            });
+
+            await this.web.lists.configure(this.configOptions)
+            .getByTitle(listName)
+            .fields.getByInternalNameOrTitle("Item")
+            .get()
+            .then(isItem => {
+            })
+            .catch(error => {
+              console.log("isisItem Error : ", error);
+              this.web.lists.configure(this.configOptions)
+                .getByTitle(listName)
+                .fields.inBatch(batch)
+                .createFieldAsXml(
+                  '<Field Type="Lookup" DisplayName="Status" Name="Status" Required="TRUE" List="' +
+                  this.statusListGUID +
+                  '" ShowField="Title" RelationshipDeleteBehavior="None"/>'
+                );
+            });
+
+            await this.web.lists.configure(this.configOptions)
+            .getByTitle(listName)
+            .fields.getByInternalNameOrTitle("Item")
+            .get()
+            .then(isItem => {
+            })
+            .catch(error => {
+              console.log("isisItem Error : ", error);
+              this.web.lists.configure(this.configOptions)
+                .getByTitle(listName)
+                .fields.inBatch(batch)
+                .createFieldAsXml(
+                  '<Field Type="Lookup" DisplayName="Responsible" Name="Responsible" Required="TRUE" List="' +
+                  this.responsibleListGUID +
+                  '" ShowField="Title" RelationshipDeleteBehavior="None"/>'
+                );
+            });
+
+            await this.web.lists.configure(this.configOptions)
+            .getByTitle(listName)
+            .fields.getByInternalNameOrTitle("Item")
+            .get()
+            .then(isItem => {
+            })
+            .catch(error => {
+              console.log("isisItem Error : ", error);
+              this.web.lists.configure(this.configOptions)
+                .getByTitle(listName)
+                .fields.inBatch(batch)
+                .createFieldAsXml(
+                  '<Field Type="Lookup" DisplayName="' +
+                  this.DocumentsColumnTitle +
+                  '" Name="' +
+                  this.DocumentsColumnTitle +
+                  '" Required="FALSE" List="' +
+                  this.documentLibraryGUID +
+                  '" ShowField="Title" RelationshipDeleteBehavior="None" Mult="TRUE" />'
+                );
+            });
+
+            batch.execute().then(() => {
+              resolve(true);
+           });
+        }
+        else {
+          console.log(taskresult);
+          resolve(false);
+        }
+      }).catch(error => {
+        console.log("Task List Exists Or Not : ", error);
+        resolve(false);
+      });
+    });
+  }
+
+  public async commentsListCreation(listName: string): Promise<boolean> {
+
+    return new Promise<boolean>((resolve) => {
+      const batch = this.web.createBatch();
+      this.web.lists.configure(this.configOptions).ensure(listName, "", 100, true).then(async commentresult => {
+        if (commentresult.created) {
+          console.log(commentresult.data.Id);
+          this.commentListGUID = commentresult.data.Id;
+
+          await this.web.lists.configure(this.configOptions)
+            .getByTitle(listName)
+            .fields.getByInternalNameOrTitle("Item")
+            .get()
+            .then(isItem => {
+            })
+            .catch(error => {
+              console.log("isisItem Error : ", error);
+              this.web.lists.configure(this.configOptions)
+                .getByTitle(listName)
+                .fields.inBatch(batch)
+                .createFieldAsXml(
+                  '<Field Type="Note" DisplayName="Comment" Name="Comment" Required="TRUE"/>'
+                );
+            });
+          
+          await this.web.lists.configure(this.configOptions)
+            .getByTitle(listName)
+            .fields.getByInternalNameOrTitle("Item")
+            .get()
+            .then(isItem => {
+            })
+            .catch(error => {
+              console.log("isisItem Error : ", error);
+              this.web.lists.configure(this.configOptions)
+                .getByTitle(listName)
+                .fields.inBatch(batch)
+                .createFieldAsXml(
+                  '<Field Type="Lookup" DisplayName="Task" Name="Task" Required="TRUE" List="9b526e51-2a92-42e4-81c8-23ad1b32fdbc" ShowField="Title" RelationshipDeleteBehavior="None"/>'
+                );
+            });
+
+            batch.execute().then(() => {
+              resolve(true);
+           });
+        }
+        else {
+          console.log(commentresult);
+          resolve(false);
+        }
+      }).catch(error => {
+        console.log("Comments List Exists Or Not : ", error);
+        resolve(false);
+      });
+    });
+  }
+  //List Creation End
 }
