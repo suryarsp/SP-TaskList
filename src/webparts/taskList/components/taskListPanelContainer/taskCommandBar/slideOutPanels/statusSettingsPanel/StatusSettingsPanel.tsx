@@ -2,6 +2,7 @@ import * as React from 'react';
 import styles from './StatusSettingsPanel.module.scss';
 import { IStatusSettingsPanelProps } from '../../../../../../../interfaces';
 import { Panel, PanelType } from 'office-ui-fabric-react/lib/Panel';
+import { DefaultButton } from 'office-ui-fabric-react/lib/Button';
 export default class StatusSettingsPanel extends React.Component< IStatusSettingsPanelProps, IStatusSettingsPanelProps> {
   private isDirty: boolean;
 
@@ -19,9 +20,19 @@ export default class StatusSettingsPanel extends React.Component< IStatusSetting
        onDismiss={() => {this.props.hidePanel(this.isDirty);}}
        headerText="Status settings"
        closeButtonAriaLabel="Close"
+       onRenderFooterContent={this._onRenderFooterContent.bind(this)}
+       isFooterAtBottom={true}
      >
        </Panel>
     </div>
+    );
+  }
+
+  private _onRenderFooterContent() {
+    return (
+      <div>
+        <DefaultButton onClick={() => this.props.hidePanel(this.isDirty)}>Close</DefaultButton>
+      </div>
     );
   }
 }

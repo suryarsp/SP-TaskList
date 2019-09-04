@@ -2,6 +2,7 @@ import * as React from 'react';
 import styles from './CategorySettingsPanel.module.scss';
 import { ICategorySettingsPanelProps,  ICategorySettingsPanelState} from '../../../../../../../interfaces/index';
 import { Panel, PanelType } from 'office-ui-fabric-react/lib/Panel';
+import { DefaultButton } from 'office-ui-fabric-react/lib/Button';
 export default class CategorySettingsPanel extends React.Component< ICategorySettingsPanelProps, ICategorySettingsPanelState> {
   private isDirty: boolean;
 
@@ -19,16 +20,18 @@ export default class CategorySettingsPanel extends React.Component< ICategorySet
        onDismiss={ () => this.props.hidePanel(this.isDirty)}
        headerText="Category settings "
        closeButtonAriaLabel="Close"
+       onRenderFooterContent={this._onRenderFooterContent.bind(this)}
+       isFooterAtBottom={true}
      >
        </Panel>
     </div>
     );
   }
 
-  private _onRenderFooterContent = () => {
+  private _onRenderFooterContent() {
     return (
       <div>
-
+        <DefaultButton onClick={() => this.props.hidePanel(this.isDirty)}>Close</DefaultButton>
       </div>
     );
   }

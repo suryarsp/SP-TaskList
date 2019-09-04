@@ -1,7 +1,17 @@
 import { ICategory } from "../../interfaces/index";
 
 
-export const TaskListConstants : { categories: ICategory[], groupViewTypes: {[key: string]: string}, preventGroupDeletionText: string, saveProgressMessage: string, successMessage: string, errorMessage: string } = {
+export const TaskListConstants :
+ { 
+   categories: ICategory[], 
+   groupViewTypes: {[key: string]: string}, 
+   preventGroupDeletionText: string,
+   saveProgressMessage: string, 
+   successMessage: string, 
+   errorMessage: string,
+   updateMessage: string
+  } = 
+   {
     categories : [
       {
         key : 'LOAN DOCUMENTS',
@@ -59,5 +69,6 @@ export const TaskListConstants : { categories: ICategory[], groupViewTypes: {[ke
     preventGroupDeletionText: "This group has categories associated with it.You must remove the relationship between the group",
     saveProgressMessage: 'Saving...',
     errorMessage: 'Error Occurred',
-    successMessage: 'Saved successfully'
+    successMessage: 'Saved successfully',
+    updateMessage: 'Updated successfully'
 };
