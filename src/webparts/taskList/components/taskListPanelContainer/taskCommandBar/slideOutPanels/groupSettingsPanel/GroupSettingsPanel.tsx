@@ -1,17 +1,44 @@
 import * as React from 'react';
 import { Panel, PanelType } from 'office-ui-fabric-react/lib/Panel';
-import { IGroupSettingsPanelProps, IGroupSettingsPanelState, IDataProvider, IGroup } from '../../../../../../../interfaces/index';
+import { IGroupSettingsPanelProps, IGroupSettingsPanelState, IDataProvider, IGroup, DragDropResult } from '../../../../../../../interfaces/index';
 import TaskDataProvider from '../../../../../../../services/TaskDataProvider';
 import styles from './GroupSettingsPanel.module.scss';
 import { TextField } from 'office-ui-fabric-react/lib/TextField';
 import { Checkbox } from 'office-ui-fabric-react/lib/Checkbox';
-import { IconButton, PrimaryButton } from 'office-ui-fabric-react/lib/Button';
+import { IconButton, PrimaryButton, DefaultButton } from 'office-ui-fabric-react/lib/Button';
 import { Dialog, DialogType, DialogFooter } from 'office-ui-fabric-react/lib/Dialog';
 import * as _ from 'lodash';
 import { TaskListConstants } from '../../../../../../../common/defaults/taskList-constants';
+import { MessageBar, MessageBarType } from 'office-ui-fabric-react/lib/MessageBar';
+import { ProgressStatusType } from '../../../../../../../interfaces/enums/progressStatusType';
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { Layer } from 'office-ui-fabric-react/lib/Layer';
 
 
-
+const getItemStyle = (isDragging, draggableStyle) => {
+  if (isDragging) {
+    return {
+      padding: 2,
+      margin: `0 0 2px 0`,
+      // some basic styles to make the items look a bit nicer
+      userSelect: 'none',
+      // styles we need to apply on draggables
+      ...draggableStyle,
+      transform: draggableStyle.transform ? `translate(0, ${draggableStyle.transform.substring(draggableStyle.transform.indexOf(',') + 1, draggableStyle.transform.indexOf(')'))})` : `none`,
+    };
+  }
+  else {
+    return {
+      padding: 2,
+      margin: `0 0 2px 0`,
+      // some basic styles to make the items look a bit nicer
+      userSelect: 'none',
+      // styles we need to apply on draggables
+      transform: `none`,
+      ...draggableStyle
+    };
+  }
+};
 export default class GroupSettingsPanel extends React.Component<IGroupSettingsPanelProps, IGroupSettingsPanelState> {
   public dataProvider: IDataProvider;
   private isDirty: boolean;
@@ -24,8 +51,9 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
       currentGroup: null,
       groups: TaskDataProvider.groups,
       isAddClicked: false,
-      preventDelete : false,
-      statusMessage: ''
+      preventDelete: false,
+      statusMessage: '',
+      statusType: null
     };
   }
 
@@ -34,16 +62,14 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
 
   }
 
-  public _onControlledCheckboxChange(group: IGroup, checked: boolean) {
+  public _onChangeDefaultCheckbox(group: IGroup, checked: boolean) {
     let groups = [...this.state.groups];
-
     let changedGroups = groups.map((g) => {
-      if (g.ID === group.ID) {
-        g.IsDefault = checked;
-        return g;
-      }
-
       if (checked) {
+        if (g.ID === group.ID) {
+          g.IsDefault = checked;
+          return g;
+        }
         g.IsDefault = false;
       }
       return g;
@@ -63,7 +89,8 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
       } else {
         // add new group to the list
         this.setState({
-          statusMessage: TaskListConstants.saveProgressMessage
+          statusMessage: TaskListConstants.saveProgressMessage,
+          statusType: ProgressStatusType.INPROGRESS
         });
         this.onAddGroup(group, newValue);
       }
@@ -83,46 +110,62 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
         }
         return g;
       });
-      this.setState({
-        groups: groups
-      }, () => () => TaskDataProvider.groups = groups);
 
+      this.setState({
+        groups: groups,
+        statusMessage: TaskListConstants.updateMessage,
+        statusType: ProgressStatusType.SUCCESS
+      }, () => () => TaskDataProvider.groups = groups);
     }, 1000);
+
+    this.clearTimeoutvalue = setTimeout(() => {
+      this.setState({
+        statusMessage: '',
+        statusType: null
+      });
+    }, 2000);
   }
 
   public onAddGroup(group: IGroup, text: string) {
     if (this.clearTimeoutvalue) {
       clearTimeout(this.clearTimeoutvalue);
     }
+
     this.clearTimeoutvalue = setTimeout(() => {
       group.Title = text;
+      group.ID = this.state.groups.length + 1;
       let groups = _.cloneDeep(this.state.groups);
       groups = groups.map(g => !g.ID ? group : g);
       this.setState({
         groups: groups,
-        statusMessage: TaskListConstants.successMessage
+        statusMessage: TaskListConstants.successMessage,
+        statusType: ProgressStatusType.SUCCESS
       }, () => TaskDataProvider.groups = groups);
 
     }, 1000);
+
     this.clearTimeoutvalue = setTimeout(() => {
-        this.setState({
-          statusMessage: ''
-        });
+      this.setState({
+        statusMessage: '',
+        statusType: null
+      });
     }, 2000);
+
+    /// TODO : handle also for error 
   }
 
   public onDeleteGroup(group: IGroup) {
     let categories = [...TaskDataProvider.categories];
     let groups = _.cloneDeep(this.state.groups);
-    if(categories.filter(c => c.Group.Title.toLowerCase() === group.Title.toLowerCase()).length > 0) {
+    if (categories.filter(c => c.Group.Title.toLowerCase() === group.Title.toLowerCase()).length > 0) {
       this.setState({
         preventDelete: true
       });
-    } else{
-        let filterdGroups = groups.filter(g => g.ID !== group.ID);
-        this.setState({
-          groups: filterdGroups
-        }, () => TaskDataProvider.groups = filterdGroups);
+    } else {
+      let filterdGroups = groups.filter(g => g.ID !== group.ID);
+      this.setState({
+        groups: filterdGroups
+      }, () => TaskDataProvider.groups = filterdGroups);
     }
   }
 
@@ -133,12 +176,46 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
     });
   }
 
+  public onDragEnd(result: DragDropResult) {
+    const { source, destination } = result;
+
+    if (!result.destination) {
+      return;
+    }
+
+    let updatedGroups = this.reorder(
+      this.state.groups,
+      source.index,
+      destination.index
+    );
+
+    updatedGroups = updatedGroups.map((item, index) => {
+      item.GUID = `${index + 1}`;
+      item.GroupSort = index + 1;
+      item.ID = index + 1;
+      return item;
+    });
+
+    this.setState({
+      groups: updatedGroups
+    }, () => TaskDataProvider.groups = updatedGroups);
+  }
+
+  public reorder(list: IGroup[], startIndex: number, endIndex: number) {
+    const result = [...list];
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
+
+    return result;
+  };
+
   public onClickAdd() {
     let currentGroup: IGroup = {
       Title: '',
       ID: null,
       IsDefault: false,
-      GroupSort: this.state.groups.length
+      GroupSort: this.state.groups.length,
+      GUID: (this.state.groups.length + 1).toString()
     };
     const groups = [...this.state.groups];
     groups.push(currentGroup);
@@ -149,8 +226,32 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
     });
   }
 
+  public getMessageBarType(statusType: ProgressStatusType) {
+    let messageBarStatus: number;
+    switch (statusType) {
+      case ProgressStatusType.INPROGRESS: {
+        messageBarStatus = MessageBarType.info;
+        break;
+      }
+
+      case ProgressStatusType.SUCCESS: {
+        messageBarStatus = MessageBarType.success;
+        break;
+      }
+
+      case ProgressStatusType.FAILURE: {
+        messageBarStatus = MessageBarType.error;
+        break;
+      }
+    }
+
+    return messageBarStatus;
+  }
+
   public render(): React.ReactElement<IGroupSettingsPanelProps> {
-    const  { groups, preventDelete, statusMessage } = this.state;
+    
+    const  { groups, preventDelete, statusMessage , statusType } = this.state;
+    const messageBarType = this.getMessageBarType(statusType);
     const preventDeletionDialog =  preventDelete ? (<Dialog
     hidden={false}
     onDismiss={() => this.onClosePreventDeleteDialog.bind(this)}
@@ -169,16 +270,18 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
     </DialogFooter>
     </Dialog>) :  null;
     return (
-         <Panel
-          isOpen={true}
-          type={PanelType.medium}
-          onDismiss={() => this.props.hidePanel(this.isDirty)}
-          headerText="Group settings"
-          closeButtonAriaLabel="Close"
-        >
-          <span>
-            { statusMessage }
-          </span>
+        <Layer>
+        <div className={styles.slidePaneloverlay}>
+             <div className={styles.groupsPanel}>
+                  <div className={styles.header}>
+                       <div className={styles.closeButton}>
+                            <IconButton
+                                 iconProps={{ iconName: 'Cancel' }}
+                                 onClick={() => {this.props.hidePanel(this.isDirty);}} />
+                       </div>
+                       <div className={styles.groupsTitle}>Group settings</div>
+                       <div className={styles.verticalSeperator}></div>
+                              </div>
           { preventDeletionDialog }
         {/* Disclaimer */}
           <div className= { styles.disclaimer}>
@@ -187,15 +290,39 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
             </p>
           </div>
 
-          {/* Groups */}
-          {
-            groups.map((group) => {
-              return (
-                <div className={styles.groupContainer}>
-                  <IconButton
-                                          iconProps={{ iconName: 'Move' }}
-                                          disabled={ group.Title.trim().length === 0 }/>);
+          <DragDropContext onDragEnd={this.onDragEnd.bind(this)}>
+        <Droppable droppableId="droppable">
+          {(p, s) => (
+            <div
+              ref={p.innerRef}
+            >
+              { groups.map((group, index) => (
+                <Draggable 
+                  key={group.GUID} 
+                  draggableId={group.GUID} 
+                  index={index}
+                  isDragDisabled = { group.Title.trim().length === 0}
+                  >
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                       
+                        style={getItemStyle(
+                          snapshot.isDragging,
+                          provided.draggableProps.style
+                        )}
+                      >
+                <div className={ styles.groupContainer}>
 
+                  {/* <IconButton
+                  iconProps={{ iconName: 'Move',  }}
+                  disabled={ group.Title.trim().length === 0}>
+                 </IconButton> */}
+                 <div {...provided.dragHandleProps}>
+                  <h6>Drag Handle</h6>
+                 </div>
+                 
                 <TextField
                    value={ group.Title}
                    disabled={ group.IsDefault}
@@ -209,7 +336,7 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
                 <Checkbox
                   checked={group.IsDefault}
                   disabled={ group.Title.trim().length === 0 }
-                  onChange={ (e, checked) => { this._onControlledCheckboxChange(group, checked);}}/>
+                  onChange={ (e, checked) => { this._onChangeDefaultCheckbox(group, checked);}}/>
 
                 {
                   !group.IsDefault ? (   <IconButton
@@ -218,21 +345,37 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
                                             onClick={ () => {this.onDeleteGroup(group);}}/>) : null
                 }
                 </div>
-              );
-            })
-          }
+                </div>
+                )}
+                </Draggable>
+              ))}
+              {p.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
 
+        
           {/* Add Button */}
-           <div className={styles.addBtn}>
           <PrimaryButton
             data-automation-id="test"
             text="Add Group"
             allowDisabledFocus={true}
             onClick = { this.onClickAdd.bind(this) }
+            style={{marginLeft: '15px'}}
           />
-          </div>
-          </Panel>
+
+          {
+            statusType ? ( <div className={ styles.statusMessage}>
+              <MessageBar 
+               messageBarType={ messageBarType}>
+                      { statusMessage }
+             </MessageBar>
+              </div>) : null 
+          }
+         </div>
+         </div>
+         </Layer>
     );
   }
-
 }

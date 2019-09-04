@@ -7,31 +7,36 @@ export class MockupDataProvider implements IDataProvider {
         GroupSort : 1,
         ID : 1,
         IsDefault: true,
-        Title: "Group 1"
+        Title: "Group 1",
+        GUID: "1" 
       },
       {
         GroupSort : 2,
         ID : 2,
         IsDefault: false,
-        Title: "Group 2"
+        Title: "Group 2",
+        GUID: "2" 
       },
       {
         GroupSort : 3,
         ID : 3,
         IsDefault: false,
-        Title: "Group 3"
+        Title: "Group 3",
+        GUID: "3" 
       },
       {
         GroupSort : 4,
         ID : 4,
         IsDefault: false,
-        Title: "Group 4"
+        Title: "Group 4",
+        GUID: "4" 
       },
       {
         GroupSort : 5,
         ID : 5,
         IsDefault: false,
-        Title: "Group 5"
+        Title: "Group 5",
+        GUID: "5" 
       }
     ]));
   }

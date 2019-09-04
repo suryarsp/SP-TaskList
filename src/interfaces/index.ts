@@ -53,3 +53,5 @@ export * from './propertyPane/taskGroupingControl/ITaskGroupingControlInternalPr
 export * from './propertyPane/taskGroupingControl/groupingCustomization/IGroupingCustomizationProps';
 export * from './propertyPane/taskGroupingControl/groupingCustomization/IGroupingCustomizationState';
 
+// other
+export * from './other/DragDropResult';
