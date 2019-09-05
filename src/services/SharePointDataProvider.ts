@@ -256,7 +256,7 @@ export class SharePointDataProvider implements IDataProvider {
           ID:inserttask.data.ID,
           IsDefault:inserttask.data.IsDefault,
           GUID:inserttask.data.GUID
-        }
+        };
         response(item);        
       }).catch(error=>{
         console.log("Insert Group Item Error :",error);
@@ -314,12 +314,12 @@ public deleteItem(listname:string,itemId:number):Promise<boolean>{
           FillColor:insertstatus.data.FillColor,
           ID:insertstatus.data.ID,
           GUID:insertstatus.data.GUID
-        }
+        };
         response(item);
       }).catch(error=>{
         console.log("Insert status Item Error :",error);
         response(null);
-      })
+      });
     });
   }
 
@@ -336,8 +336,8 @@ public deleteItem(listname:string,itemId:number):Promise<boolean>{
       }).catch(error=>{
         console.log("Update status item error : ",error);
         response(false);
-      })
-    })
+      });
+    });
   }
   //Status list method end
 
@@ -356,7 +356,7 @@ public insertResponsibleItem(listName:string,items:IResponsibleParty):Promise<IR
         FillColor: insertResponsible.data.FillColor,
         ID:insertResponsible.data.ID,
         GUID:insertResponsible.data.GUID
-      }
+      };
       response(item);
     }).catch(error=>{
       console.log("Insert status Item Error :",error);
@@ -378,7 +378,7 @@ public updateResponsibleItem(listName:string,itemId:number,items:IResponsiblePar
       console.log("Update status item error : ",error);
       response(false);
     });
-  })
+  });
 }
 
 //Responsible list method end
@@ -404,7 +404,7 @@ public insertCategoryItem(listName:string,items:ICategory):Promise<ICategory>{
         children:[],
         key:insertCategory.data.ID,
         text:insertCategory.data.Title
-      }
+      };
       response(item);
     }).catch(error=>{
       console.log("Insert category item error message :",error);
@@ -445,7 +445,7 @@ public insertCommentItem(listName:string,items:IComment):Promise<IComment>{
         Task: items.Task,
         ID:insertComments.data.ID,
         GUID:insertComments.data.GUID
-      }
+      };
       response(item);
     }).catch(error=>{
       console.log("Insert comment list item error : ",error);
