@@ -1,7 +1,8 @@
 export interface IComment {
   Task: ICommentTask;
   Comment: string;
-  ID: number;
+  ID?: number;
+  GUID?:string;
 }
 
  interface ICommentTask {

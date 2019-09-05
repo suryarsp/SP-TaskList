@@ -242,18 +242,25 @@ export class SharePointDataProvider implements IDataProvider {
 
 
   //Group List Methods start
-  public insertGroupItem(listName:string,Items:IGroup):Promise<boolean>{
-    return new Promise<boolean>((response)=>{
+  public insertGroupItem(listName:string,Items:IGroup):Promise<IGroup>{
+    return new Promise<IGroup>((response)=>{
       this.web.lists.configure(this.configOptions).getByTitle(listName).items.add({
         Title:"Title",
         GroupSort:1,
         IsDefault:true
       }).then(inserttask=>{
         console.log("Insert group item : ",inserttask);
-        response(true);
+        let item :IGroup = {
+          Title:inserttask.data.Title,
+          GroupSort:inserttask.data.GroupSort,
+          ID:inserttask.data.ID,
+          IsDefault:inserttask.data.IsDefault,
+          GUID:inserttask.data.GUID
+        }
+        response(item);        
       }).catch(error=>{
         console.log("Insert Group Item Error :",error);
-        response(false);
+        response(null);
       });
     });
   }
@@ -291,8 +298,8 @@ public deleteItem(listname:string,itemId:number):Promise<boolean>{
   
 
   //Status list methods start
-  public insertStatusItem(listName:string,items:IStatus):Promise<boolean>{
-    return new Promise<boolean>((response)=>{
+  public insertStatusItem(listName:string,items:IStatus):Promise<IStatus>{
+    return new Promise<IStatus>((response)=>{
       this.web.lists.configure(this.configOptions).getByTitle(listName).items.add({
         Title:items.Title,
         StatusSort:items.StatusSort,
@@ -300,10 +307,18 @@ public deleteItem(listname:string,itemId:number):Promise<boolean>{
         FillColor:items.FillColor
       }).then(insertstatus=>{
         console.log("Insert status item : ",insertstatus);
-        response(true);
+        let item:IStatus={
+          Title:insertstatus.data.Title,
+          StatusSort:insertstatus.data.StatusSort,
+          FontColor:insertstatus.data.FontColor,        
+          FillColor:insertstatus.data.FillColor,
+          ID:insertstatus.data.ID,
+          GUID:insertstatus.data.GUID
+        }
+        response(item);
       }).catch(error=>{
         console.log("Insert status Item Error :",error);
-        response(false);
+        response(null);
       })
     });
   }
@@ -327,18 +342,25 @@ public deleteItem(listname:string,itemId:number):Promise<boolean>{
   //Status list method end
 
 //Responsible list method start
-public insertResponsibleItem(listName:string,items:IResponsibleParty):Promise<boolean>{
-  return new Promise<boolean>((response)=>{
+public insertResponsibleItem(listName:string,items:IResponsibleParty):Promise<IResponsibleParty>{
+  return new Promise<IResponsibleParty>((response)=>{
     this.web.lists.configure(this.configOptions).getByTitle(listName).items.add({        
       Title: items.Title,
       FontColor: items.FontColor,
       FillColor: items.FillColor
     }).then(insertResponsible=>{
       console.log("Insert status item : ",insertResponsible);
-      response(true);
+      let item:IResponsibleParty={
+        Title: insertResponsible.data.Title,
+        FontColor: insertResponsible.data.FontColor,
+        FillColor: insertResponsible.data.FillColor,
+        ID:insertResponsible.data.ID,
+        GUID:insertResponsible.data.GUID
+      }
+      response(item);
     }).catch(error=>{
       console.log("Insert status Item Error :",error);
-      response(false);
+      response(null);
     });
   });
 }
@@ -363,8 +385,8 @@ public updateResponsibleItem(listName:string,itemId:number,items:IResponsiblePar
 
 //Category list method start
 
-public insertCategoryItem(listName:string,items:ICategory):Promise<boolean>{
-  return new Promise<boolean>((response)=>{
+public insertCategoryItem(listName:string,items:ICategory):Promise<ICategory>{
+  return new Promise<ICategory>((response)=>{
     this.web.lists.configure(this.configOptions).getByTitle(listName).items.add({
       Title:items.Title,
       CategorySort: items.CategorySort,
@@ -372,10 +394,21 @@ public insertCategoryItem(listName:string,items:ICategory):Promise<boolean>{
       ParentId: items.Parent.Id
     }).then(insertCategory=>{
       console.log("Insert category item : ",insertCategory);
-      response(true);
+      let item:ICategory={
+        Title:insertCategory.data.Title,
+        CategorySort: insertCategory.data.CategorySort,
+        Group: insertCategory.data.Group,
+        Parent: insertCategory.data.Parent,
+        ID:insertCategory.data.ID,
+        GUID:insertCategory.data.GUID,
+        children:[],
+        key:insertCategory.data.ID,
+        text:insertCategory.data.Title
+      }
+      response(item);
     }).catch(error=>{
       console.log("Insert category item error message :",error);
-      response(false);
+      response(null);
     });
   });
 }
@@ -400,17 +433,23 @@ public updateCategoryItem(listName:string,itemId:number,items:ICategory):Promise
 //Category list method end
 
 //Comment list method start
-public insertCommentItem(listName:string,items:IComment):Promise<boolean>{
-  return new Promise<boolean>((response)=>{
+public insertCommentItem(listName:string,items:IComment):Promise<IComment>{
+  return new Promise<IComment>((response)=>{
     this.web.lists.configure(this.configOptions).getByTitle(listName).items.add({
       Comment: items.Comment,
       TaskId: items.Task.ID
     }).then(insertComments=>{
       console.log("Insert comment list item : ",insertComments);
-      response(true);
+      let item:IComment={
+        Comment: items.Comment,
+        Task: items.Task,
+        ID:insertComments.data.ID,
+        GUID:insertComments.data.GUID
+      }
+      response(item);
     }).catch(error=>{
       console.log("Insert comment list item error : ",error);
-      response(false);
+      response(null);
     });
   });
 }

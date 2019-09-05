@@ -61,7 +61,7 @@ export class MockupDataProvider implements IDataProvider {
     return null;
   }
 
-  public insertGroupItem(listName:string):Promise<boolean>{
+  public insertGroupItem(listName:string):Promise<IGroup>{
     return null;
   }
 
@@ -74,7 +74,7 @@ export class MockupDataProvider implements IDataProvider {
     return null;
   }
 
-  public insertStatusItem(listName:string,items:IStatus):Promise<boolean>{
+  public insertStatusItem(listName:string,items:IStatus):Promise<IStatus>{
     return null;
   }
 
