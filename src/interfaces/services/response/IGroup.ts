@@ -4,5 +4,6 @@ export interface IGroup {
   GroupSort: number;
   IsDefault: boolean;
   ID?: number;
+  isExisting ?: boolean;
   GUID?:string;
 }

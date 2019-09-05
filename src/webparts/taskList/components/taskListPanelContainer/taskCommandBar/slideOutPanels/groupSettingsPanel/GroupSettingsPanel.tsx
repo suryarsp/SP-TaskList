@@ -77,23 +77,41 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
 
     this.setState({
       groups: changedGroups
-    });
+    }, );
   }
 
   public onChangeGroupTitle(newValue: string, group: IGroup) {
-    const groups = this.state.groups;
-    if (newValue.trim().length > 0 || newValue !== null) {
+    let groups = [...this.state.groups];
+    group.Title = newValue;
+    const isGroupAlreadyPresent = groups.filter(g => g.Title.toLowerCase() === newValue.toLowerCase()).length > 1;
+    if (!isGroupAlreadyPresent) {
+      group.isExisting = false;
+      this.setState({
+        groups: groups
+      });
       if (group.ID) {
-        // update the existing group
         this.onUpdateGroup(group, newValue);
       } else {
-        // add new group to the list
-        this.setState({
-          statusMessage: TaskListConstants.saveProgressMessage,
-          statusType: ProgressStatusType.INPROGRESS
-        });
         this.onAddGroup(group, newValue);
       }
+    } else {
+      if (this.clearTimeoutvalue) {
+        clearTimeout(this.clearTimeoutvalue);
+      }
+
+      groups = groups.map(g => {
+        if (g.GUID === group.GUID) {
+          g.isExisting = true;
+        }
+        return g;
+      });
+      this.clearTimeoutvalue = setTimeout(() => {
+        this.setState({
+          groups: groups,
+          statusMessage: '',
+          statusType: null
+        });
+      }, 1000);
     }
   }
 
@@ -105,8 +123,7 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
       let groups = _.cloneDeep(this.state.groups);
       groups = groups.map((g) => {
         if (group.ID == g.ID) {
-          g.Title = text;
-          return g;
+          return group;
         }
         return g;
       });
@@ -118,12 +135,7 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
       }, () => () => TaskDataProvider.groups = groups);
     }, 1000);
 
-    this.clearTimeoutvalue = setTimeout(() => {
-      this.setState({
-        statusMessage: '',
-        statusType: null
-      });
-    }, 2000);
+    this.resetStatus();
   }
 
   public onAddGroup(group: IGroup, text: string) {
@@ -132,7 +144,6 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
     }
 
     this.clearTimeoutvalue = setTimeout(() => {
-      group.Title = text;
       group.ID = this.state.groups.length + 1;
       let groups = _.cloneDeep(this.state.groups);
       groups = groups.map(g => !g.ID ? group : g);
@@ -144,14 +155,17 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
 
     }, 1000);
 
+    this.resetStatus();
+    /// TODO : handle also for error
+  }
+
+  public resetStatus() {
     this.clearTimeoutvalue = setTimeout(() => {
       this.setState({
         statusMessage: '',
         statusType: null
       });
     }, 2000);
-
-    /// TODO : handle also for error 
   }
 
   public onDeleteGroup(group: IGroup) {
@@ -184,7 +198,7 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
     }
 
     let updatedGroups = this.reorder(
-      this.state.groups,
+      _.cloneDeep(this.state.groups),
       source.index,
       destination.index
     );
@@ -202,12 +216,11 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
   }
 
   public reorder(list: IGroup[], startIndex: number, endIndex: number) {
-    const result = [...list];
+    const result = _.cloneDeep(list);
     const [removed] = result.splice(startIndex, 1);
     result.splice(endIndex, 0, removed);
-
     return result;
-  };
+  }
 
   public onClickAdd() {
     let currentGroup: IGroup = {
@@ -215,7 +228,8 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
       ID: null,
       IsDefault: false,
       GroupSort: this.state.groups.length,
-      GUID: (this.state.groups.length + 1).toString()
+      GUID: (this.state.groups.length + 1).toString(),
+      isExisting: false
     };
     const groups = [...this.state.groups];
     groups.push(currentGroup);
@@ -249,7 +263,7 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
   }
 
   public render(): React.ReactElement<IGroupSettingsPanelProps> {
-    
+
     const  { groups, preventDelete, statusMessage , statusType } = this.state;
     const messageBarType = this.getMessageBarType(statusType);
     const preventDeletionDialog =  preventDelete ? (<Dialog
@@ -297,17 +311,17 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
               ref={p.innerRef}
             >
               { groups.map((group, index) => (
-                <Draggable 
-                  key={group.GUID} 
-                  draggableId={group.GUID} 
+                <Draggable
+                  key={group.GUID}
+                  draggableId={group.GUID}
                   index={index}
-                  isDragDisabled = { group.Title.trim().length === 0}
+                  isDragDisabled = { group.Title.trim().length === 0 || statusType !== null}
                   >
                     {(provided, snapshot) => (
                       <div
                         ref={provided.innerRef}
                         {...provided.draggableProps}
-                       
+
                         style={getItemStyle(
                           snapshot.isDragging,
                           provided.draggableProps.style
@@ -322,25 +336,22 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
                  <div {...provided.dragHandleProps}>
                   <h6>Drag Handle</h6>
                  </div>
-                 
+
                 <TextField
                    value={ group.Title}
-                   disabled={ group.IsDefault}
+                   disabled={ group.IsDefault || statusType !== null}
                    styles={{ fieldGroup: { width: 200 } }}
-                   onChange= { (e, newValue) =>
-                   {
-                     this.onChangeGroupTitle(newValue, group);
-                     }
-                     } />
+                   onChange= { (e, newValue) => { this.onChangeGroupTitle(newValue, group); }}
+                   errorMessage = {  group.isExisting ? "Group already exists" : (group.Title.trim().length === 0) ? "Value cannot be empty": null }/>
 
                 <Checkbox
                   checked={group.IsDefault}
-                  disabled={ group.Title.trim().length === 0 }
+                  disabled={ group.Title.trim().length === 0 || statusType !== null}
                   onChange={ (e, checked) => { this._onChangeDefaultCheckbox(group, checked);}}/>
 
                 {
                   !group.IsDefault ? (   <IconButton
-                                            disabled={ group.Title.trim().length === 0 }
+                                            disabled={ group.Title.trim().length === 0 || statusType !== null}
                                             iconProps={{ iconName: 'Delete' }}
                                             onClick={ () => {this.onDeleteGroup(group);}}/>) : null
                 }
@@ -355,7 +366,7 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
         </Droppable>
       </DragDropContext>
 
-        
+
           {/* Add Button */}
           <PrimaryButton
             data-automation-id="test"
@@ -367,11 +378,11 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
 
           {
             statusType ? ( <div className={ styles.statusMessage}>
-              <MessageBar 
-               messageBarType={ messageBarType}>
+              <MessageBar
+               messageBarType={ messageBarType }>
                       { statusMessage }
              </MessageBar>
-              </div>) : null 
+              </div>) : null
           }
          </div>
          </div>

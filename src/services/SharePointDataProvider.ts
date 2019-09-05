@@ -256,8 +256,8 @@ export class SharePointDataProvider implements IDataProvider {
           ID:inserttask.data.ID,
           IsDefault:inserttask.data.IsDefault,
           GUID:inserttask.data.GUID
-        }
-        response(item);        
+        };
+        response(item);
       }).catch(error=>{
         console.log("Insert Group Item Error :",error);
         response(null);
@@ -295,7 +295,7 @@ public deleteItem(listname:string,itemId:number):Promise<boolean>{
   });
 }
 
-  
+
 
   //Status list methods start
   public insertStatusItem(listName:string,items:IStatus):Promise<IStatus>{
@@ -303,23 +303,23 @@ public deleteItem(listname:string,itemId:number):Promise<boolean>{
       this.web.lists.configure(this.configOptions).getByTitle(listName).items.add({
         Title:items.Title,
         StatusSort:items.StatusSort,
-        FontColor:items.FontColor,        
+        FontColor:items.FontColor,
         FillColor:items.FillColor
       }).then(insertstatus=>{
         console.log("Insert status item : ",insertstatus);
         let item:IStatus={
           Title:insertstatus.data.Title,
           StatusSort:insertstatus.data.StatusSort,
-          FontColor:insertstatus.data.FontColor,        
+          FontColor:insertstatus.data.FontColor,
           FillColor:insertstatus.data.FillColor,
           ID:insertstatus.data.ID,
           GUID:insertstatus.data.GUID
-        }
+        };
         response(item);
       }).catch(error=>{
         console.log("Insert status Item Error :",error);
         response(null);
-      })
+      });
     });
   }
 
@@ -328,7 +328,7 @@ public deleteItem(listname:string,itemId:number):Promise<boolean>{
       this.web.lists.configure(this.configOptions).getByTitle(listname).items.getById(itemId).update({
         Title:items.Title,
         StatusSort:items.StatusSort,
-        FontColor:items.FontColor,        
+        FontColor:items.FontColor,
         FillColor:items.FillColor
       }).then(updategroup=>{
         console.log("Update status item : ",updategroup);
@@ -336,15 +336,15 @@ public deleteItem(listname:string,itemId:number):Promise<boolean>{
       }).catch(error=>{
         console.log("Update status item error : ",error);
         response(false);
-      })
-    })
+      });
+    });
   }
   //Status list method end
 
 //Responsible list method start
 public insertResponsibleItem(listName:string,items:IResponsibleParty):Promise<IResponsibleParty>{
   return new Promise<IResponsibleParty>((response)=>{
-    this.web.lists.configure(this.configOptions).getByTitle(listName).items.add({        
+    this.web.lists.configure(this.configOptions).getByTitle(listName).items.add({
       Title: items.Title,
       FontColor: items.FontColor,
       FillColor: items.FillColor
@@ -356,7 +356,7 @@ public insertResponsibleItem(listName:string,items:IResponsibleParty):Promise<IR
         FillColor: insertResponsible.data.FillColor,
         ID:insertResponsible.data.ID,
         GUID:insertResponsible.data.GUID
-      }
+      };
       response(item);
     }).catch(error=>{
       console.log("Insert status Item Error :",error);
@@ -368,8 +368,8 @@ public insertResponsibleItem(listName:string,items:IResponsibleParty):Promise<IR
 public updateResponsibleItem(listName:string,itemId:number,items:IResponsibleParty):Promise<boolean>{
   return new Promise<boolean>((response)=>{
     this.web.lists.configure(this.configOptions).getByTitle(listName).items.getById(itemId).update({
-      Title:items.Title,        
-      FontColor:items.FontColor,        
+      Title:items.Title,
+      FontColor:items.FontColor,
       FillColor:items.FillColor
     }).then(updateResponsible=>{
       console.log("Update status item : ",updateResponsible);
@@ -378,7 +378,7 @@ public updateResponsibleItem(listName:string,itemId:number,items:IResponsiblePar
       console.log("Update status item error : ",error);
       response(false);
     });
-  })
+  });
 }
 
 //Responsible list method end
@@ -404,7 +404,7 @@ public insertCategoryItem(listName:string,items:ICategory):Promise<ICategory>{
         children:[],
         key:insertCategory.data.ID,
         text:insertCategory.data.Title
-      }
+      };
       response(item);
     }).catch(error=>{
       console.log("Insert category item error message :",error);
@@ -445,7 +445,7 @@ public insertCommentItem(listName:string,items:IComment):Promise<IComment>{
         Task: items.Task,
         ID:insertComments.data.ID,
         GUID:insertComments.data.GUID
-      }
+      };
       response(item);
     }).catch(error=>{
       console.log("Insert comment list item error : ",error);
@@ -554,7 +554,7 @@ public updateCommentItem(listName:string,itemId:number,items:IComment):Promise<b
         if (responsibleresult.created) {
           console.log(responsibleresult.data.Id);
           this.responsibleListGUID = responsibleresult.data.Id;
-          
+
           await this.web.lists.configure(this.configOptions)
             .getByTitle(listName)
             .fields.getByInternalNameOrTitle("Item")
@@ -626,7 +626,7 @@ public updateCommentItem(listName:string,itemId:number,items:IComment):Promise<b
                   '<Field Type="Number" DisplayName="StatusSort" Name="StatusSort" Required="TRUE"/>'
                 );
             });
-          
+
           await this.web.lists.configure(this.configOptions)
             .getByTitle(listName)
             .fields.getByInternalNameOrTitle("Item")
@@ -698,7 +698,7 @@ public updateCommentItem(listName:string,itemId:number,items:IComment):Promise<b
                   '<Field Type="Number" DisplayName="CategorySort" Name="CategorySort" Required="TRUE"/>'
                 );
             });
-          
+
           await this.web.lists.configure(this.configOptions)
             .getByTitle(listName)
             .fields.getByInternalNameOrTitle("Item")
@@ -792,7 +792,7 @@ public updateCommentItem(listName:string,itemId:number,items:IComment):Promise<b
                   '<Field Type="Number" DisplayName="TaskSort" Name="TaskSort" Required="TRUE"/>'
                 );
             });
-          
+
           await this.web.lists.configure(this.configOptions)
             .getByTitle(listName)
             .fields.getByInternalNameOrTitle("Item")
@@ -944,7 +944,7 @@ public updateCommentItem(listName:string,itemId:number,items:IComment):Promise<b
                   '<Field Type="Note" DisplayName="Comment" Name="Comment" Required="TRUE"/>'
                 );
             });
-          
+
           await this.web.lists.configure(this.configOptions)
             .getByTitle(listName)
             .fields.getByInternalNameOrTitle("Item")
