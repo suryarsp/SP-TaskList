@@ -2,15 +2,15 @@ import { ICategory } from "../../interfaces/index";
 
 
 export const TaskListConstants :
- { 
-   categories: ICategory[], 
-   groupViewTypes: {[key: string]: string}, 
+ {
+   categories: ICategory[],
+   groupViewTypes: {[key: string]: string},
    preventGroupDeletionText: string,
-   saveProgressMessage: string, 
-   successMessage: string, 
+   saveProgressMessage: string,
+   successMessage: string,
    errorMessage: string,
    updateMessage: string
-  } = 
+  } =
    {
     categories : [
       {
@@ -72,3 +72,12 @@ export const TaskListConstants :
     successMessage: 'Saved successfully',
     updateMessage: 'Updated successfully'
 };
+
+
+// private groupListView = ['Item', 'Title', 'GroupSort', 'IsDefault', 'ID', 'Created', 'Editor', 'Modified'];
+// private responsibleListView = ['Item', 'Title', 'FontColor', 'FillColor', 'ID', 'Created', 'Editor', 'Modified'];
+// private statusListView = ['Item', 'Title', 'StatusSort','FontColor', 'FillColor', 'ID', 'Created', 'Editor', 'Modified'];
+// private categoryListView = ['Item', 'Title', 'CategorySort','Parent', 'Group', 'ID', 'Created', 'Editor', 'Modified'];
+// private commentsListView = ['Item', 'Title', 'Comment','Task', 'Created', 'Editor', 'Modified'];
+// private taskListView = ['Item', 'Title', 'TaskSort','Parent', 'Group','Category', 'Status','Document','ID', 'Created', 'Editor', 'Modified'];
+

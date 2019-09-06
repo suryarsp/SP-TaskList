@@ -11,13 +11,20 @@ export default class TaskDataProvider  {
   private static _instance: IDataProvider;
   public static listPermissions : IPermissions[];
   public static libraryPermissions : IPermissions[];
-  public static listName: string;
-  public static librarayName: string;
   public static documentLibraryUniqueID: string;
   public static categories: ICategory[] = [];
   public static groups: IGroup[] = [];
   public static responsibleParties: IResponsibleParty[] = [];
   public static statuses: IStatus[] = [];
+  public static listNames : {
+    taskListName: string,
+    commentsListName: string,
+    groupListName: string,
+    categoryListName: string,
+    statusListName: string,
+    responsibleListName: string
+  };
+  public static libraryName: string;
 
   // public static categoryExpandPosition: ICategoryExpandPosition[] = [];
   public static context : IWebPartContext;

@@ -1,14 +1,12 @@
-
-export interface ITaskListProps {
+export interface ITaskListWebPartProps {
+  taskListName: string;
+  commentsListName: string;
   defaultTaskCategory: string;
   alwaysDownloadAllDocuments: boolean;
   itemsPerPage: number;
   isGroupingEnabled: boolean;
   isCategoryUniqueEnabled: boolean;
   selectedViewType: string;
-  // List Names
-  taskListName: string;
-  commentsListName: string;
   groupListName: string;
   categoryListName: string;
   statusListName: string;

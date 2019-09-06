@@ -8,35 +8,35 @@ export class MockupDataProvider implements IDataProvider {
         ID : 1,
         IsDefault: true,
         Title: "Group 1",
-        GUID: "1" 
+        GUID: "1"
       },
       {
         GroupSort : 2,
         ID : 2,
         IsDefault: false,
         Title: "Group 2",
-        GUID: "2" 
+        GUID: "2"
       },
       {
         GroupSort : 3,
         ID : 3,
         IsDefault: false,
         Title: "Group 3",
-        GUID: "3" 
+        GUID: "3"
       },
       {
         GroupSort : 4,
         ID : 4,
         IsDefault: false,
         Title: "Group 4",
-        GUID: "4" 
+        GUID: "4"
       },
       {
         GroupSort : 5,
         ID : 5,
         IsDefault: false,
         Title: "Group 5",
-        GUID: "5" 
+        GUID: "5"
       }
     ]));
   }
@@ -55,10 +55,6 @@ export class MockupDataProvider implements IDataProvider {
 
   public getTaskListFields(listname: string): Promise<IColumn[]> {
     return new Promise<IColumn[]>((resolve) => resolve([]));
-  }
-
-  public getPermissions(listTitle: string): Promise<{ permission: import("sp-pnp-js").PermissionKind; allowed: boolean; }[]> {
-    return null;
   }
 
   public insertGroupItem(listName:string):Promise<IGroup>{
@@ -80,8 +76,5 @@ export class MockupDataProvider implements IDataProvider {
 
   public updateStatusItem(listname:string,itemId:number,items:IStatus):Promise<boolean>{
     return null;
-  }
- 
-  constructor() {
   }
 }

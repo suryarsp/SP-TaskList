@@ -54,6 +54,12 @@ export * from './propertyPane/taskGroupingControl/ITaskGroupingControlComponentP
 export * from './propertyPane/taskGroupingControl/ITaskGroupingControlInternalProps';
 export * from './propertyPane/taskGroupingControl/groupingCustomization/IGroupingCustomizationProps';
 export * from './propertyPane/taskGroupingControl/groupingCustomization/IGroupingCustomizationState';
-
+export * from  './propertyPane/createButtonWithIndication/ICreateButtonWithIndicationInternalProps';
+export * from  './propertyPane/createButtonWithIndication/ICreateButtonWithIndicationProps';
+export * from  './propertyPane/createButtonWithIndication/ICreateButtonWithIndicationProps';
+export * from  './propertyPane/createButtonWithIndication/progressButton/IProgressButtonProps';
+export * from  './propertyPane/createButtonWithIndication/progressButton/IProgressButtonState';
 // other
 export * from './other/DragDropResult';
+
+export * from './components/ITaskListWebPartProps';

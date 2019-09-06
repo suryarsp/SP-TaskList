@@ -7,6 +7,8 @@ import { Web, util, ConfigOptions, ODataBatch, PermissionKind, ListItemFormUpdat
 import { IPermissions } from "./permissions/IPermissions";
 import { SPHttpClient, ISPHttpClientOptions, IHttpClientOptions, IDigestCache, DigestCache } from "@microsoft/sp-http";
 import IDownloadItems from "../interfaces/services/response/IDownloadItems";
+import { ListDetailsConstants } from "../common/defaults/listView-constants";
+import TaskDataProvider from "./TaskDataProvider";
 
 export class SharePointDataProvider implements IDataProvider {
 
@@ -272,12 +274,12 @@ export class SharePointDataProvider implements IDataProvider {
 
 
   //Group List Methods start
-  public insertGroupItem(listName: string, Items: IGroup): Promise<IGroup> {
+  public insertGroupItem(listName: string, group: IGroup): Promise<IGroup> {
     return new Promise<IGroup>((response) => {
       this.web.lists.configure(this.configOptions).getByTitle(listName).items.add({
-        Title: "Title",
-        GroupSort: 1,
-        IsDefault: true
+        Title: group.Title,
+        GroupSort: group.GroupSort,
+        IsDefault: group.IsDefault
       }).then(inserttask => {
         if (inserttask) {
           console.log("Insert group item : ", inserttask);
@@ -300,12 +302,12 @@ export class SharePointDataProvider implements IDataProvider {
     });
   }
 
-  public updateGroupItem(listname: string, itemId: number, Items: IGroup): Promise<boolean> {
+  public updateGroupItem(listname: string, itemId: number, group: IGroup): Promise<boolean> {
     return new Promise<boolean>((response) => {
       this.web.lists.configure(this.configOptions).getByTitle(listname).items.getById(itemId).update({
-        Title: "Group 2",
-        GroupSort: 1,
-        IsDefault: false
+        Title: group.Title,
+        GroupSort: group.GroupSort,
+        IsDefault: group.IsDefault
       }).then(updategroup => {
         if (updategroup) {
           console.log("Update group item : ", updategroup);
@@ -400,7 +402,7 @@ export class SharePointDataProvider implements IDataProvider {
         FillColor: items.FillColor
       }).then(insertResponsible => {
         if (insertResponsible) {
-          console.log("Insert status item : ", insertResponsible);
+          console.log("insertResponsible item : ", insertResponsible);
           let item: IResponsibleParty = {
             Title: insertResponsible.data.Title,
             FontColor: insertResponsible.data.FontColor,
@@ -414,7 +416,7 @@ export class SharePointDataProvider implements IDataProvider {
           response(null);
         }
       }).catch(error => {
-        console.log("Insert status Item Error :", error);
+        console.log("insertResponsible Item Error :", error);
         response(null);
       });
     });
@@ -428,14 +430,14 @@ export class SharePointDataProvider implements IDataProvider {
         FillColor: items.FillColor
       }).then(updateResponsible => {
         if (updateResponsible) {
-          console.log("Update status item : ", updateResponsible);
+          console.log("updateResponsible item : ", updateResponsible);
           response(true);
         }
         else {
           response(false);
         }
       }).catch(error => {
-        console.log("Update status item error : ", error);
+        console.log("updateResponsible item error : ", error);
         response(false);
       });
     });
@@ -555,7 +557,6 @@ export class SharePointDataProvider implements IDataProvider {
 
   //List Creation start
   public async groupListCreation(listName: string): Promise<boolean> {
-
     return new Promise<boolean>((resolve) => {
       const batch = this.web.createBatch();
       this.web.lists.configure(this.configOptions).ensure(listName, "", 100, true).then(async groupresult => {
@@ -610,7 +611,7 @@ export class SharePointDataProvider implements IDataProvider {
     });
   }
 
-  public async commonlistViewCreation(listName: string, items: any): Promise<boolean> {
+  public async commonlistViewCreation(listName: string, items: string[]): Promise<boolean> {
     const batch = this.web.createBatch();
     //const fields = ['Item', 'Group', 'ResponsibleParty', 'Status', 'SortOrder', 'Comments', this.DocumentsColumnTitle, 'ID', 'Created', 'Editor', 'Modified'];
     const fields = items;
@@ -853,23 +854,24 @@ export class SharePointDataProvider implements IDataProvider {
   }
 
   public async taskListCreation(listName: string): Promise<boolean> {
-    if (this.groupListGUID == null) {
-      this.getListGUID("Group").then((value: string) => {
+    const { groupListName, responsibleListName, categoryListName, statusListName} = TaskDataProvider.listNames ;
+    if (this.groupListGUID === null) {
+      this.getListGUID(groupListName).then((value: string) => {
         this.groupListGUID = value;
       });
     }
-    if (this.responsibleListGUID == null) {
-      this.getListGUID("Responsible").then((value: string) => {
+    if (this.responsibleListGUID === null) {
+      this.getListGUID(responsibleListName).then((value: string) => {
         this.responsibleListGUID = value;
       });
     }
-    if (this.statusListGUID == null) {
-      this.getListGUID("Status").then((value: string) => {
+    if (this.statusListGUID === null) {
+      this.getListGUID(statusListName).then((value: string) => {
         this.statusListGUID = value;
       });
     }
-    if (this.categoryListGUID == null) {
-      this.getListGUID("Category").then((value: string) => {
+    if (this.categoryListGUID === null) {
+      this.getListGUID(categoryListName).then((value: string) => {
         this.categoryListGUID = value;
       });
     }
@@ -1821,5 +1823,39 @@ export class SharePointDataProvider implements IDataProvider {
     });
   }
 
+  public async listExists(listname: string): Promise<boolean> {
+    return new Promise<boolean>((resolve) => {
+         this.web.lists.filter("Title eq '" + listname + "'")
+              .get()
+              .then((islistExists) => {
+                   if (islistExists.length > 0) {
+                        TaskDataProvider.documentLibraryUniqueID = islistExists[0].Id;
+                        resolve(true);
+                   }
+                   else {
+                        resolve(false);
+                   }
+              }).catch(error => {
+                   console.log("Closing CheckList Exists Or Not : ", error);
+                   resolve(false);
+              });
+    });
+}
+
+public async libraryExists(libraryName: string): Promise<boolean> {
+    return new Promise<boolean>((resolve) => {
+         this.web.lists.filter("Title eq '" + libraryName + "'").get().then((islibraryExists) => {
+              if (islibraryExists.length > 0) {
+                   resolve(true);
+              }
+              else {
+                   resolve(false);
+              }
+         }).catch(error => {
+              console.log("Document Library Exists Or Not : ", error);
+              resolve(false);
+         });
+    });
+}
 
 }

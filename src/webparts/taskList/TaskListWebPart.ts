@@ -14,21 +14,12 @@ import {
 
 import * as strings from 'TaskListWebPartStrings';
 import TaskList from './components/TaskList';
-import { ITaskListProps } from '../../interfaces/index';
+import { ITaskListProps, ITaskListWebPartProps } from '../../interfaces/index';
 import { TaskListConstants } from '../../common/defaults/taskList-constants';
 import { TaskGroupingControlComponent } from '../../propertyPanelCustomControls/taskGroupingControl/TaskGroupingControl';
 import TaskDataProvider from '../../services/TaskDataProvider';
+import { CreateButtonWithIndication } from '../../propertyPanelCustomControls/CreateButtonWithIndication/CreateButtonWithIndication';
 require('../../styles/main.css');
-export interface ITaskListWebPartProps {
-  taskListName: string;
-  commentsListName: string;
-  defaultTaskCategory: string;
-  alwaysDownloadAllDocuments: boolean;
-  itemsPerPage: number;
-  isGroupingEnabled: boolean;
-  isCategoryUniqueEnabled: boolean;
-  selectedViewType: string;
-}
 
 export default class TaskListWebPart extends BaseClientSideWebPart<ITaskListWebPartProps> {
 
@@ -36,15 +27,20 @@ export default class TaskListWebPart extends BaseClientSideWebPart<ITaskListWebP
     TaskDataProvider.context = this.context;
     const element: React.ReactElement<ITaskListProps> = React.createElement(
       TaskList, {
-        taskListName: this.properties.taskListName,
-        commentsListName: this.properties.commentsListName,
-        defaultTaskCategory: this.properties.defaultTaskCategory,
-        alwaysDownloadAllDocuments: this.properties.alwaysDownloadAllDocuments,
-        itemsPerPage: this.properties.itemsPerPage,
-        isGroupingEnabled: this.properties.isGroupingEnabled,
-        isCategoryUniqueEnabled: this.properties.isCategoryUniqueEnabled,
-        selectedViewType: this.properties.selectedViewType
-      }
+      taskListName: this.properties.taskListName,
+      commentsListName: this.properties.commentsListName,
+      defaultTaskCategory: this.properties.defaultTaskCategory,
+      alwaysDownloadAllDocuments: this.properties.alwaysDownloadAllDocuments,
+      itemsPerPage: this.properties.itemsPerPage,
+      isGroupingEnabled: this.properties.isGroupingEnabled,
+      isCategoryUniqueEnabled: this.properties.isCategoryUniqueEnabled,
+      selectedViewType: this.properties.selectedViewType,
+      groupListName: this.properties.groupListName,
+      categoryListName: this.properties.categoryListName,
+      statusListName: this.properties.statusListName,
+      responsibleListName: this.properties.responsibleListName,
+      libraryName: this.properties.libraryName,
+    }
     );
 
     ReactDom.render(element, this.domElement);
@@ -68,11 +64,11 @@ export default class TaskListWebPart extends BaseClientSideWebPart<ITaskListWebP
   }
 
   public onEnableOrDisableGroup(checked: boolean) {
-      this.properties.isGroupingEnabled = checked;
+    this.properties.isGroupingEnabled = checked;
   }
 
   public onEanbleOrDisableUniqueCategory(checked: boolean) {
-      this.properties.isCategoryUniqueEnabled = checked;
+    this.properties.isCategoryUniqueEnabled = checked;
   }
 
   public onChangeGroupView(type: string) {
@@ -101,6 +97,67 @@ export default class TaskListWebPart extends BaseClientSideWebPart<ITaskListWebP
                 PropertyPaneTextField('commentsListName', {
                   label: "Comments list name",
                   onGetErrorMessage: this.validateTextField.bind(this)
+                }),
+
+                PropertyPaneLabel("Blank", {
+                  text: ""
+                }),
+
+
+                PropertyPaneTextField('groupListName', {
+                  label: "Group list name",
+                  onGetErrorMessage: this.validateTextField.bind(this)
+                }),
+
+                PropertyPaneLabel("Blank", {
+                  text: ""
+                }),
+
+                PropertyPaneTextField('categoryListName', {
+                  label: "Category list name",
+                  onGetErrorMessage: this.validateTextField.bind(this)
+                }),
+
+                PropertyPaneLabel("Blank", {
+                  text: ""
+                }),
+
+                PropertyPaneTextField('statusListName', {
+                  label: "Status list name",
+                  onGetErrorMessage: this.validateTextField.bind(this)
+                }),
+
+                PropertyPaneLabel("Blank", {
+                  text: ""
+                }),
+
+                PropertyPaneTextField('responsibleListName', {
+                  label: "Responsbile party list name",
+                  onGetErrorMessage: this.validateTextField.bind(this)
+                }),
+
+                PropertyPaneLabel("Blank", {
+                  text: ""
+                }),
+
+                PropertyPaneTextField('libraryName', {
+                  label: "Library name",
+                  onGetErrorMessage: this.validateTextField.bind(this)
+                }),
+
+                PropertyPaneLabel("Blank", {
+                  text: ""
+                }),
+
+                new CreateButtonWithIndication("createList", {
+                  label: "Create List",
+                  taskListName: this.properties.taskListName,
+                  commentsListName: this.properties.commentsListName,
+                  groupListName: this.properties.groupListName,
+                  categoryListName: this.properties.categoryListName,
+                  responsibleListName: this.properties.responsibleListName,
+                  statusListName: this.properties.statusListName,
+                  libraryName: this.properties.libraryName
                 }),
 
                 PropertyPaneLabel("Blank", {
@@ -142,7 +199,7 @@ export default class TaskListWebPart extends BaseClientSideWebPart<ITaskListWebP
                   isGroupingEnabled: this.properties.isGroupingEnabled,
                   isCategoryUniqueEnabled: this.properties.isCategoryUniqueEnabled,
                   selectedViewType: this.properties.selectedViewType,
-                  onEnableOrDisableGroup : this.onEnableOrDisableGroup.bind(this),
+                  onEnableOrDisableGroup: this.onEnableOrDisableGroup.bind(this),
                   onEnableOrDisableUniqueCategory: this.onEanbleOrDisableUniqueCategory.bind(this),
                   onChangeGroupView: this.onChangeGroupView.bind(this)
                 }),
@@ -150,6 +207,8 @@ export default class TaskListWebPart extends BaseClientSideWebPart<ITaskListWebP
                 PropertyPaneLabel("Blank", {
                   text: ""
                 }),
+
+
               ]
             }
           ]

@@ -21,14 +21,20 @@
     "description": { "default": "Task List" },
     "officeFabricIconFontName": "Page",
     "properties": {
-      "taskListName": "Matter Tasks",
+      "taskListName": "Task",
       "commentsListName": "Comments",
       "defaultTaskCategory": "LOAN DOCUMENTS",
       "alwaysDownloadAllDocuments": false,
       "itemsPerPage": 10,
       "isGroupingEnabled": false,
       "isCategoryUniqueEnabled": false,
-      "selectedViewType": "list"
+      "selectedViewType": "list",
+      "groupListName" :"Group",
+      "categoryListName": "Category",
+      "statusListName": "Status",
+      "responsibleListName": "Responsible",
+      "libraryName": "TaskDocument"
+
     }
   }]
 }
