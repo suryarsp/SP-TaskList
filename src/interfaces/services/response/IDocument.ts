@@ -5,9 +5,17 @@ export interface IDocument {
   Modified: string;
   UniqueId: string;
   DocIcon: string;
+  Editor: Editor;
 }
 
 export interface File {
   Name: string;
   ServerRelativeUrl: string;
+}
+
+export interface Editor {
+	Title: string;
+     Id: number;
+     LastName: string;
+     FirstName: string;
 }

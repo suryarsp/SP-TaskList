@@ -46,6 +46,8 @@ export * from './services/response/IGroup';
 export * from './services/response/IResponsibleParty';
 export * from './services/response/IStatus';
 export * from './services/response/IColumn';
+export * from './services/response/ICreateFolder';
+export * from './services/response/IDownloadItems';
 
 // Property Pane
 export * from './propertyPane/taskGroupingControl/ITaskGroupingControlComponentProps';
