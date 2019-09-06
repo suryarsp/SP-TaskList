@@ -1,6 +1,7 @@
 .disclaimer {
   background-color: lightgray;
   padding: 2px 0px 4px 16px;
+  margin: 10px 20px 20px 10px;
   border-radius: 5px;
   p {
     color: black;
@@ -90,6 +91,7 @@ $contentPadding: 0 17px 0 15px;
             font-weight: 300;
             padding: 0 0 15px 0;
         }
+        .addBtn
         .DocName {
             display: block;
             font-size: 14px;

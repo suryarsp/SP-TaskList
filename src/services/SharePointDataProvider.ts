@@ -26,7 +26,7 @@ export class SharePointDataProvider implements IDataProvider {
   private documentLibraryGUID: string;
   private taskListGUID: string;
   private commentListGUID: string;
-
+  private listNames =  TaskDataProvider.listNames;
   private configOptions: ConfigOptions = {
     headers: {
       Accept: 'application/json;odata=nometadata'
@@ -164,14 +164,14 @@ export class SharePointDataProvider implements IDataProvider {
     let web: Web = new Web(this._absoluteUrl);
     let GroupListColl: IGroup[] = [];
     return new Promise<IGroup[]>(resolve => {
-      web.lists.configure(this.configOptions).getByTitle(listname).items.select("Title", "ID", "GroupSort", "IsDefault", "GUID").get().then((groupitems: IGroup[]) => {
+      web.lists.configure(this.configOptions).getByTitle(listname).items.select("Title", "ID", "GroupSort", "IsDefault", "GUID").top(5000).get().then((groupitems: IGroup[]) => {
         console.log("Group : ", groupitems);
         console.log("Group JSON : ", JSON.stringify(groupitems));
         groupitems.forEach(element => {
           let items: IGroup = {
             ID: element.ID,
             IsDefault: element.IsDefault,
-            Title: element.Title,
+            Title: element.Title ? element.Title:"",
             GroupSort: element.GroupSort,
             GUID: element.GUID
           };
@@ -186,13 +186,13 @@ export class SharePointDataProvider implements IDataProvider {
     let web: Web = new Web(this._absoluteUrl);
     let ResponsibleListColl: IResponsibleParty[] = [];
     return new Promise<IResponsibleParty[]>(resolve => {
-      web.lists.configure(this.configOptions).getByTitle(listname).items.select("Title", "ID", "FontColor", "FillColor", "GUID").get().then((responsibleitems: IResponsibleParty[]) => {
+      web.lists.configure(this.configOptions).getByTitle(listname).items.select("Title", "ID", "FontColor", "FillColor", "GUID").top(5000).get().then((responsibleitems: IResponsibleParty[]) => {
         console.log("responsibleitems : ", responsibleitems);
         console.log("responsibleitems JSON : ", JSON.stringify(responsibleitems));
         responsibleitems.forEach(element => {
           let items: IResponsibleParty = {
             ID: element.ID,
-            Title: element.Title,
+            Title: element.Title ? element.Title : "",
             FontColor: element.FontColor,
             FillColor: element.FillColor,
             GUID: element.GUID
@@ -208,14 +208,14 @@ export class SharePointDataProvider implements IDataProvider {
     let web: Web = new Web(this._absoluteUrl);
     let StatusitemsListColl: IStatus[] = [];
     return new Promise<IStatus[]>(resolve => {
-      web.lists.configure(this.configOptions).getByTitle(listname).items.select("Title", "ID", "StatusSort", "FontColor", "FillColor", "GUID").get().then((Statusitems: IStatus[]) => {
+      web.lists.configure(this.configOptions).getByTitle(listname).items.select("Title", "ID", "StatusSort", "FontColor", "FillColor", "GUID").top(5000).get().then((Statusitems: IStatus[]) => {
         console.log("Status : ", Statusitems);
         console.log("Status JSON : ", JSON.stringify(Statusitems));
         Statusitems.forEach(element => {
           let items: IStatus = {
             ID: element.ID,
             FontColor: element.FontColor,
-            Title: element.Title,
+            Title: element.Title ? element.Title : "",
             FillColor: element.FillColor,
             StatusSort: element.StatusSort,
             GUID: element.GUID
@@ -231,13 +231,13 @@ export class SharePointDataProvider implements IDataProvider {
     let web: Web = new Web(this._absoluteUrl);
     let CategoryListColl: ICategory[] = [];
     return new Promise<ICategory[]>(resolve => {
-      web.lists.configure(this.configOptions).getByTitle(listname).items.select("Title", "ID", "CategorySort", "Parent/Title", "Parent/Id", "Group/Title", "Group/Id", "GUID").expand("Parent", "Group").get().then((categoryitems: ICategory[]) => {
+      web.lists.configure(this.configOptions).getByTitle(listname).items.select("Title", "ID", "CategorySort", "Parent/Title", "Parent/Id", "Group/Title", "Group/Id", "GUID").expand("Parent", "Group").top(5000).get().then((categoryitems: ICategory[]) => {
         console.log("category : ", categoryitems);
         console.log("category JSON : ", JSON.stringify(categoryitems));
         categoryitems.forEach(element => {
           let items: ICategory = {
             ID: element.ID,
-            Title: element.Title,
+            Title: element.Title ? element.Title :"",
             CategorySort: element.CategorySort,
             Group: element.Group,
             Parent: element.Parent,
@@ -560,13 +560,11 @@ export class SharePointDataProvider implements IDataProvider {
     return new Promise<boolean>((resolve) => {
       const batch = this.web.createBatch();
       this.web.lists.configure(this.configOptions).ensure(listName, "", 100, true).then(async groupresult => {
-        if (groupresult.created) {
           console.log(groupresult.data.Id);
           this.groupListGUID = groupresult.data.Id;
-
           await this.web.lists.configure(this.configOptions)
             .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("Item")
+            .fields.getByInternalNameOrTitle("GroupSort")
             .get()
             .then(isItem => {
             })
@@ -582,7 +580,7 @@ export class SharePointDataProvider implements IDataProvider {
 
           await this.web.lists.configure(this.configOptions)
             .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("Item")
+            .fields.getByInternalNameOrTitle("IsDefault")
             .get()
             .then(isItem => {
             })
@@ -599,11 +597,7 @@ export class SharePointDataProvider implements IDataProvider {
           batch.execute().then(() => {
             resolve(true);
           });
-        }
-        else {
-          console.log(groupresult);
-          resolve(false);
-        }
+
       }).catch(error => {
         console.log("Group List Exists Or Not : ", error);
         resolve(false);
@@ -628,17 +622,15 @@ export class SharePointDataProvider implements IDataProvider {
   }
 
   public async responsibleListCreation(listName: string): Promise<boolean> {
-
     return new Promise<boolean>((resolve) => {
       const batch = this.web.createBatch();
       this.web.lists.configure(this.configOptions).ensure(listName, "", 100, true).then(async responsibleresult => {
-        if (responsibleresult.created) {
           console.log(responsibleresult.data.Id);
           this.responsibleListGUID = responsibleresult.data.Id;
 
           await this.web.lists.configure(this.configOptions)
             .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("Item")
+            .fields.getByInternalNameOrTitle("FontColor")
             .get()
             .then(isItem => {
             })
@@ -654,7 +646,7 @@ export class SharePointDataProvider implements IDataProvider {
 
           await this.web.lists.configure(this.configOptions)
             .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("Item")
+            .fields.getByInternalNameOrTitle("FillColor")
             .get()
             .then(isItem => {
             })
@@ -671,11 +663,6 @@ export class SharePointDataProvider implements IDataProvider {
           batch.execute().then(() => {
             resolve(true);
           });
-        }
-        else {
-          console.log(responsibleresult);
-          resolve(false);
-        }
       }).catch(error => {
         console.log("Responsible List Exists Or Not : ", error);
         resolve(false);
@@ -684,17 +671,15 @@ export class SharePointDataProvider implements IDataProvider {
   }
 
   public async statusListCreation(listName: string): Promise<boolean> {
-
     return new Promise<boolean>((resolve) => {
       const batch = this.web.createBatch();
       this.web.lists.configure(this.configOptions).ensure(listName, "", 100, true).then(async statusresult => {
-        if (statusresult.created) {
           console.log(statusresult.data.Id);
           this.statusListGUID = statusresult.data.Id;
 
           await this.web.lists.configure(this.configOptions)
             .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("Item")
+            .fields.getByInternalNameOrTitle("StatusSort")
             .get()
             .then(isItem => {
             })
@@ -710,7 +695,7 @@ export class SharePointDataProvider implements IDataProvider {
 
           await this.web.lists.configure(this.configOptions)
             .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("Item")
+            .fields.getByInternalNameOrTitle("FontColor")
             .get()
             .then(isItem => {
             })
@@ -726,7 +711,7 @@ export class SharePointDataProvider implements IDataProvider {
 
           await this.web.lists.configure(this.configOptions)
             .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("Item")
+            .fields.getByInternalNameOrTitle("FillColor")
             .get()
             .then(isItem => {
             })
@@ -743,11 +728,6 @@ export class SharePointDataProvider implements IDataProvider {
           batch.execute().then(() => {
             resolve(true);
           });
-        }
-        else {
-          console.log(statusresult);
-          resolve(false);
-        }
       }).catch(error => {
         console.log("Status List Exists Or Not : ", error);
         resolve(false);
@@ -756,21 +736,20 @@ export class SharePointDataProvider implements IDataProvider {
   }
 
   public async categoryListCreation(listName: string): Promise<boolean> {
-    if (this.groupListGUID == null) {
-      this.getListGUID("Group").then((value: string) => {
+    if (!this.groupListGUID) {
+      this.getListGUID(this.listNames.groupListName).then((value: string) => {
         this.groupListGUID = value;
       });
     }
     return new Promise<boolean>((resolve) => {
       const batch = this.web.createBatch();
       this.web.lists.configure(this.configOptions).ensure(listName, "", 100, true).then(async categoryresult => {
-        if (categoryresult.created) {
           console.log(categoryresult.data.Id);
           this.categoryListGUID = categoryresult.data.Id;
 
           await this.web.lists.configure(this.configOptions)
             .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("Item")
+            .fields.getByInternalNameOrTitle("CategorySort")
             .get()
             .then(isItem => {
             })
@@ -786,7 +765,7 @@ export class SharePointDataProvider implements IDataProvider {
 
           await this.web.lists.configure(this.configOptions)
             .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("Item")
+            .fields.getByInternalNameOrTitle("Parent")
             .get()
             .then(isItem => {
             })
@@ -804,7 +783,7 @@ export class SharePointDataProvider implements IDataProvider {
 
           await this.web.lists.configure(this.configOptions)
             .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("Item")
+            .fields.getByInternalNameOrTitle("Group")
             .get()
             .then(isItem => {
             })
@@ -823,11 +802,6 @@ export class SharePointDataProvider implements IDataProvider {
           batch.execute().then(() => {
             resolve(true);
           });
-        }
-        else {
-          console.log(categoryresult);
-          resolve(false);
-        }
       }).catch(error => {
         console.log("Category List Exists Or Not : ", error);
         resolve(false);
@@ -854,25 +828,29 @@ export class SharePointDataProvider implements IDataProvider {
   }
 
   public async taskListCreation(listName: string): Promise<boolean> {
-    const { groupListName, responsibleListName, categoryListName, statusListName} = TaskDataProvider.listNames ;
-    if (this.groupListGUID === null) {
-      this.getListGUID(groupListName).then((value: string) => {
+    if (!this.groupListGUID) {
+      this.getListGUID(this.listNames.groupListName).then((value: string) => {
         this.groupListGUID = value;
       });
     }
-    if (this.responsibleListGUID === null) {
-      this.getListGUID(responsibleListName).then((value: string) => {
+    if (!this.responsibleListGUID) {
+      this.getListGUID(this.listNames.responsibleListName).then((value: string) => {
         this.responsibleListGUID = value;
       });
     }
-    if (this.statusListGUID === null) {
-      this.getListGUID(statusListName).then((value: string) => {
+    if (!this.statusListGUID) {
+      this.getListGUID(this.listNames.statusListName).then((value: string) => {
         this.statusListGUID = value;
       });
     }
-    if (this.categoryListGUID === null) {
-      this.getListGUID(categoryListName).then((value: string) => {
+    if (!this.categoryListGUID) {
+      this.getListGUID(this.listNames.categoryListName).then((value: string) => {
         this.categoryListGUID = value;
+      });
+    }
+    if(!this.documentLibraryGUID){
+      this.getListGUID(TaskDataProvider.libraryName).then((value:string)=>{
+        this.documentLibraryGUID = value;
       });
     }
     return new Promise<boolean>((resolve) => {
@@ -884,7 +862,7 @@ export class SharePointDataProvider implements IDataProvider {
 
           await this.web.lists.configure(this.configOptions)
             .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("Item")
+            .fields.getByInternalNameOrTitle("TaskSort")
             .get()
             .then(isItem => {
             })
@@ -900,7 +878,7 @@ export class SharePointDataProvider implements IDataProvider {
 
           await this.web.lists.configure(this.configOptions)
             .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("Item")
+            .fields.getByInternalNameOrTitle("Parent")
             .get()
             .then(isItem => {
             })
@@ -918,7 +896,7 @@ export class SharePointDataProvider implements IDataProvider {
 
           await this.web.lists.configure(this.configOptions)
             .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("Item")
+            .fields.getByInternalNameOrTitle("Group")
             .get()
             .then(isItem => {
             })
@@ -936,7 +914,7 @@ export class SharePointDataProvider implements IDataProvider {
 
           await this.web.lists.configure(this.configOptions)
             .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("Item")
+            .fields.getByInternalNameOrTitle("Category")
             .get()
             .then(isItem => {
             })
@@ -954,7 +932,7 @@ export class SharePointDataProvider implements IDataProvider {
 
           await this.web.lists.configure(this.configOptions)
             .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("Item")
+            .fields.getByInternalNameOrTitle("Status")
             .get()
             .then(isItem => {
             })
@@ -972,7 +950,7 @@ export class SharePointDataProvider implements IDataProvider {
 
           await this.web.lists.configure(this.configOptions)
             .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("Item")
+            .fields.getByInternalNameOrTitle("Responsible")
             .get()
             .then(isItem => {
             })
@@ -990,7 +968,7 @@ export class SharePointDataProvider implements IDataProvider {
 
           await this.web.lists.configure(this.configOptions)
             .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("Item")
+            .fields.getByInternalNameOrTitle(this.DocumentsColumnTitle)
             .get()
             .then(isItem => {
             })
@@ -1026,21 +1004,20 @@ export class SharePointDataProvider implements IDataProvider {
   }
 
   public async commentsListCreation(listName: string): Promise<boolean> {
-    if (this.taskListGUID == null) {
-      this.getListGUID("Task").then((value: string) => {
+    if (!this.taskListGUID) {
+      this.getListGUID(this.listNames.taskListName).then((value: string) => {
         this.taskListGUID = value;
       });
     }
     return new Promise<boolean>((resolve) => {
       const batch = this.web.createBatch();
       this.web.lists.configure(this.configOptions).ensure(listName, "", 100, true).then(async commentresult => {
-        if (commentresult.created) {
           console.log(commentresult.data.Id);
           this.commentListGUID = commentresult.data.Id;
 
           await this.web.lists.configure(this.configOptions)
             .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("Item")
+            .fields.getByInternalNameOrTitle("Comment")
             .get()
             .then(isItem => {
             })
@@ -1056,7 +1033,7 @@ export class SharePointDataProvider implements IDataProvider {
 
           await this.web.lists.configure(this.configOptions)
             .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("Item")
+            .fields.getByInternalNameOrTitle("Task")
             .get()
             .then(isItem => {
             })
@@ -1073,11 +1050,6 @@ export class SharePointDataProvider implements IDataProvider {
           batch.execute().then(() => {
             resolve(true);
           });
-        }
-        else {
-          console.log(commentresult);
-          resolve(false);
-        }
       }).catch(error => {
         console.log("Comments List Exists Or Not : ", error);
         resolve(false);

@@ -31,7 +31,7 @@ export default class TaskDataProvider  {
 
   public static get Instance() {
     if(!this._instance){
-        if (DEBUG && Environment.type === EnvironmentType.SharePoint) {
+        if (DEBUG && Environment.type === EnvironmentType.Local) {
              this._instance = new MockupDataProvider();
         } else {
              this._instance = new SharePointDataProvider(this.context);

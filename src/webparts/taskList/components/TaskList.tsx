@@ -18,11 +18,11 @@ export default class TaskList extends React.Component<ITaskListProps, ITaskListS
   public componentDidMount() {
     TaskDataProvider.listNames = {
       taskListName: this.props.taskListName,
-      commentsListName: this.props.taskListName,
-      groupListName: this.props.taskListName,
-      categoryListName: this.props.taskListName,
-      statusListName: this.props.taskListName,
-      responsibleListName: this.props.taskListName
+      commentsListName: this.props.commentsListName,
+      groupListName: this.props.groupListName,
+      categoryListName: this.props.categoryListName,
+      statusListName: this.props.statusListName,
+      responsibleListName: this.props.responsibleListName
     };
     TaskDataProvider.libraryName  = this.props.libraryName;
     this.dataProvider = TaskDataProvider.Instance;
@@ -32,34 +32,28 @@ export default class TaskList extends React.Component<ITaskListProps, ITaskListS
 
   public getAdminSettings() {
     const { groupListName, statusListName, categoryListName, responsibleListName } = TaskDataProvider.listNames;
-    this.dataProvider.getGroups(groupListName).then((groups) => {
-      TaskDataProvider.groups = groups;
-      console.log(groups);
-    }).
-      catch((error) => {
-        console.log("Get Groups", error);
-    });
 
-    this.dataProvider.getCategories(categoryListName).then((categories) => {
-      TaskDataProvider.categories = categories;
-    }).
-      catch((error) => {
-        console.log("Get categories", error);
-    });
 
-    this.dataProvider.getStatuses(statusListName).then((statuses) => {
-      TaskDataProvider.statuses = statuses;
-    }).
-      catch((error) => {
-        console.log("Get statuses", error);
-    });
+    // this.dataProvider.getCategories(categoryListName).then((categories) => {
+    //   TaskDataProvider.categories = categories;
+    // }).
+    //   catch((error) => {
+    //     console.log("Get categories", error);
+    // });
 
-    this.dataProvider.getResponsibleParties(responsibleListName).then((parties) => {
-      TaskDataProvider.responsibleParties = parties;
-    }).
-      catch((error) => {
-        console.log("Get responsibleParties", error);
-    });
+    // this.dataProvider.getStatuses(statusListName).then((statuses) => {
+    //   TaskDataProvider.statuses = statuses;
+    // }).
+    //   catch((error) => {
+    //     console.log("Get statuses", error);
+    // });
+
+    // this.dataProvider.getResponsibleParties(responsibleListName).then((parties) => {
+    //   TaskDataProvider.responsibleParties = parties;
+    // }).
+    //   catch((error) => {
+    //     console.log("Get responsibleParties", error);
+    // });
 
   }
 
