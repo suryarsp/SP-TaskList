@@ -314,46 +314,60 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
       source.index,
       destination.index
     );
-    updatedGroups = updatedGroups.map((item, index) => {
-      item.GroupSort = index + 1;
-      return item;
-    });
-    const destionationGroup = groups[destination.index];
-    destionationGroup.GroupSort = source.index + 1;
+
+
     const sourceGroup = groups[source.index];
-    sourceGroup.GroupSort = destination.index + 1;
+    const sourceIndex = source.index;
+    const destinationIndex = destination.index;
+
+      /**
+       * TODO: Sort order update
+       */
     this.setState({
       statusMessage: 'Sorting inprogress',
       statusType: ProgressStatusType.INPROGRESS
     });
-    await Promise.all([this.dataProvider.updateGroupItem(this.groupListName, sourceGroup.ID, sourceGroup), this.dataProvider.updateGroupItem(this.groupListName, destionationGroup.ID, destionationGroup)])
-      .then((results) => {
-        if (results[0] && results[1]) {
-          this.setState({
-            groups: updatedGroups,
-            statusMessage: 'Sorted successfully',
-            statusType: ProgressStatusType.SUCCESS
-          }, () => TaskDataProvider.groups = groups);
-          this.resetStatus();
-        } else {
-          this.setState({
-            groups: groups,
-            statusMessage: 'Error orrucured during sorting',
-            statusType: ProgressStatusType.FAILURE
-          });
-        }
+    updatedGroups = updatedGroups.map((g) => {
+      if(g.ID === sourceGroup.ID) {
 
-      }).catch((e) => {
-        this.setState({
-          groups: groups,
-          statusMessage: 'Error orrucured during sorting',
-          statusType: ProgressStatusType.FAILURE
-        });
-      });
+      }
+      return g;
+    });
+    this.dataProvider.updateGroupItem(this.groupListName, sourceGroup.ID, sourceGroup)
+    .then(() => {
 
-    this.setState({
-      groups: updatedGroups
-    }, () => TaskDataProvider.groups = updatedGroups);
+    })
+    .catch(() => {
+
+    });
+    // await Promise.all([this.dataProvider.updateGroupItem(this.groupListName, sourceGroup.ID, sourceGroup), this.dataProvider.updateGroupItem(this.groupListName, destionationGroup.ID, destionationGroup)])
+    //   .then((results) => {
+    //     if (results[0] && results[1]) {
+    //       this.setState({
+    //         groups: updatedGroups,
+    //         statusMessage: 'Sorted successfully',
+    //         statusType: ProgressStatusType.SUCCESS
+    //       }, () => TaskDataProvider.groups = groups);
+    //       this.resetStatus();
+    //     } else {
+    //       this.setState({
+    //         groups: groups,
+    //         statusMessage: 'Error orrucured during sorting',
+    //         statusType: ProgressStatusType.FAILURE
+    //       });
+    //     }
+
+    //   }).catch((e) => {
+    //     this.setState({
+    //       groups: groups,
+    //       statusMessage: 'Error orrucured during sorting',
+    //       statusType: ProgressStatusType.FAILURE
+    //     });
+    //   });
+
+    // this.setState({
+    //   groups: updatedGroups
+    // }, () => TaskDataProvider.groups = updatedGroups);
   }
 
   public reorder(list: IGroup[], startIndex: number, endIndex: number) {

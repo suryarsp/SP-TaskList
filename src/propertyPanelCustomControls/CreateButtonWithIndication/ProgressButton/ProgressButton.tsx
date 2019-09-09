@@ -59,7 +59,7 @@ export default class ProgressButton extends React.Component<IProgressButtonProps
       creationInProgress: true
     });
 
-    const { groupListName, statusListName, responsibleListName, categoryListName, taskListName, commentsListName, libraryName } = this.props;
+    const {statusListName, responsibleListName, categoryListName, taskListName, commentsListName, libraryName } = this.props;
     const { group, category, status, responsibleParty, comments, task } = ListDetailsConstants;
 
     this.dataProvider.statusListCreation(statusListName).then(
@@ -67,7 +67,7 @@ export default class ProgressButton extends React.Component<IProgressButtonProps
         if (isStatusCreated) {
           this.dataProvider.responsibleListCreation(responsibleListName).then(
             (isResponsibleCreated) => {
-              if (isResponsibleCreated) {            
+              if (isResponsibleCreated) {
                 this.dataProvider.categoryListCreation(categoryListName).then(
                   (isCategoryCreated) => {
                     if (isCategoryCreated) {

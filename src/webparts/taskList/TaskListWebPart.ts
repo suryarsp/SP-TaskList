@@ -77,6 +77,10 @@ export default class TaskListWebPart extends BaseClientSideWebPart<ITaskListWebP
     this.properties.selectedViewType = type;
   }
 
+  public onChangeGroupListName(value: string) {
+    this.properties.groupListName = value;
+  }
+
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
     return {
       pages: [
@@ -145,7 +149,6 @@ export default class TaskListWebPart extends BaseClientSideWebPart<ITaskListWebP
                   label: "Create List",
                   taskListName: this.properties.taskListName,
                   commentsListName: this.properties.commentsListName,
-                  groupListName: this.properties.groupListName,
                   categoryListName: this.properties.categoryListName,
                   responsibleListName: this.properties.responsibleListName,
                   statusListName: this.properties.statusListName,
@@ -207,7 +210,8 @@ export default class TaskListWebPart extends BaseClientSideWebPart<ITaskListWebP
                   onEnableOrDisableGroup: this.onEnableOrDisableGroup.bind(this),
                   onEnableOrDisableUniqueCategory: this.onEanbleOrDisableUniqueCategory.bind(this),
                   onChangeGroupView: this.onChangeGroupView.bind(this),
-                  groupListName: this.properties.groupListName
+                  groupListName: this.properties.groupListName,
+                  onChangeGroupListName: this.onChangeGroupListName.bind(this)
                 }),
 
                 PropertyPaneLabel("Blank", {

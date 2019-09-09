@@ -19,13 +19,14 @@ export class TaskGroupingControlComponent implements IPropertyPaneField<ITaskGro
           this.properties = {
                key: 'statusCode',
                onRender: this.onRender.bind(this),
-               isGroupingEnabled: properties.isCategoryUniqueEnabled,
+               isGroupingEnabled: properties.isGroupingEnabled,
                isCategoryUniqueEnabled: properties.isCategoryUniqueEnabled,
                selectedViewType: properties.selectedViewType,
                onEnableOrDisableGroup: properties.onEnableOrDisableGroup,
                onEnableOrDisableUniqueCategory: properties.onEnableOrDisableUniqueCategory,
                onChangeGroupView: properties.onChangeGroupView,
-               groupListName: properties.groupListName
+               groupListName: properties.groupListName,
+               onChangeGroupListName: properties.onChangeGroupListName
           };
      }
 
@@ -39,13 +40,14 @@ export class TaskGroupingControlComponent implements IPropertyPaneField<ITaskGro
                this.elem = elem;
       }
           const element: React.ReactElement<IGroupingCustomizationProps> = React.createElement(GroupingCustomization, {
-            isGroupingEnabled: this.properties.isCategoryUniqueEnabled,
+            isGroupingEnabled: this.properties.isGroupingEnabled,
             isCategoryUniqueEnabled: this.properties.isCategoryUniqueEnabled,
             selectedViewType: this.properties.selectedViewType,
             onEnableOrDisableGroup: this.properties.onEnableOrDisableGroup,
             onEnableOrDisableUniqueCategory: this.properties.onEnableOrDisableUniqueCategory,
             onChangeGroupView: this.properties.onChangeGroupView,
-            groupListName: this.properties.groupListName
+            groupListName: this.properties.groupListName,
+            onChangeGroupListName: this.properties.onChangeGroupListName
           });
           setTimeout(() => {
                ReactDom.render(element, elem);

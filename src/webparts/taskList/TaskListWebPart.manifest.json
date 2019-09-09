@@ -29,7 +29,7 @@
       "isGroupingEnabled": false,
       "isCategoryUniqueEnabled": false,
       "selectedViewType": "list",
-      "groupListName" :"Group",
+      "groupListName" : "",
       "categoryListName": "Category",
       "statusListName": "Status",
       "responsibleListName": "Responsible",

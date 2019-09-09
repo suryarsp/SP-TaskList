@@ -29,7 +29,6 @@ export class CreateButtonWithIndication
 			label: properties.label,
       onRender: this.onRender.bind(this),
       taskListName: properties.taskListName,
-      groupListName: properties.groupListName,
       categoryListName: properties.categoryListName,
       responsibleListName: properties.responsibleListName,
       statusListName: properties.statusListName,
@@ -54,7 +53,6 @@ export class CreateButtonWithIndication
 		> = React.createElement(ProgressButton, {
       text: this.properties.label,
       taskListName: this.properties.taskListName,
-      groupListName: this.properties.groupListName,
       categoryListName: this.properties.categoryListName,
       responsibleListName: this.properties.responsibleListName,
       statusListName: this.properties.statusListName,

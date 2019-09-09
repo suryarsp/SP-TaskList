@@ -8,4 +8,5 @@ export interface IGroupingCustomizationState {
   showWarning: boolean;
   creationSuccess: boolean;
   isErrorOccured: boolean;
+  isListPresent: boolean;
 }
