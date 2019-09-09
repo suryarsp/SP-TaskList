@@ -1,5 +1,5 @@
 export interface ICategory {
-  Group: GroupOrParentCategory;
+  Group?: GroupOrParentCategory;
   Title: string;
   CategorySort: number;
   ID?: number;
@@ -8,6 +8,7 @@ export interface ICategory {
   Parent?: GroupOrParentCategory;
   key : string;
   text : string;
+  isExisting?: boolean;
 }
 
 

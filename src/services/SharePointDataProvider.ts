@@ -448,13 +448,33 @@ export class SharePointDataProvider implements IDataProvider {
   //Category list method start
 
   public insertCategoryItem(listName: string, items: ICategory): Promise<ICategory> {
+    let obj = {};
+    if(items.Group && items.Parent){
+      obj["Title"] = items.Title;
+      obj["CategorySort"] = items.CategorySort;            
+      obj["ParentId"] = items.Parent.Id;    
+      obj["GroupId"] = items.Group.Id;
+    }
+    if(items.Group)
+    {
+      obj["Title"] = items.Title;
+      obj["CategorySort"] = items.CategorySort;      
+      obj["GroupId"] = items.Group.Id;
+    }
+    else if(items.Parent){
+      obj["Title"] = items.Title;
+      obj["CategorySort"] = items.CategorySort;            
+      obj["ParentId"] = items.Parent.Id;     
+    }
+    else{
+      obj["Title"] = items.Title;
+      obj["CategorySort"] = items.CategorySort;     
+    }
+    
+    console.log(obj);
+    
     return new Promise<ICategory>((response) => {
-      this.web.lists.configure(this.configOptions).getByTitle(listName).items.add({
-        Title: items.Title,
-        CategorySort: items.CategorySort,
-        GroupId: items.Group.Id,
-        ParentId: items.Parent.Id
-      }).then(insertCategory => {
+      this.web.lists.configure(this.configOptions).getByTitle(listName).items.add(obj).then(insertCategory => {
         if (insertCategory) {
           console.log("Insert category item : ", insertCategory);
           let item: ICategory = {
@@ -574,7 +594,7 @@ export class SharePointDataProvider implements IDataProvider {
                 .getByTitle(listName)
                 .fields.inBatch(batch)
                 .createFieldAsXml(
-                  '<Field Type="Number" DisplayName="GroupSort" Name="GroupSort" Required="TRUE"/>'
+                  '<Field Type="Number" DisplayName="GroupSort" Name="GroupSort" Required="TRUE" Decimals="5"/>'
                 );
             });
 
@@ -689,7 +709,7 @@ export class SharePointDataProvider implements IDataProvider {
                 .getByTitle(listName)
                 .fields.inBatch(batch)
                 .createFieldAsXml(
-                  '<Field Type="Number" DisplayName="StatusSort" Name="StatusSort" Required="TRUE"/>'
+                  '<Field Type="Number" DisplayName="StatusSort" Name="StatusSort" Required="TRUE"  Decimals="5"/>'
                 );
             });
 
@@ -735,12 +755,83 @@ export class SharePointDataProvider implements IDataProvider {
     });
   }
 
-  public async categoryListCreation(listName: string): Promise<boolean> {
+  public async categoryMappingAfterGroup(listName:string,defaultGroup:string):Promise<boolean>{
     if (!this.groupListGUID) {
       this.getListGUID(this.listNames.groupListName).then((value: string) => {
         this.groupListGUID = value;
       });
     }
+    return new Promise<boolean>((resolve)=>{
+      const batch = this.web.createBatch();
+      this.web.lists.configure(this.configOptions).ensure(listName, "", 100, true).then(async categoryresult => {
+
+        await this.web.lists.configure(this.configOptions)
+        .getByTitle(listName)
+        .fields.getByInternalNameOrTitle("Group")
+        .get()
+        .then(isItem => {
+        })
+        .catch(error => {
+          console.log("isisItem Error : ", error);
+          this.web.lists.configure(this.configOptions)
+            .getByTitle(listName)
+            .fields.inBatch(batch)
+            .createFieldAsXml(
+              '<Field Type="Lookup" DisplayName="Group" Name="Group" Required="FALSE" List="' +
+              this.groupListGUID +
+              '" ShowField="Title" RelationshipDeleteBehavior="None"><Default>'+defaultGroup+'</Default></Field>'
+            );
+        });
+
+        batch.execute().then(() => {
+          resolve(true);
+        });
+      }).catch(error => {
+        console.log("Category List Exists Or Not : ", error);
+        resolve(false);
+      });
+    });
+  }
+
+  public async taskMappingAfterGroup(listName:string,defaultGroup:string):Promise<boolean>{
+    if (!this.groupListGUID) {
+      this.getListGUID(this.listNames.groupListName).then((value: string) => {
+        this.groupListGUID = value;
+      });
+    }
+    return new Promise<boolean>((resolve)=>{
+      const batch = this.web.createBatch();
+      this.web.lists.configure(this.configOptions).ensure(listName, "", 107, true).then(async categoryresult => {
+
+        await this.web.lists.configure(this.configOptions)
+        .getByTitle(listName)
+        .fields.getByInternalNameOrTitle("Group")
+        .get()
+        .then(isItem => {
+        })
+        .catch(error => {
+          console.log("isisItem Error : ", error);
+          this.web.lists.configure(this.configOptions)
+            .getByTitle(listName)
+            .fields.inBatch(batch)
+            .createFieldAsXml(
+              '<Field Type="Lookup" DisplayName="Group" Name="Group" Required="TRUE" List="' +
+              this.groupListGUID +
+              '" ShowField="Title" RelationshipDeleteBehavior="None"><Default>'+defaultGroup+'</Default></Field>'
+            );
+        });
+
+        batch.execute().then(() => {
+          resolve(true);
+        });
+      }).catch(error => {
+        console.log("Task List Exists Or Not : ", error);
+        resolve(false);
+      });
+    });
+  }
+
+  public async categoryListCreation(listName: string): Promise<boolean> {
     return new Promise<boolean>((resolve) => {
       const batch = this.web.createBatch();
       this.web.lists.configure(this.configOptions).ensure(listName, "", 100, true).then(async categoryresult => {
@@ -759,7 +850,7 @@ export class SharePointDataProvider implements IDataProvider {
                 .getByTitle(listName)
                 .fields.inBatch(batch)
                 .createFieldAsXml(
-                  '<Field Type="Number" DisplayName="CategorySort" Name="CategorySort" Required="TRUE"/>'
+                  '<Field Type="Number" DisplayName="CategorySort" Name="CategorySort" Required="TRUE" Decimals="5"/>'
                 );
             });
 
@@ -779,25 +870,7 @@ export class SharePointDataProvider implements IDataProvider {
                   this.categoryListGUID +
                   '" ShowField="Title" RelationshipDeleteBehavior="None"/>'
                 );
-            });
-
-          await this.web.lists.configure(this.configOptions)
-            .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("Group")
-            .get()
-            .then(isItem => {
-            })
-            .catch(error => {
-              console.log("isisItem Error : ", error);
-              this.web.lists.configure(this.configOptions)
-                .getByTitle(listName)
-                .fields.inBatch(batch)
-                .createFieldAsXml(
-                  '<Field Type="Lookup" DisplayName="Group" Name="Group" Required="FALSE" List="' +
-                  this.groupListGUID +
-                  '" ShowField="Title" RelationshipDeleteBehavior="None"/>'
-                );
-            });
+            });        
 
           batch.execute().then(() => {
             resolve(true);
@@ -818,7 +891,7 @@ export class SharePointDataProvider implements IDataProvider {
             resolve(true);
           }
           else {
-            resolve(false);
+            resolve(true);
           }
         }).catch(error => {
           console.log("Document Library Exists Or Not : ", error);
@@ -828,11 +901,6 @@ export class SharePointDataProvider implements IDataProvider {
   }
 
   public async taskListCreation(listName: string): Promise<boolean> {
-    if (!this.groupListGUID) {
-      this.getListGUID(this.listNames.groupListName).then((value: string) => {
-        this.groupListGUID = value;
-      });
-    }
     if (!this.responsibleListGUID) {
       this.getListGUID(this.listNames.responsibleListName).then((value: string) => {
         this.responsibleListGUID = value;
@@ -853,10 +921,15 @@ export class SharePointDataProvider implements IDataProvider {
         this.documentLibraryGUID = value;
       });
     }
+    if(!this.commentListGUID){
+      this.getListGUID(this.listNames.commentsListName).then((value:string)=>{
+        this.commentListGUID = value;
+      });
+    }
     return new Promise<boolean>((resolve) => {
       const batch = this.web.createBatch();
       this.web.lists.configure(this.configOptions).ensure(listName, "", 107, true).then(async taskresult => {
-        if (taskresult.created) {
+     
           console.log(taskresult.data.Id);
           this.taskListGUID = taskresult.data.Id;
 
@@ -872,7 +945,7 @@ export class SharePointDataProvider implements IDataProvider {
                 .getByTitle(listName)
                 .fields.inBatch(batch)
                 .createFieldAsXml(
-                  '<Field Type="Number" DisplayName="TaskSort" Name="TaskSort" Required="TRUE"/>'
+                  '<Field Type="Number" DisplayName="TaskSort" Name="TaskSort" Required="TRUE" Decimals="5"/>'
                 );
             });
 
@@ -890,24 +963,6 @@ export class SharePointDataProvider implements IDataProvider {
                 .createFieldAsXml(
                   '<Field Type="Lookup" DisplayName="Parent" Name="Parent" Required="FALSE" List="' +
                   this.taskListGUID +
-                  '" ShowField="Title" RelationshipDeleteBehavior="None"/>'
-                );
-            });
-
-          await this.web.lists.configure(this.configOptions)
-            .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("Group")
-            .get()
-            .then(isItem => {
-            })
-            .catch(error => {
-              console.log("isisItem Error : ", error);
-              this.web.lists.configure(this.configOptions)
-                .getByTitle(listName)
-                .fields.inBatch(batch)
-                .createFieldAsXml(
-                  '<Field Type="Lookup" DisplayName="Group" Name="Group" Required="TRUE" List="' +
-                  this.groupListGUID +
                   '" ShowField="Title" RelationshipDeleteBehavior="None"/>'
                 );
             });
@@ -988,14 +1043,26 @@ export class SharePointDataProvider implements IDataProvider {
                 );
             });
 
+            await this.web.lists.configure(this.configOptions)
+            .getByTitle(listName)
+            .fields.getByInternalNameOrTitle("Comments")
+            .get()
+            .then(isItem => {
+            })
+            .catch(error => {
+              console.log("isisItem Error : ", error);
+              this.web.lists.configure(this.configOptions)
+                .getByTitle(listName)
+                .fields.inBatch(batch)
+                .createFieldAsXml(
+                  '<Field Type="Lookup" DisplayName="Comments" Name="Comments" Required="TRUE" List="'+
+                  this.commentListGUID+
+                  '" ShowField="ID" RelationshipDeleteBehavior="None" Mult="TRUE"/>'
+                );
+            });
           batch.execute().then(() => {
             resolve(true);
-          });
-        }
-        else {
-          console.log(taskresult);
-          resolve(false);
-        }
+          });        
       }).catch(error => {
         console.log("Task List Exists Or Not : ", error);
         resolve(false);
@@ -1030,23 +1097,7 @@ export class SharePointDataProvider implements IDataProvider {
                   '<Field Type="Note" DisplayName="Comment" Name="Comment" Required="TRUE"/>'
                 );
             });
-
-          await this.web.lists.configure(this.configOptions)
-            .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("Task")
-            .get()
-            .then(isItem => {
-            })
-            .catch(error => {
-              console.log("isisItem Error : ", error);
-              this.web.lists.configure(this.configOptions)
-                .getByTitle(listName)
-                .fields.inBatch(batch)
-                .createFieldAsXml(
-                  '<Field Type="Lookup" DisplayName="Task" Name="Task" Required="TRUE" List="9b526e51-2a92-42e4-81c8-23ad1b32fdbc" ShowField="Title" RelationshipDeleteBehavior="None"/>'
-                );
-            });
-
+         
           batch.execute().then(() => {
             resolve(true);
           });
@@ -1389,6 +1440,19 @@ export class SharePointDataProvider implements IDataProvider {
         });
     });
   }
+
+  //List Delete start
+
+  public deleteList(listName:string):Promise<boolean>{
+    return new Promise<boolean>((resolve)=>{
+      this.web.lists.getByTitle(listName).delete().then(deleteresult =>{
+        resolve(true);
+      }).catch(error =>{
+        console.log("List delete error message : ",error);
+      });
+    });
+  }
+  //List Delete End
 
   //Bulk Delete method
   public async deleteBulkTaskListItemAndDocuments(listname: string, items: number[], folderRelativeUrl: string[]): Promise<boolean> {

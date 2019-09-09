@@ -1,5 +1,5 @@
 import * as React from "react";
-import { IProgressButtonProps, IProgressButtonState, IDataProvider, IGroup } from '../../../interfaces';
+import { IProgressButtonProps, IProgressButtonState, IDataProvider, IGroup, ICategory } from '../../../interfaces';
 import { PrimaryButton, Spinner, SpinnerSize, css, Label } from "office-ui-fabric-react";
 import styles from './ProgressButton.module.scss';
 import TaskDataProvider from "../../../services/TaskDataProvider";
@@ -22,9 +22,9 @@ export default class ProgressButton extends React.Component<IProgressButtonProps
     TaskDataProvider.context = this.context;
     this.dataProvider = TaskDataProvider.Instance;
     this.checkListAndLibrary().then((isCreated) => {
-         this.setState({
-              disabled: isCreated
-         });
+      this.setState({
+        disabled: isCreated
+      });
     });
   }
 
@@ -61,71 +61,43 @@ export default class ProgressButton extends React.Component<IProgressButtonProps
 
     const { groupListName, statusListName, responsibleListName, categoryListName, taskListName, commentsListName, libraryName } = this.props;
     const { group, category, status, responsibleParty, comments, task } = ListDetailsConstants;
-    this.dataProvider.groupListCreation(groupListName).then(
-      (isGroupCreated) => {
-        if (isGroupCreated) {
-          this.dataProvider.statusListCreation(statusListName).then(
-            (isStatusCreated) => {
-              if (isStatusCreated) {
-                this.dataProvider.responsibleListCreation(responsibleListName).then(
-                  (isResponsibleCreated) => {
-                    if (isResponsibleCreated) {
-                      this.dataProvider.categoryListCreation(categoryListName).then(
-                        (isCategoryCreated) => {
-                          if (isCategoryCreated) {
-                            this.dataProvider.documentLibraryCreation(libraryName).then(
-                              (isLibraryCreated) => {
-                                if (isLibraryCreated) {
+
+    this.dataProvider.statusListCreation(statusListName).then(
+      (isStatusCreated) => {
+        if (isStatusCreated) {
+          this.dataProvider.responsibleListCreation(responsibleListName).then(
+            (isResponsibleCreated) => {
+              if (isResponsibleCreated) {            
+                this.dataProvider.categoryListCreation(categoryListName).then(
+                  (isCategoryCreated) => {
+                    if (isCategoryCreated) {
+                      this.dataProvider.documentLibraryCreation(libraryName).then(
+                        (isLibraryCreated) => {
+                          if (isLibraryCreated) {
+                            this.dataProvider.commentsListCreation(commentsListName).then(
+                              (isCommentsCreated) => {
+                                if (isCommentsCreated) {
                                   this.dataProvider.taskListCreation(taskListName).then(
                                     (isTaskListCreated) => {
                                       if (isTaskListCreated) {
-                                        this.dataProvider.commentsListCreation(commentsListName).then(
-                                          (isCommentsCreated) => {
-                                            if (isCommentsCreated) {
-                                              this.dataProvider.commonlistViewCreation(groupListName, group.listViews).then(
-                                                (isGroupView) => {
-                                                  if (isGroupView) {
-                                                    this.dataProvider.commonlistViewCreation(statusListName, status.listViews).then(
-                                                      (isStatusView) => {
-                                                        if (isStatusView) {
-                                                          this.dataProvider.commonlistViewCreation(responsibleListName, responsibleParty.listViews).then(
-                                                            (isResponsibleView) => {
-                                                              if (isResponsibleView) {
-                                                                this.dataProvider.commonlistViewCreation(categoryListName, category.listViews).then(
-                                                                  (isCategoryView) => {
-                                                                    if (isCategoryView) {
-                                                                      this.dataProvider.commonlistViewCreation(commentsListName, comments.listViews).then(
-                                                                        (isCommentView) => {
-                                                                          if (isCommentView) {
-                                                                            this.dataProvider.commonlistViewCreation(taskListName, task.listViews).then(
-                                                                              (isTaskView) => {
-                                                                                if (isTaskView) {
-                                                                                  const defaultGroup:IGroup = {
-                                                                                    Title:"All tasks group",
-                                                                                    GroupSort:1,
-                                                                                    IsDefault:true
-                                                                                  };
-                                                                                  this.dataProvider.insertGroupItem(groupListName,defaultGroup).then(() => {
-                                                                                    this.setState({
-                                                                                      creationSuccess: true,
-                                                                                      creationInProgress: false,
-                                                                                      disabled: true,
-                                                                                      creationFailed: false
-                                                                                    });
-                                                                                  });
-                                                                                }
-                                                                              });
-                                                                          }
-                                                                        });
-                                                                    }
-                                                                  });
-                                                              }
-                                                            });
-                                                        }
-                                                      });
+                                        const defaultcategory: ICategory = {
+                                          Title: "All tasks category",
+                                          CategorySort: 1,
+                                          children: [],
+                                          key: "1",
+                                          text: "All tasks category"
+                                        };
+                                        this.dataProvider.insertCategoryItem(categoryListName, defaultcategory).then(
+                                          (isInsertCategory) => {
+                                            if (isInsertCategory) {
 
-                                                  }
-                                                });
+                                              this.setState({
+                                                creationSuccess: true,
+                                                creationInProgress: false,
+                                                disabled: true,
+                                                creationFailed: false
+                                              });
+
                                             }
                                           });
                                       }
@@ -139,8 +111,7 @@ export default class ProgressButton extends React.Component<IProgressButtonProps
               }
             });
         }
-      }
-    );
+      });
   }
 
    public async checkListAndLibrary() : Promise<boolean> {
@@ -155,16 +126,16 @@ export default class ProgressButton extends React.Component<IProgressButtonProps
           this.dataProvider.listExists(taskListName)
         ];
 
-        return new Promise<boolean>(async (resolve) => {
-             await Promise.all(promises).then((values) => {
-                  if (values.filter(v => !v).length === 0) {
-                       resolve(true);
-                  } else {
-                       resolve( false);
-                  }
-             }).catch(() => {
-             resolve( false);
-             });
-        });
-   }
+    return new Promise<boolean>(async (resolve) => {
+      await Promise.all(promises).then((values) => {
+        if (values.filter(v => !v).length === 0) {
+          resolve(true);
+        } else {
+          resolve(false);
+        }
+      }).catch(() => {
+        resolve(false);
+      });
+    });
+  }
 }
