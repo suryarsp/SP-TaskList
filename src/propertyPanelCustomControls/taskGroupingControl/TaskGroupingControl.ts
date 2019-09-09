@@ -24,7 +24,8 @@ export class TaskGroupingControlComponent implements IPropertyPaneField<ITaskGro
                selectedViewType: properties.selectedViewType,
                onEnableOrDisableGroup: properties.onEnableOrDisableGroup,
                onEnableOrDisableUniqueCategory: properties.onEnableOrDisableUniqueCategory,
-               onChangeGroupView: properties.onChangeGroupView
+               onChangeGroupView: properties.onChangeGroupView,
+               groupListName: properties.groupListName
           };
      }
 
@@ -43,7 +44,8 @@ export class TaskGroupingControlComponent implements IPropertyPaneField<ITaskGro
             selectedViewType: this.properties.selectedViewType,
             onEnableOrDisableGroup: this.properties.onEnableOrDisableGroup,
             onEnableOrDisableUniqueCategory: this.properties.onEnableOrDisableUniqueCategory,
-            onChangeGroupView: this.properties.onChangeGroupView
+            onChangeGroupView: this.properties.onChangeGroupView,
+            groupListName: this.properties.groupListName
           });
           setTimeout(() => {
                ReactDom.render(element, elem);

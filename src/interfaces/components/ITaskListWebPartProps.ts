@@ -12,4 +12,6 @@ export interface ITaskListWebPartProps {
   statusListName: string;
   responsibleListName: string;
   libraryName: string;
+  minNoOfItemsForStream: number;
+  defaultExpand: string;
 }

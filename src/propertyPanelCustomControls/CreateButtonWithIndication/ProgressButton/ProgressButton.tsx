@@ -43,10 +43,12 @@ export default class ProgressButton extends React.Component<IProgressButtonProps
           disabled={this.state.disabled}
           text={"Enable TaskList"}
           onClick={this.onClickCreateListAndLibrary.bind(this)}
-        />
-        {
+        >
+          {
           this.state.creationInProgress ? <Spinner size={SpinnerSize.medium} hidden={this.state.creationInProgress} /> : null
-        }
+          }
+        </PrimaryButton>
+
       </div>
     );
   }
@@ -142,11 +144,10 @@ export default class ProgressButton extends React.Component<IProgressButtonProps
   }
 
    public async checkListAndLibrary() : Promise<boolean> {
-        const { groupListName, responsibleListName, statusListName, categoryListName, commentsListName, libraryName, taskListName } = this.props;
+        const { responsibleListName, statusListName, categoryListName, commentsListName, libraryName, taskListName } = this.props;
         let promises = new Array<Promise<boolean>>();
         promises = [
           this.dataProvider.libraryExists(libraryName),
-          this.dataProvider.listExists(groupListName),
           this.dataProvider.listExists(categoryListName),
           this.dataProvider.listExists(responsibleListName),
           this.dataProvider.listExists(statusListName),

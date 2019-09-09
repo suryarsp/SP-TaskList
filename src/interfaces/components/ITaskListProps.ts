@@ -14,4 +14,6 @@ export interface ITaskListProps {
   statusListName: string;
   responsibleListName: string;
   libraryName: string;
+  minNoOfItemsForStream: number;
+  defaultExpand: string;
 }

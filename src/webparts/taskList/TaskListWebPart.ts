@@ -40,6 +40,8 @@ export default class TaskListWebPart extends BaseClientSideWebPart<ITaskListWebP
       statusListName: this.properties.statusListName,
       responsibleListName: this.properties.responsibleListName,
       libraryName: this.properties.libraryName,
+      minNoOfItemsForStream: this.properties.minNoOfItemsForStream,
+      defaultExpand: this.properties.defaultExpand
     }
     );
 
@@ -103,16 +105,6 @@ export default class TaskListWebPart extends BaseClientSideWebPart<ITaskListWebP
                   text: ""
                 }),
 
-
-                PropertyPaneTextField('groupListName', {
-                  label: "Group list name",
-                  onGetErrorMessage: this.validateTextField.bind(this)
-                }),
-
-                PropertyPaneLabel("Blank", {
-                  text: ""
-                }),
-
                 PropertyPaneTextField('categoryListName', {
                   label: "Category list name",
                   onGetErrorMessage: this.validateTextField.bind(this)
@@ -141,7 +133,7 @@ export default class TaskListWebPart extends BaseClientSideWebPart<ITaskListWebP
                 }),
 
                 PropertyPaneTextField('libraryName', {
-                  label: "Library name",
+                  label: "Tasklist Document Library name",
                   onGetErrorMessage: this.validateTextField.bind(this)
                 }),
 
@@ -164,15 +156,6 @@ export default class TaskListWebPart extends BaseClientSideWebPart<ITaskListWebP
                   text: ""
                 }),
 
-                PropertyPaneDropdown('defaultTaskCategory', {
-                  label: 'Default Task Category',
-                  options: TaskListConstants.categories,
-                }),
-
-                PropertyPaneLabel("Blank", {
-                  text: ""
-                }),
-
                 PropertyPaneCheckbox('alwaysDownloadAllDocuments', {
                   text: "Always download files",
                   checked: false
@@ -187,8 +170,30 @@ export default class TaskListWebPart extends BaseClientSideWebPart<ITaskListWebP
                   label: "No of tasks to be displayed per page",
                   value: this.properties.itemsPerPage,
                   placeholder: "Enter the value",
-                  minValue: 10,
-                  maxValue: 25,
+                  minValue: 1,
+                  maxValue: 5000,
+                }),
+
+                PropertyPaneLabel("Blank", {
+                  text: ""
+                }),
+
+                PropertyFieldNumber("MinNoOfItemsForStream", {
+                  key: "MinNoOfItemsForStream",
+                  label: "Minimum no of documents for stream download",
+                  value: this.properties.minNoOfItemsForStream,
+                  placeholder: "Input no of documents to start stream download",
+                  minValue: 1,
+                  maxValue: 5000
+                }),
+
+                PropertyPaneLabel("Blank", {
+                  text: ""
+                }),
+
+                PropertyPaneDropdown('defaultExpand', {
+                  label: 'Default expanded by',
+                  options: TaskListConstants.expandByValues,
                 }),
 
                 PropertyPaneLabel("Blank", {
@@ -201,14 +206,18 @@ export default class TaskListWebPart extends BaseClientSideWebPart<ITaskListWebP
                   selectedViewType: this.properties.selectedViewType,
                   onEnableOrDisableGroup: this.onEnableOrDisableGroup.bind(this),
                   onEnableOrDisableUniqueCategory: this.onEanbleOrDisableUniqueCategory.bind(this),
-                  onChangeGroupView: this.onChangeGroupView.bind(this)
+                  onChangeGroupView: this.onChangeGroupView.bind(this),
+                  groupListName: this.properties.groupListName
                 }),
 
                 PropertyPaneLabel("Blank", {
                   text: ""
                 }),
 
-
+                PropertyPaneDropdown('defaultTaskListSort', {
+                  label: 'Default Task Category',
+                  options: TaskListConstants.columns,
+                }),
               ]
             }
           ]

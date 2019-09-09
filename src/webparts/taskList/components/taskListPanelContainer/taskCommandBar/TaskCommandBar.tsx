@@ -98,7 +98,7 @@ export  class TaskCommandBar extends React.Component<
           let commands: ICommandBarItemProps[] = [];
           let newTask = {
                key: "NewTask",
-               name: "New Task",
+               name: "New",
                onClick: () => {
                   this.onCLickNewTask();
                },
@@ -109,7 +109,7 @@ export  class TaskCommandBar extends React.Component<
 
           let editTask = {
                key: "EditTask",
-               name: "Edit Task",
+               name: "Edit",
                onClick: () => {
                     this.onClickEditTask();
                },
@@ -163,7 +163,7 @@ export  class TaskCommandBar extends React.Component<
 
           let deleteCommand = {
                key: "delete",
-               name: "Delete Task",
+               name: "Delete",
                onClick: () => {
                     this.props.onClickDelete();
                },

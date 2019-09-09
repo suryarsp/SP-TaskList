@@ -13,6 +13,7 @@ import { MessageBar, MessageBarType } from 'office-ui-fabric-react/lib/MessageBa
 import { ProgressStatusType } from '../../../../../../../interfaces/enums/progressStatusType';
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { Layer } from 'office-ui-fabric-react/lib/Layer';
+import { Spinner, SpinnerSize } from 'office-ui-fabric-react';
 
 
 const getItemStyle = (isDragging, draggableStyle) => {
@@ -72,12 +73,14 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
   }
 
   public _onChangeDefaultCheckbox(group: IGroup, checked: boolean) {
-    let groups = [...this.state.groups];
+    let groups = _.cloneDeep(this.state.groups);
     let previousGroup = groups.filter(g => g.IsDefault)[0];
+    const { saveProgress, updateSuccess, saveError}  = TaskListConstants.errorMessages;
     if (checked) {
-      group.IsDefault = checked;
+       group.IsDefault = checked;
+       group.isSaving = true;
       this.setState({
-        statusMessage: TaskListConstants.saveProgressMessage,
+        statusMessage: saveProgress,
         statusType: ProgressStatusType.INPROGRESS
       });
       this.dataProvider.updateGroupItem(this.groupListName, group.ID, group)
@@ -86,35 +89,36 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
           this.dataProvider.updateGroupItem(this.groupListName, previousGroup.ID, previousGroup).then((isPreviousSuccess) => {
             let changedGroups = groups.map((g) => {
               g.IsDefault = g.ID === group.ID ? checked : false;
+              g.isSaving = false;
               return g;
             });
             if (isSuccess && isPreviousSuccess) {
               this.setState({
                 statusType: ProgressStatusType.SUCCESS,
-                statusMessage: TaskListConstants.updateMessage,
+                statusMessage: updateSuccess,
                 groups: changedGroups
               }, () => TaskDataProvider.groups = changedGroups);
               this.resetStatus();
             } else {
               this.setState({
                 statusType: ProgressStatusType.FAILURE,
-                statusMessage: TaskListConstants.errorMessage,
+                statusMessage: saveError,
                 groups: groups
-              }, () => TaskDataProvider.groups = groups);
+              });
             }
-          }).catch((e) => {
+          }).catch(() => {
             this.setState({
               statusType: ProgressStatusType.FAILURE,
-              statusMessage: TaskListConstants.errorMessage,
+              statusMessage: saveError,
               groups: groups
-            }, () => TaskDataProvider.groups = groups);
+            });
           });
-        }).catch((error) => {
+        }).catch(() => {
           this.setState({
             statusType: ProgressStatusType.FAILURE,
-            statusMessage: TaskListConstants.errorMessage,
+            statusMessage: saveError,
             groups: groups
-          }, () => TaskDataProvider.groups = groups);
+          });
         });
     }
 
@@ -123,6 +127,7 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
   public onChangeGroupTitle(newValue: string, group: IGroup) {
     let groups = _.cloneDeep(this.state.groups);
     group.Title = newValue;
+    group.isSaving = true;
     const isGroupAlreadyPresent = groups.filter(g => g.Title.toLowerCase() === newValue.toLowerCase()).length > 0;
       if (!isGroupAlreadyPresent) {
         if (group.ID) {
@@ -154,21 +159,30 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
   }
 
   public onUpdateGroup(group: IGroup, title : string) {
+    const { saveError, updateSuccess } = TaskListConstants.errorMessages;
     if (this.clearTimeoutvalue) {
       clearTimeout(this.clearTimeoutvalue);
     }
     this.clearTimeoutvalue = setTimeout(() => {
+      this.forceUpdate();
       let groups = _.cloneDeep(this.state.groups);
       let updatedGroup = groups.filter(g => g.ID === group.ID)[0];
       updatedGroup.Title = title;
+      updatedGroup.isSaving = false;
       this.dataProvider.updateGroupItem(this.groupListName, updatedGroup.ID, updatedGroup)
         .then((isUpdated) => {
           if (isUpdated) {
             updatedGroup.isExisting = false;
-            groups = groups.map(g => g.ID === group.ID ? updatedGroup : g);
+            groups = groups.map(g => {
+              if(g.ID === group.ID) {
+                return updatedGroup;
+              }
+              g.isSaving = false;
+              return g;
+            });
             this.setState({
               groups: groups,
-              statusMessage: TaskListConstants.updateMessage,
+              statusMessage: updateSuccess,
               statusType: ProgressStatusType.SUCCESS
             }, () => {
               TaskDataProvider.groups = groups;
@@ -177,22 +191,27 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
           } else {
             this.setState({
               groups: groups,
-              statusMessage: TaskListConstants.errorMessage,
+              statusMessage: saveError,
               statusType: ProgressStatusType.FAILURE
-            }, () => () => TaskDataProvider.groups = groups);
-            this.resetStatus();
+            });
           }
         }).catch((error) => {
           this.setState({
             groups: groups,
-            statusMessage: TaskListConstants.errorMessage,
+            statusMessage: saveError,
             statusType: ProgressStatusType.FAILURE
-          }, () => () => TaskDataProvider.groups = groups);
-          this.resetStatus();
+          });
         });
 
     }, 1000);
+  }
 
+  public onClickCancel(e) {
+    let groups = _.cloneDeep(this.state.groups);
+    let updatedGroups = groups.filter(g => g.ID);
+    this.setState({
+      groups: updatedGroups
+    });
   }
 
   public onAddGroup(group: IGroup, title: string) {
@@ -200,26 +219,33 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
       clearTimeout(this.clearTimeoutvalue);
     }
     this.clearTimeoutvalue = setTimeout(() => {
+      this.forceUpdate();
       let groups = _.cloneDeep(this.state.groups);
       let newlyCreatedGroup = groups.filter(g => g.ID === group.ID)[0];
       newlyCreatedGroup.Title = title;
       this.dataProvider.insertGroupItem(this.groupListName, newlyCreatedGroup)
         .then((newGroup) => {
           newGroup.isExisting = false;
-          groups = groups.map(g => !g.ID ? newGroup : g);
+          newGroup.isSaving = false;
+          groups = groups.map( g => {
+            if(!g.ID) {
+              return newGroup;
+            }
+            g.isSaving = false;
+            return g;
+          });
           this.setState({
             groups: groups,
-            statusMessage: TaskListConstants.successMessage,
+            statusMessage: TaskListConstants.errorMessages.saveSuccess,
             statusType: ProgressStatusType.SUCCESS
-          }, () => TaskDataProvider.groups = groups);
+          });
           this.resetStatus();
         }).catch(() => {
           this.setState({
             groups: groups,
-            statusMessage: TaskListConstants.errorMessage,
+            statusMessage: TaskListConstants.errorMessages.saveError,
             statusType: ProgressStatusType.FAILURE
-          }, () => TaskDataProvider.groups = groups);
-          this.resetStatus();
+          });
         });
     }, 1000);
   }
@@ -236,6 +262,7 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
   public onDeleteGroup(group: IGroup) {
     let categories = _.cloneDeep(TaskDataProvider.categories);
     let groups = _.cloneDeep(this.state.groups);
+    const  { deleteSuccess, deleteError}  = TaskListConstants.errorMessages;
     if (categories.filter(c => c.Group.Title.toLowerCase() === group.Title.toLowerCase()).length > 0) {
       this.setState({
         preventDelete: true
@@ -247,25 +274,23 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
             let filterdGroups = groups.filter(g => g.ID !== group.ID);
             this.setState({
               groups: filterdGroups,
-              statusMessage: 'Deleted Successfully',
+              statusMessage: deleteSuccess,
               statusType: ProgressStatusType.FAILURE
             }, () => TaskDataProvider.groups = filterdGroups);
             this.resetStatus();
           } else {
             this.setState({
               groups: groups,
-              statusMessage: 'Error orrucured during deletion',
+              statusMessage: deleteError,
               statusType: ProgressStatusType.FAILURE
-            }, () => TaskDataProvider.groups = groups);
-            this.resetStatus();
+            });
           }
-        }).catch((error) => {
+        }).catch(() => {
           this.setState({
             groups: groups,
-            statusMessage: 'Error orrucured during deletion',
+            statusMessage: deleteError,
             statusType: ProgressStatusType.FAILURE
-          }, () => TaskDataProvider.groups = groups);
-          this.resetStatus();
+          });
         });
     }
   }
@@ -315,8 +340,7 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
             groups: groups,
             statusMessage: 'Error orrucured during sorting',
             statusType: ProgressStatusType.FAILURE
-          }, () => TaskDataProvider.groups = groups);
-          this.resetStatus();
+          });
         }
 
       }).catch((e) => {
@@ -324,8 +348,7 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
           groups: groups,
           statusMessage: 'Error orrucured during sorting',
           statusType: ProgressStatusType.FAILURE
-        }, () => TaskDataProvider.groups = groups);
-        this.resetStatus();
+        });
       });
 
     this.setState({
@@ -432,7 +455,7 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
                         key={group.GUID}
                         draggableId={group.GUID}
                         index={index}
-                        isDragDisabled={group.Title.trim().length === 0 || statusType !== null}
+                        isDragDisabled={group.Title.trim().length === 0 || group.isSaving}
                       >
                         {(provided, snapshot) => (
                           <div
@@ -456,7 +479,7 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
 
                               <TextField
                                 value={group.Title}
-                                disabled={group.IsDefault || statusType !== null}
+                                disabled={group.IsDefault || group.isSaving}
                                 styles={{ fieldGroup: { width: 200 } }}
                                 autoFocus={true}
                                 onChange={(e, newValue) => { this.onChangeGroupTitle(newValue, group); }}
@@ -464,15 +487,20 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
 
                               <Checkbox
                                 checked={group.IsDefault}
-                                disabled={group.Title.trim().length === 0 || statusType !== null}
+                                disabled={group.Title.trim().length === 0 || group.isSaving}
                                 onChange={(e, checked) => { this._onChangeDefaultCheckbox(group, checked); }} />
 
                               {
                                 !group.IsDefault ? (<IconButton
-                                  disabled={group.Title.trim().length === 0 || statusType !== null}
+                                  disabled={group.Title.trim().length === 0 || group.isSaving}
                                   iconProps={{ iconName: 'Delete' }}
                                   onClick={() => { this.onDeleteGroup(group); }} />) : null
                               }
+
+                              { !group.ID ? <IconButton iconProps={{ iconName: 'Cancel' }} onClick={ this.onClickCancel.bind(this)} /> : null }
+                              {
+                                group.isSaving ? <Spinner size={SpinnerSize.medium} hidden={!group.isSaving} /> : null
+                    }
                             </div>
                           </div>
                         )}
@@ -491,7 +519,6 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
                 data-automation-id="test"
                 text="Add Group"
                 allowDisabledFocus={true}
-                disabled={statusType !== null}
                 onClick={this.onClickAdd.bind(this)}
                 style={{ marginLeft: '15px' }}
               />

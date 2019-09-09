@@ -1,76 +1,67 @@
-import { ICategory } from "../../interfaces/index";
+
+import { IPropertyPaneDropdownOption } from "@microsoft/sp-property-pane";
 
 
 export const TaskListConstants :
  {
-   categories: ICategory[],
+   columns: IPropertyPaneDropdownOption[];
+   expandByValues: IPropertyPaneDropdownOption[];
    groupViewTypes: {[key: string]: string},
    preventGroupDeletionText: string,
-   saveProgressMessage: string,
-   successMessage: string,
-   errorMessage: string,
-   updateMessage: string
-  } =
+   errorMessages : {
+     saveProgress: string,
+     saveSuccess: string,
+     saveError: string,
+     updateSuccess: string,
+     deleteSuccess: string;
+     deleteError: string
+      }} =
    {
-    categories : [
+    columns : [
       {
-        key : 'LOAN DOCUMENTS',
-        text : 'LOAN DOCUMENTS',
-        CategorySort: 1,
-        Group:  {
-          Id: 1,
-          Title: ''
-        },
-        ID: 1,
-        Title : 'LOAN DOCUMENTS',
-        children: []
+        key: 'Sort',
+        text: 'Sort'
       },
       {
-        key : 'Organizational Documents',
-        text : 'Organizational Documents',
-        CategorySort: 2,
-        Group:  {
-          Id: 2,
-          Title: ''
-        },
-        ID: 2,
-        Title : 'Organizational Documents',
-        children: []
+        key: 'TaskName',
+        text: 'TaskName'
       },
       {
-        key : 'Title and Survey',
-        text : 'Title and Survey',
-        CategorySort: 3,
-        Group:  {
-          Id: 3,
-          Title: ''
-        },
-        ID: 3,
-        Title : 'Title and Survey',
-        children: []
+        key: 'Paty',
+        text: 'Responsible Party / Status'
+      },
+    ],
+    expandByValues: [
+      {
+        key: 'Group',
+        text: 'Group'
       },
       {
-        key : 'Others',
-        text : 'Others',
-        CategorySort: 4,
-        Group:  {
-          Id: 4,
-          Title: ''
-        },
-        ID: 4,
-        Title : 'Others',
-        children: []
-      }
+        key: 'Category',
+        text: 'Category'
+      },
+      {
+        key: 'SubCategory',
+        text: 'Sub category'
+      },
+      {
+        key: 'Task',
+        text: 'Task'
+      },
     ],
     groupViewTypes: {
       list : "list",
       tab : 'tab'
     },
     preventGroupDeletionText: "This group has categories associated with it.You must remove the relationship between the group",
-    saveProgressMessage: 'Saving...',
-    errorMessage: 'Error Occurred',
-    successMessage: 'Saved successfully',
-    updateMessage: 'Updated successfully'
+    errorMessages: {
+      saveProgress: "Saving...",
+      saveSuccess: "Saved successfully",
+      saveError: "Error occured while saving",
+      updateSuccess: "Updated successfully",
+      deleteSuccess: "Deleted successfully",
+      deleteError: "Error occured while deletion"
+    }
 };
 
 
