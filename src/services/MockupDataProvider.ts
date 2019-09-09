@@ -50,7 +50,48 @@ export class MockupDataProvider implements IDataProvider {
   }
 
   public getCategories(listname: string): Promise<ICategory[]> {
-    return new Promise<ICategory[]>((resolve) => resolve([]));
+    return new Promise<ICategory[]>((resolve) => resolve([
+      {
+        Title:"Category 1",
+        CategorySort:1,
+        Group:{Id:1,Title:"Group 1"},
+        children:[],
+        key:"1",
+        text:"Category 1",        
+        ID:1,
+        GUID:"1"
+      },
+      {
+        Title:"Category 2",
+        CategorySort:2,
+        Group:{Id:1,Title:"Group 1"},
+        children:[],
+        key:"2",
+        text:"Category 2",        
+        ID:2,
+        GUID:"2"
+      },
+      {
+        Title:"Category 3",
+        CategorySort:3,
+        Group:{Id:2,Title:"Group 2"},
+        children:[],
+        key:"3",
+        text:"Category 3",        
+        ID:3,
+        GUID:"3"
+      },
+      {
+        Title:"Category 4",
+        CategorySort:4,
+        Group:{Id:3,Title:"Group 3"},
+        children:[],
+        key:"4",
+        text:"Category 4",        
+        ID:4,
+        GUID:"4"
+      }
+    ]));
   }
 
   public getTaskListFields(listname: string): Promise<IColumn[]> {

@@ -448,13 +448,33 @@ export class SharePointDataProvider implements IDataProvider {
   //Category list method start
 
   public insertCategoryItem(listName: string, items: ICategory): Promise<ICategory> {
+    let obj = {};
+    if(items.Group && items.Parent){
+      obj["Title"] = items.Title;
+      obj["CategorySort"] = items.CategorySort;            
+      obj["ParentId"] = items.Parent.Id;    
+      obj["GroupId"] = items.Group.Id;
+    }
+    if(items.Group)
+    {
+      obj["Title"] = items.Title;
+      obj["CategorySort"] = items.CategorySort;      
+      obj["GroupId"] = items.Group.Id;
+    }
+    else if(items.Parent){
+      obj["Title"] = items.Title;
+      obj["CategorySort"] = items.CategorySort;            
+      obj["ParentId"] = items.Parent.Id;     
+    }
+    else{
+      obj["Title"] = items.Title;
+      obj["CategorySort"] = items.CategorySort;     
+    }
+    
+    console.log(obj);
+    
     return new Promise<ICategory>((response) => {
-      this.web.lists.configure(this.configOptions).getByTitle(listName).items.add({
-        Title: items.Title,
-        CategorySort: items.CategorySort,
-        GroupId: items.Group.Id,
-        ParentId: items.Parent.Id
-      }).then(insertCategory => {
+      this.web.lists.configure(this.configOptions).getByTitle(listName).items.add(obj).then(insertCategory => {
         if (insertCategory) {
           console.log("Insert category item : ", insertCategory);
           let item: ICategory = {
@@ -871,7 +891,7 @@ export class SharePointDataProvider implements IDataProvider {
             resolve(true);
           }
           else {
-            resolve(false);
+            resolve(true);
           }
         }).catch(error => {
           console.log("Document Library Exists Or Not : ", error);
@@ -909,7 +929,7 @@ export class SharePointDataProvider implements IDataProvider {
     return new Promise<boolean>((resolve) => {
       const batch = this.web.createBatch();
       this.web.lists.configure(this.configOptions).ensure(listName, "", 107, true).then(async taskresult => {
-        if (taskresult.created) {
+     
           console.log(taskresult.data.Id);
           this.taskListGUID = taskresult.data.Id;
 
@@ -1040,16 +1060,9 @@ export class SharePointDataProvider implements IDataProvider {
                   '" ShowField="ID" RelationshipDeleteBehavior="None" Mult="TRUE"/>'
                 );
             });
-
-
           batch.execute().then(() => {
             resolve(true);
-          });
-        }
-        else {
-          console.log(taskresult);
-          resolve(false);
-        }
+          });        
       }).catch(error => {
         console.log("Task List Exists Or Not : ", error);
         resolve(false);
