@@ -23,4 +23,8 @@ export interface IDataProvider {
   libraryExists?: (libraryName: string) =>  Promise<boolean>;
   listExists?: (listname: string) =>  Promise<boolean>;
   documentLibraryCreation?: (libraryName: string) => Promise<boolean>;
+  deleteList?: (listName:string) => Promise<boolean>;
+
+  taskMappingAfterGroup?: (listName:string,defaultGroup:string)=>Promise<boolean>;
+  categoryMappingAfterGroup?: (listName:string,defaultGroup:string)=>Promise<boolean>;
 }

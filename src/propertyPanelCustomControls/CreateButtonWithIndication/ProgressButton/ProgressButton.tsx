@@ -58,74 +58,33 @@ export default class ProgressButton extends React.Component<IProgressButtonProps
     });
 
     const { groupListName, statusListName, responsibleListName, categoryListName, taskListName, commentsListName, libraryName } = this.props;
-    const { group, category, status, responsibleParty, comments, task } = ListDetailsConstants;
-    this.dataProvider.groupListCreation(groupListName).then(
-      (isGroupCreated) => {
-        if (isGroupCreated) {
-          this.dataProvider.statusListCreation(statusListName).then(
-            (isStatusCreated) => {
-              if (isStatusCreated) {
-                this.dataProvider.responsibleListCreation(responsibleListName).then(
-                  (isResponsibleCreated) => {
-                    if (isResponsibleCreated) {
-                      this.dataProvider.categoryListCreation(categoryListName).then(
-                        (isCategoryCreated) => {
-                          if (isCategoryCreated) {
-                            this.dataProvider.documentLibraryCreation(libraryName).then(
-                              (isLibraryCreated) => {
-                                if (isLibraryCreated) {
+    const { group, category, status, responsibleParty, comments, task } = ListDetailsConstants;  
+
+    this.dataProvider.statusListCreation(statusListName).then(
+      (isStatusCreated) => {
+        if (isStatusCreated) {
+          this.dataProvider.responsibleListCreation(responsibleListName).then(
+            (isResponsibleCreated) => {
+              if (isResponsibleCreated) {
+                this.dataProvider.categoryListCreation(categoryListName).then(
+                  (isCategoryCreated) => {
+                    if (isCategoryCreated) {
+                      this.dataProvider.documentLibraryCreation(libraryName).then(
+                        (isLibraryCreated) => {
+                          if (isLibraryCreated) {
+                            this.dataProvider.commentsListCreation(commentsListName).then(
+                              (isCommentsCreated) => {
+                                if (isCommentsCreated) {
                                   this.dataProvider.taskListCreation(taskListName).then(
                                     (isTaskListCreated) => {
                                       if (isTaskListCreated) {
-                                        this.dataProvider.commentsListCreation(commentsListName).then(
-                                          (isCommentsCreated) => {
-                                            if (isCommentsCreated) {
-                                              this.dataProvider.commonlistViewCreation(groupListName, group.listViews).then(
-                                                (isGroupView) => {
-                                                  if (isGroupView) {
-                                                    this.dataProvider.commonlistViewCreation(statusListName, status.listViews).then(
-                                                      (isStatusView) => {
-                                                        if (isStatusView) {
-                                                          this.dataProvider.commonlistViewCreation(responsibleListName, responsibleParty.listViews).then(
-                                                            (isResponsibleView) => {
-                                                              if (isResponsibleView) {
-                                                                this.dataProvider.commonlistViewCreation(categoryListName, category.listViews).then(
-                                                                  (isCategoryView) => {
-                                                                    if (isCategoryView) {
-                                                                      this.dataProvider.commonlistViewCreation(commentsListName, comments.listViews).then(
-                                                                        (isCommentView) => {
-                                                                          if (isCommentView) {
-                                                                            this.dataProvider.commonlistViewCreation(taskListName, task.listViews).then(
-                                                                              (isTaskView) => {
-                                                                                if (isTaskView) {
-                                                                                  const defaultGroup:IGroup = {
-                                                                                    Title:"All tasks group",
-                                                                                    GroupSort:1,
-                                                                                    IsDefault:true
-                                                                                  };
-                                                                                  this.dataProvider.insertGroupItem(groupListName,defaultGroup).then(() => {
-                                                                                    this.setState({
-                                                                                      creationSuccess: true,
-                                                                                      creationInProgress: false,
-                                                                                      disabled: true,
-                                                                                      creationFailed: false
-                                                                                    });
-                                                                                  });
-                                                                                }
-                                                                              });
-                                                                          }
-                                                                        });
-                                                                    }
-                                                                  });
-                                                              }
-                                                            });
-                                                        }
-                                                      });
-
-                                                  }
-                                                });
-                                            }
-                                          });
+                                        this.setState({
+                                          creationSuccess: true,
+                                          creationInProgress: false,
+                                          disabled: true,
+                                          creationFailed: false
+                                        });
+                                        
                                       }
                                     });
                                 }
@@ -137,8 +96,7 @@ export default class ProgressButton extends React.Component<IProgressButtonProps
               }
             });
         }
-      }
-    );
+      });
   }
 
    public async checkListAndLibrary() : Promise<boolean> {
