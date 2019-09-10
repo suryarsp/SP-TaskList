@@ -22,6 +22,15 @@ export default class TaskList extends React.Component<ITaskListProps, ITaskListS
   }
 
   public componentDidMount() {
+    TaskDataProvider.listNames = {
+      taskListName: this.props.taskListName,
+      commentsListName: this.props.commentsListName,
+      groupListName: this.props.groupListName,
+      categoryListName: this.props.categoryListName,
+      statusListName: this.props.statusListName,
+      responsibleListName: this.props.responsibleListName
+    };
+    TaskDataProvider.libraryName  = this.props.libraryName;
     this.dataProvider = TaskDataProvider.Instance;
     this.checkIfListAndLibraryPresent(this.props);
   }
@@ -50,15 +59,6 @@ export default class TaskList extends React.Component<ITaskListProps, ITaskListS
                       isListAndLibraryPresent: true,
                       isLoading: false
                     });
-                    TaskDataProvider.listNames = {
-                      taskListName: this.props.taskListName,
-                      commentsListName: this.props.commentsListName,
-                      groupListName: this.props.groupListName,
-                      categoryListName: this.props.categoryListName,
-                      statusListName: this.props.statusListName,
-                      responsibleListName: this.props.responsibleListName
-                    };
-                    TaskDataProvider.libraryName  = this.props.libraryName;
               } else {
                 this.setState({
                   isListAndLibraryPresent: false,
