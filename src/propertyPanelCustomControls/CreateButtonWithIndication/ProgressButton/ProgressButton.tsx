@@ -60,7 +60,6 @@ export default class ProgressButton extends React.Component<IProgressButtonProps
     });
 
     const {statusListName, responsibleListName, categoryListName, taskListName, commentsListName, libraryName } = this.props;
-    const { group, category, status, responsibleParty, comments, task } = ListDetailsConstants;
 
     this.dataProvider.statusListCreation(statusListName).then(
       (isStatusCreated) => {
@@ -80,6 +79,13 @@ export default class ProgressButton extends React.Component<IProgressButtonProps
                                   this.dataProvider.taskListCreation(taskListName).then(
                                     (isTaskListCreated) => {
                                       if (isTaskListCreated) {
+                                        TaskDataProvider.listNames = {
+                                          categoryListName : categoryListName,
+                                          commentsListName: commentsListName,
+                                          responsibleListName: responsibleListName,
+                                          statusListName: statusListName,
+                                          taskListName: taskListName
+                                        };
                                         const defaultcategory: ICategory = {
                                           Title: "All tasks category",
                                           CategorySort: 1,
