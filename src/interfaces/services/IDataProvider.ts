@@ -33,4 +33,5 @@ export interface IDataProvider {
   updateCommentItem?: (listName: string, itemId: number, items: IComment)=> Promise<boolean>;
   insertResponsibleItem?: (listName: string, items: IResponsibleParty)=> Promise<IResponsibleParty>;
   updateResponsibleItem?: (listName: string, itemId: number, items: IResponsibleParty)=> Promise<boolean>;
+  deleteListField?: (listName:string,fieldName:string)=>Promise<boolean>;
 }
