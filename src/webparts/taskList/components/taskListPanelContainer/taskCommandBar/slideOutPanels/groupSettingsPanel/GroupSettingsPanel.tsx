@@ -69,16 +69,16 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
     }).
       catch((error) => {
         console.log("Get Groups", error);
-    });
+      });
   }
 
   public _onChangeDefaultCheckbox(group: IGroup, checked: boolean) {
     let groups = _.cloneDeep(this.state.groups);
     let previousGroup = groups.filter(g => g.IsDefault)[0];
-    const { saveProgress, updateSuccess, saveError}  = TaskListConstants.errorMessages;
+    const { saveProgress, updateSuccess, saveError } = TaskListConstants.errorMessages;
     if (checked) {
-       group.IsDefault = checked;
-       group.isSaving = true;
+      group.IsDefault = checked;
+      group.isSaving = true;
       this.setState({
         statusMessage: saveProgress,
         statusType: ProgressStatusType.INPROGRESS
@@ -129,36 +129,36 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
     group.Title = newValue;
     group.isSaving = true;
     const isGroupAlreadyPresent = groups.filter(g => g.Title.toLowerCase() === newValue.toLowerCase()).length > 0;
-      if (!isGroupAlreadyPresent) {
-        if (group.ID) {
-          this.onUpdateGroup(group, newValue);
-        } else {
-          this.onAddGroup(group, newValue);
-        }
+    if (!isGroupAlreadyPresent) {
+      if (group.isNew) {
+        this.onAddGroup(group, newValue);
       } else {
-        if (this.clearTimeoutvalue) {
-          clearTimeout(this.clearTimeoutvalue);
-        }
-        groups = groups.map(g => {
-          if (g.GUID === group.GUID) {
-            g.Title = newValue;
-            g.isExisting = true;
-          } else {
-            g.isExisting = false;
-          }
-          return g;
-        });
-        this.clearTimeoutvalue = setTimeout(() => {
-          this.setState({
-            groups: groups,
-            statusMessage: '',
-            statusType: null
-          });
-        }, 1000);
+        this.onUpdateGroup(group, newValue);
       }
+    } else {
+      if (this.clearTimeoutvalue) {
+        clearTimeout(this.clearTimeoutvalue);
+      }
+      groups = groups.map(g => {
+        if (g.GUID === group.GUID) {
+          g.Title = newValue;
+          g.isExisting = true;
+        } else {
+          g.isExisting = false;
+        }
+        return g;
+      });
+      this.clearTimeoutvalue = setTimeout(() => {
+        this.setState({
+          groups: groups,
+          statusMessage: '',
+          statusType: null
+        });
+      }, 1000);
+    }
   }
 
-  public onUpdateGroup(group: IGroup, title : string) {
+  public onUpdateGroup(group: IGroup, title: string) {
     const { saveError, updateSuccess } = TaskListConstants.errorMessages;
     if (this.clearTimeoutvalue) {
       clearTimeout(this.clearTimeoutvalue);
@@ -174,7 +174,7 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
           if (isUpdated) {
             updatedGroup.isExisting = false;
             groups = groups.map(g => {
-              if(g.ID === group.ID) {
+              if (g.ID === group.ID) {
                 return updatedGroup;
               }
               g.isSaving = false;
@@ -206,9 +206,16 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
     }, 1000);
   }
 
-  public onClickCancel(e) {
+  public onClickCancel(group: IGroup) {
     let groups = _.cloneDeep(this.state.groups);
-    let updatedGroups = groups.filter(g => g.ID);
+    let updatedGroups = groups.filter(g => g.GUID !== group.GUID);
+    updatedGroups = updatedGroups.map((g, index) => {
+      if (!g.ID) {
+        g.SortOrder = index + 1;
+        g.GUID = (index + 1).toString();
+      }
+      return g;
+    });
     this.setState({
       groups: updatedGroups
     });
@@ -221,14 +228,14 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
     this.clearTimeoutvalue = setTimeout(() => {
       this.forceUpdate();
       let groups = _.cloneDeep(this.state.groups);
-      let newlyCreatedGroup = groups.filter(g => g.ID === group.ID)[0];
+      let newlyCreatedGroup = _.cloneDeep(groups.filter(g => g.GUID === group.GUID)[0]);
       newlyCreatedGroup.Title = title;
       this.dataProvider.insertGroupItem(this.groupListName, newlyCreatedGroup)
         .then((newGroup) => {
           newGroup.isExisting = false;
           newGroup.isSaving = false;
-          groups = groups.map( g => {
-            if(!g.ID) {
+          groups = groups.map(g => {
+            if (g.GUID === group.GUID) {
               return newGroup;
             }
             g.isSaving = false;
@@ -262,7 +269,7 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
   public onDeleteGroup(group: IGroup) {
     let categories = _.cloneDeep(TaskDataProvider.categories);
     let groups = _.cloneDeep(this.state.groups);
-    const  { deleteSuccess, deleteError}  = TaskListConstants.errorMessages;
+    const { deleteSuccess, deleteError } = TaskListConstants.errorMessages;
     if (categories.filter(c => c.Group.Title.toLowerCase() === group.Title.toLowerCase()).length > 0) {
       this.setState({
         preventDelete: true
@@ -319,56 +326,111 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
     const sourceGroup = groups[source.index];
     const sourceIndex = source.index;
     const destinationIndex = destination.index;
+    const destinationGroup = groups[destinationIndex < sourceIndex ? destinationIndex : destinationIndex + 1];
 
-      /**
-       * TODO: Sort order update
-       */
+    if(destinationGroup) {
+      sourceGroup.SortOrder = this.calculateGroupSort(groups, _.findIndex(groups, g => g.GUID === destinationGroup.GUID));
+    } else {
+      sourceGroup.SortOrder = this.calculateGroupSort(groups, groups.length);
+    }
+
     this.setState({
-      statusMessage: 'Sorting inprogress',
+      statusMessage: 'Sorting...',
       statusType: ProgressStatusType.INPROGRESS
     });
-    updatedGroups = updatedGroups.map((g) => {
-      if(g.ID === sourceGroup.ID) {
 
-      }
-      return g;
-    });
     this.dataProvider.updateGroupItem(this.groupListName, sourceGroup.ID, sourceGroup)
-    .then(() => {
-
-    })
-    .catch(() => {
-
-    });
-    // await Promise.all([this.dataProvider.updateGroupItem(this.groupListName, sourceGroup.ID, sourceGroup), this.dataProvider.updateGroupItem(this.groupListName, destionationGroup.ID, destionationGroup)])
-    //   .then((results) => {
-    //     if (results[0] && results[1]) {
-    //       this.setState({
-    //         groups: updatedGroups,
-    //         statusMessage: 'Sorted successfully',
-    //         statusType: ProgressStatusType.SUCCESS
-    //       }, () => TaskDataProvider.groups = groups);
-    //       this.resetStatus();
-    //     } else {
-    //       this.setState({
-    //         groups: groups,
-    //         statusMessage: 'Error orrucured during sorting',
-    //         statusType: ProgressStatusType.FAILURE
-    //       });
-    //     }
-
-    //   }).catch((e) => {
-    //     this.setState({
-    //       groups: groups,
-    //       statusMessage: 'Error orrucured during sorting',
-    //       statusType: ProgressStatusType.FAILURE
-    //     });
-    //   });
-
-    // this.setState({
-    //   groups: updatedGroups
-    // }, () => TaskDataProvider.groups = updatedGroups);
+      .then((isUpdated) => {
+        if (isUpdated) {
+          updatedGroups = updatedGroups.map((g) => {
+            if (g.ID === sourceGroup.ID) {
+              return sourceGroup;
+            }
+            return g;
+          });
+          this.setState({
+            groups: updatedGroups,
+            statusMessage: TaskListConstants.errorMessages.sortSuccess,
+            statusType: ProgressStatusType.SUCCESS
+          }, () => TaskDataProvider.groups = groups);
+          this.resetStatus();
+        } else {
+          this.setState({
+            groups: groups,
+            statusMessage: TaskListConstants.errorMessages.sortError,
+            statusType: ProgressStatusType.FAILURE
+          });
+        }
+      })
+      .catch(() => {
+        this.setState({
+          groups: groups,
+          statusMessage: TaskListConstants.errorMessages.sortError,
+          statusType: ProgressStatusType.FAILURE
+        });
+      });
   }
+
+  private calculateGroupSort(groups: IGroup[], newIndex: number): number {
+    if (newIndex === 0) { // at first position
+         if (groups.length > 0) {
+              let newSortIndex = 1.00000000000;
+              for (let index = 0; index < groups.length; index++) {
+                   if (groups[index].SortOrder) {
+                        let firstSort = groups[index].SortOrder;
+                        newSortIndex = firstSort - 1.00000000001;
+                        let nextSort = 1.00000000000;
+                        if (index + 1 < groups.length - 1) {
+                             nextSort = groups[index + 1].SortOrder;
+                        }
+                        if (newSortIndex > nextSort) {
+                             newSortIndex = nextSort - 1.00000000001;
+                        }
+                        break;
+                   }
+              }
+              return newSortIndex;
+         }
+    }
+    else if (newIndex === groups.length - 1) { // at one before to last
+         if (groups.length > 1) {
+              let prevSortIndex = groups[newIndex - 1].SortOrder;
+              let nextSortIndex = groups[newIndex].SortOrder;
+              let newSortIndex = (Number(prevSortIndex) + Number(nextSortIndex)) / 2.00000000000;
+              return newSortIndex;
+         }
+         else {
+              return 1.00000000000;
+         }
+    }
+    else if (newIndex === groups.length) // at last position
+    {
+         let newSortIndex = _.maxBy(groups, (t) => t.SortOrder).SortOrder + 1.00000000001;
+         return newSortIndex;
+    }
+    else {
+         let prevSortIndex = 1.00000000000;
+         if (newIndex - 1 < groups.length) {
+              prevSortIndex = groups[newIndex - 1].SortOrder;
+         }
+         let nextSortIndex = null;
+         if (newIndex < groups.length) {
+              nextSortIndex = groups[newIndex].SortOrder;
+         }
+         if (!nextSortIndex) {
+              for (let index = newIndex + 1; index < groups.length; index++) {
+                   if (groups[index].SortOrder) {
+                        nextSortIndex = groups[index].SortOrder;
+                        break;
+                   }
+              }
+              if (!nextSortIndex) {
+                   nextSortIndex = prevSortIndex + 1.00000000000;
+              }
+         }
+         return (Number(prevSortIndex) + Number(nextSortIndex)) / 2.00000000000;
+    }
+}
 
   public reorder(list: IGroup[], startIndex: number, endIndex: number) {
     const result = _.cloneDeep(list);
@@ -378,14 +440,15 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
   }
 
   public onClickAdd() {
+    const groups = _.cloneDeep(this.state.groups);
     let currentGroup: IGroup = {
       Title: '',
       ID: null,
       IsDefault: false,
-      GroupSort: this.state.groups.length + 1,
-      GUID: (this.state.groups.length + 1).toString()
+      SortOrder: _.maxBy(groups, (t) => t.SortOrder).SortOrder + 1.00000000001,
+      GUID: (this.state.groups.length + 1).toString(),
+      isNew: true
     };
-    const groups = _.cloneDeep(this.state.groups);
     groups.push(currentGroup);
     this.setState({
       isAddClicked: true,
@@ -497,7 +560,7 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
                                 styles={{ fieldGroup: { width: 200 } }}
                                 autoFocus={true}
                                 onChange={(e, newValue) => { this.onChangeGroupTitle(newValue, group); }}
-                                errorMessage ={ group.isExisting ? "Value already exists" : ""}/>
+                                errorMessage={group.isExisting ? "Value already exists" : ""} />
 
                               <Checkbox
                                 checked={group.IsDefault}
@@ -511,10 +574,10 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
                                   onClick={() => { this.onDeleteGroup(group); }} />) : null
                               }
 
-                              { !group.ID ? <IconButton iconProps={{ iconName: 'Cancel' }} onClick={ this.onClickCancel.bind(this)} /> : null }
+                              {group.isNew ? <IconButton iconProps={{ iconName: 'Cancel' }} onClick={(e) => { this.onClickCancel(group); }} /> : null}
                               {
                                 group.isSaving ? <Spinner size={SpinnerSize.medium} hidden={!group.isSaving} /> : null
-                    }
+                              }
                             </div>
                           </div>
                         )}
@@ -538,7 +601,7 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
               />
             </div>
 
-
+            {/* Message Bar */}
             {
               statusType ? (<div className={styles.statusMessage}>
                 <MessageBar
