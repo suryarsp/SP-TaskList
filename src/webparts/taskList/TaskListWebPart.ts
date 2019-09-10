@@ -79,6 +79,7 @@ export default class TaskListWebPart extends BaseClientSideWebPart<ITaskListWebP
 
   public onChangeGroupListName(value: string) {
     this.properties.groupListName = value;
+    this.render();
   }
 
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {

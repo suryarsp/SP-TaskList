@@ -1,10 +1,11 @@
 export interface IGroup {
 
   Title: string;
-  GroupSort: number;
+  SortOrder: number;
   IsDefault: boolean;
   ID ?: number;
   isExisting ?: boolean;
   GUID?:string;
   isSaving ?: boolean;
+  isNew?: boolean;
 }

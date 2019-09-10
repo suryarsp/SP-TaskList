@@ -19,7 +19,7 @@ export default class TaskDataProvider  {
   public static listNames : {
     taskListName: string,
     commentsListName: string,
-    groupListName: string,
+    groupListName ?: string,
     categoryListName: string,
     statusListName: string,
     responsibleListName: string

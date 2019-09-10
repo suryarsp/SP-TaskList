@@ -33,7 +33,7 @@
       "categoryListName": "Category",
       "statusListName": "Status",
       "responsibleListName": "Responsible",
-      "libraryName": "TaskDocument",
+      "libraryName": "Tasklist Documents",
       "minNoOfItemsForStream": 50,
       "defaultExpand": null
     }
