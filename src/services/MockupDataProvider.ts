@@ -53,7 +53,7 @@ export class MockupDataProvider implements IDataProvider {
     return new Promise<ICategory[]>((resolve) => resolve([
       {
         Title:"Category 1",
-        CategorySort:1,
+        SortOrder:1,
         Group:{Id:1,Title:"Group 1"},
         children:[],
         key:"1",
@@ -63,7 +63,7 @@ export class MockupDataProvider implements IDataProvider {
       },
       {
         Title:"Category 2",
-        CategorySort:2,
+        SortOrder:2,
         Group:{Id:1,Title:"Group 1"},
         children:[],
         key:"2",
@@ -73,7 +73,7 @@ export class MockupDataProvider implements IDataProvider {
       },
       {
         Title:"Category 3",
-        CategorySort:3,
+        SortOrder:3,
         Group:{Id:2,Title:"Group 2"},
         children:[],
         key:"3",
@@ -83,7 +83,7 @@ export class MockupDataProvider implements IDataProvider {
       },
       {
         Title:"Category 4",
-        CategorySort:4,
+        SortOrder:4,
         Group:{Id:3,Title:"Group 3"},
         children:[],
         key:"4",

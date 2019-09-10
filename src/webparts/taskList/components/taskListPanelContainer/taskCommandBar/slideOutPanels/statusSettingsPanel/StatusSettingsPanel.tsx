@@ -115,7 +115,7 @@ export default class StatusSettingsPanel extends React.Component< IStatusSetting
     let currentStatus: IStatus = {
       Title: '',
       ID: null,      
-      StatusSort: this.state.status.length + 1,
+      SortOrder: this.state.status.length + 1,
       GUID: (this.state.status.length + 1).toString(),
       FontColor:"",
       FillColor:""
@@ -129,11 +129,18 @@ export default class StatusSettingsPanel extends React.Component< IStatusSetting
     });
   }
 
-  public onClickCancel(e) {
-    let status = _.cloneDeep(this.state.status);
-    let updatedstatus= status.filter(g => g.ID);
+  public onClickCancel(status: IStatus) {
+    let statuses = _.cloneDeep(this.state.status);
+    let updateStatus = statuses.filter(s => s.GUID !== status.GUID);
+    updateStatus = updateStatus.map((s, index) => {
+      if (!s.ID) {
+       s.SortOrder = index + 1;
+        s.GUID = (index + 1).toString();
+      }
+      return s;
+    });
     this.setState({
-      status: updatedstatus
+      status: updateStatus
     });
   }
 
@@ -238,7 +245,7 @@ export default class StatusSettingsPanel extends React.Component< IStatusSetting
                                  // onClick={() => { this.onDeleteGroup(group); }} 
                                   />
 
-                            { !cStatus.ID ? <IconButton iconProps={{ iconName: 'Cancel' }} onClick={ this.onClickCancel.bind(this)} /> : null }
+                            { !cStatus.ID ? <IconButton iconProps={{ iconName: 'Cancel' }} onClick={ (e) => {this.onClickCancel(cStatus);}} /> : null }
                               {
                                 cStatus.isSaving ? <Spinner size={SpinnerSize.medium} hidden={!cStatus.isSaving} /> : null
                     }

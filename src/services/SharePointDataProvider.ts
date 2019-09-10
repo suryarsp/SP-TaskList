@@ -208,7 +208,7 @@ export class SharePointDataProvider implements IDataProvider {
     let web: Web = new Web(this._absoluteUrl);
     let StatusitemsListColl: IStatus[] = [];
     return new Promise<IStatus[]>(resolve => {
-      web.lists.configure(this.configOptions).getByTitle(listname).items.select("Title", "ID", "StatusSort", "FontColor", "FillColor", "GUID").top(5000).get().then((Statusitems: IStatus[]) => {
+      web.lists.configure(this.configOptions).getByTitle(listname).items.select("Title", "ID", "SortOrder", "FontColor", "FillColor", "GUID").top(5000).get().then((Statusitems: IStatus[]) => {
         console.log("Status : ", Statusitems);
         console.log("Status JSON : ", JSON.stringify(Statusitems));
         Statusitems.forEach(element => {
@@ -217,7 +217,7 @@ export class SharePointDataProvider implements IDataProvider {
             FontColor: element.FontColor,
             Title: element.Title ? element.Title : "",
             FillColor: element.FillColor,
-            StatusSort: element.StatusSort,
+            SortOrder: element.SortOrder,
             GUID: element.GUID
           };
           StatusitemsListColl.push(items);
@@ -231,14 +231,14 @@ export class SharePointDataProvider implements IDataProvider {
     let web: Web = new Web(this._absoluteUrl);
     let CategoryListColl: ICategory[] = [];
     return new Promise<ICategory[]>(resolve => {
-      web.lists.configure(this.configOptions).getByTitle(listname).items.select("Title", "ID", "CategorySort", "Parent/Title", "Parent/Id", "Group/Title", "Group/Id", "GUID").expand("Parent", "Group").top(5000).get().then((categoryitems: ICategory[]) => {
+      web.lists.configure(this.configOptions).getByTitle(listname).items.select("Title", "ID", "SortOrder", "Parent/Title", "Parent/Id", "Group/Title", "Group/Id", "GUID").expand("Parent", "Group").top(5000).get().then((categoryitems: ICategory[]) => {
         console.log("category : ", categoryitems);
         console.log("category JSON : ", JSON.stringify(categoryitems));
         categoryitems.forEach(element => {
           let items: ICategory = {
             ID: element.ID,
             Title: element.Title ? element.Title :"",
-            CategorySort: element.CategorySort,
+            SortOrder: element.SortOrder,
             Group: element.Group,
             Parent: element.Parent,
             children: [],
@@ -344,7 +344,7 @@ export class SharePointDataProvider implements IDataProvider {
     return new Promise<IStatus>((response) => {
       this.web.lists.configure(this.configOptions).getByTitle(listName).items.add({
         Title: items.Title,
-        StatusSort: items.StatusSort,
+        SortOrder: items.SortOrder,
         FontColor: items.FontColor,
         FillColor: items.FillColor
       }).then(insertstatus => {
@@ -352,7 +352,7 @@ export class SharePointDataProvider implements IDataProvider {
           console.log("Insert status item : ", insertstatus);
           let item: IStatus = {
             Title: insertstatus.data.Title,
-            StatusSort: insertstatus.data.StatusSort,
+            SortOrder: insertstatus.data.SortOrder,
             FontColor: insertstatus.data.FontColor,
             FillColor: insertstatus.data.FillColor,
             ID: insertstatus.data.ID,
@@ -374,7 +374,7 @@ export class SharePointDataProvider implements IDataProvider {
     return new Promise<boolean>((response) => {
       this.web.lists.configure(this.configOptions).getByTitle(listname).items.getById(itemId).update({
         Title: items.Title,
-        StatusSort: items.StatusSort,
+        SortOrder: items.SortOrder,
         FontColor: items.FontColor,
         FillColor: items.FillColor
       }).then(updatestatus => {
@@ -451,24 +451,24 @@ export class SharePointDataProvider implements IDataProvider {
     let obj = {};
     if(items.Group && items.Parent){
       obj["Title"] = items.Title;
-      obj["CategorySort"] = items.CategorySort;
+      obj["SortOrder"] = items.SortOrder;
       obj["ParentId"] = items.Parent.Id;
       obj["GroupId"] = items.Group.Id;
     }
     if(items.Group)
     {
       obj["Title"] = items.Title;
-      obj["CategorySort"] = items.CategorySort;
+      obj["SortOrder"] = items.SortOrder;
       obj["GroupId"] = items.Group.Id;
     }
     else if(items.Parent){
       obj["Title"] = items.Title;
-      obj["CategorySort"] = items.CategorySort;
+      obj["SortOrder"] = items.SortOrder;
       obj["ParentId"] = items.Parent.Id;
     }
     else{
       obj["Title"] = items.Title;
-      obj["CategorySort"] = items.CategorySort;
+      obj["SortOrder"] = items.SortOrder;
     }
 
     console.log(obj);
@@ -479,7 +479,7 @@ export class SharePointDataProvider implements IDataProvider {
           console.log("Insert category item : ", insertCategory);
           let item: ICategory = {
             Title: insertCategory.data.Title,
-            CategorySort: insertCategory.data.CategorySort,
+            SortOrder: insertCategory.data.SortOrder,
             Group: insertCategory.data.Group,
             Parent: insertCategory.data.Parent,
             ID: insertCategory.data.ID,
@@ -504,7 +504,7 @@ export class SharePointDataProvider implements IDataProvider {
     return new Promise<boolean>((response) => {
       this.web.lists.configure(this.configOptions).getByTitle(listName).items.getById(itemId).update({
         Title: items.Title,
-        CategorySort: items.CategorySort,
+        SortOrder: items.SortOrder,
         GroupId: items.Group.Id,
         ParentId: items.Parent.Id
       }).then(updateCategory => {
@@ -699,7 +699,7 @@ export class SharePointDataProvider implements IDataProvider {
 
           await this.web.lists.configure(this.configOptions)
             .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("StatusSort")
+            .fields.getByInternalNameOrTitle("SortOrder")
             .get()
             .then(isItem => {
             })
@@ -709,7 +709,7 @@ export class SharePointDataProvider implements IDataProvider {
                 .getByTitle(listName)
                 .fields.inBatch(batch)
                 .createFieldAsXml(
-                  '<Field Type="Number" DisplayName="StatusSort" Name="StatusSort" Required="TRUE"/>'
+                  '<Field Type="Number" DisplayName="SortOrder" Name="SortOrder" Required="TRUE"/>'
                 );
             });
 
@@ -840,7 +840,7 @@ export class SharePointDataProvider implements IDataProvider {
 
           await this.web.lists.configure(this.configOptions)
             .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("CategorySort")
+            .fields.getByInternalNameOrTitle("SortOrder")
             .get()
             .then(isItem => {
             })
@@ -850,7 +850,7 @@ export class SharePointDataProvider implements IDataProvider {
                 .getByTitle(listName)
                 .fields.inBatch(batch)
                 .createFieldAsXml(
-                  '<Field Type="Number" DisplayName="CategorySort" Name="CategorySort" Required="TRUE" />'
+                  '<Field Type="Number" DisplayName="SortOrder" Name="SortOrder" Required="TRUE" />'
                 );
             });
 

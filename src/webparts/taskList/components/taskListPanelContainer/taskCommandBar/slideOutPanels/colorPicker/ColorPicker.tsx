@@ -1,7 +1,7 @@
 import * as  React from "react";
 import colorstyles from "./ColorPicker.module.scss";
 import { IColorPickerProps, IColorPickerState } from '../../../../../../../interfaces/index';
-import reactCSS from 'reactcss'
+import reactCSS from 'reactcss';
 import { SketchPicker } from 'react-color';
 
 export default class ColorPicker extends React.Component<IColorPickerProps, IColorPickerState> {

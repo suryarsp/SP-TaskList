@@ -88,7 +88,7 @@ export default class ProgressButton extends React.Component<IProgressButtonProps
                                         };
                                         const defaultcategory: ICategory = {
                                           Title: "All tasks category",
-                                          CategorySort: 1,
+                                          SortOrder: 1.00000000001,
                                           children: [],
                                           key: "1",
                                           text: "All tasks category"
