@@ -3,6 +3,7 @@ import colorstyles from "./ColorPicker.module.scss";
 import { IColorPickerProps, IColorPickerState } from '../../../../../../../interfaces/index';
 import reactCSS from 'reactcss';
 import { SketchPicker } from 'react-color';
+import hexToRgba from 'hex-to-rgba';
 
 export default class ColorPicker extends React.Component<IColorPickerProps, IColorPickerState> {
     private isDirty: boolean;
@@ -11,13 +12,27 @@ export default class ColorPicker extends React.Component<IColorPickerProps, ICol
         this.isDirty = false;
         this.state = {
             displayColorPicker: false,
-            color: {
-                r: '255',
-                g: '255',
-                b: '255',
-                a: '0.5',
-            }
-        };
+            color: this.converthexTorbg(props.displayColor)
+        };        
+    }
+
+    public converthexTorbg(color:string){
+        let rgba = {  r: '255',
+                        g: '255',
+                        b: '255',
+                        a: '0.5'
+                    };
+        
+        if(color){
+            let colorColl = hexToRgba(color);
+            let splitColor = colorColl.split('(')[1].split(')')[0].split(',');
+            rgba.r =splitColor[0];
+            rgba.g =splitColor[1];
+            rgba.b =splitColor[2];
+            rgba.a =splitColor[3];
+            console.log(colorColl);
+        }       
+        return rgba;
     }
 
     public handleClick = () => {
@@ -29,7 +44,7 @@ export default class ColorPicker extends React.Component<IColorPickerProps, ICol
     }
 
     public handleChange = (color) => {
-        this.props.onChangeColor(color.rgb);
+        this.props.onChangeColor(color.hex);
         this.setState({ color: color.rgb });
     }
 

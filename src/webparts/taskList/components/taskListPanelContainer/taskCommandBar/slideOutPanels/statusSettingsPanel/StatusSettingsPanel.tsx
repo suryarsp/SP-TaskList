@@ -146,11 +146,60 @@ export default class StatusSettingsPanel extends React.Component< IStatusSetting
 
   public onChangeFillColor(colorValue: string, status: IStatus) {
       console.log("Fill Color : ",colorValue,status);
+      let statuses = _.cloneDeep(this.state.status);  
+      status.FillColor = colorValue;
+      this.dataProvider.updateStatusItem(this.statusListName,status.ID,status).then(isStatusInsert=>{
+        console.log(isStatusInsert);
+        if(isStatusInsert){
+          console.log("Updated Successfully");
+        }
+      }).catch(error=>{
+        console.log("Update Status error message : ",error);
+      });
 
   }
 
   public onChangeFontColor(colorValue:string, status:IStatus){
     console.log("Font Color : ",colorValue,status);
+    let statuses = _.cloneDeep(this.state.status);  
+    status.FontColor = colorValue;
+    this.dataProvider.updateStatusItem(this.statusListName,status.ID,status).then(isStatusInsert=>{
+      console.log(isStatusInsert);
+      if(isStatusInsert){
+        console.log("Updated Successfully");
+      }
+    }).catch(error=>{
+      console.log("Update Status error message : ",error);
+    });
+  }
+
+  public onDeleteGroup(status:IStatus){
+    let statuses = _.cloneDeep(this.state.status);
+    const { deleteSuccess, deleteError } = TaskListConstants.errorMessages;  
+    this.dataProvider.deleteItem(this.statusListName, status.ID)
+      .then((isDeleted) => {
+        if (isDeleted) {
+          let filterdStatus= statuses.filter(s => s.ID !== status.ID);
+          this.setState({
+            status: filterdStatus,
+            statusMessage: deleteSuccess,
+            statusType: ProgressStatusType.FAILURE
+          }, () => TaskDataProvider.statuses = filterdStatus);
+          this.resetStatus();
+        } else {
+          this.setState({
+            status: statuses,
+            statusMessage: deleteError,
+            statusType: ProgressStatusType.FAILURE
+          });
+        }
+      }).catch(() => {
+        this.setState({
+          status: statuses,
+          statusMessage: deleteError,
+          statusType: ProgressStatusType.FAILURE
+        });
+      });   
   }
   
 
@@ -235,14 +284,14 @@ export default class StatusSettingsPanel extends React.Component< IStatusSetting
                               //  onChange={(e, newValue) => { this.onChangeGroupTitle(newValue, group); }}
                                 errorMessage ={ cStatus.isExisting ? "Value already exists" : ""}
                                />
-                                <ColorPicker key={cStatus.GUID+"fill"}  onChangeColor={ (value) => {this.onChangeFillColor(value, cStatus);}} />
+                                <ColorPicker key={cStatus.GUID+"fill"} displayColor={cStatus.FillColor} onChangeColor={ (value) => {this.onChangeFillColor(value, cStatus);}} />
 
-                                <ColorPicker key={cStatus.GUID+"font"} onChangeColor={ (value) => {this.onChangeFontColor(value, cStatus);}}/>
+                                <ColorPicker key={cStatus.GUID+"font"} displayColor={cStatus.FontColor} onChangeColor={ (value) => {this.onChangeFontColor(value, cStatus);}}/>
 
                                 <IconButton
                                   disabled={cStatus.Title.trim().length === 0 || statusType !== null}
                                   iconProps={{ iconName: 'Delete' }}
-                                 // onClick={() => { this.onDeleteGroup(group); }} 
+                                  onClick={() => { this.onDeleteGroup(cStatus); }} 
                                   />
 
                             { !cStatus.ID ? <IconButton iconProps={{ iconName: 'Cancel' }} onClick={ (e) => {this.onClickCancel(cStatus);}} /> : null }
