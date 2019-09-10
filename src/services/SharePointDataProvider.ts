@@ -1452,6 +1452,18 @@ export class SharePointDataProvider implements IDataProvider {
       });
     });
   }
+
+  public deleteListField(listName:string,fieldName:string):Promise<boolean>{
+    return new Promise<boolean>((resolve)=>{
+      this.web.lists.getByTitle(listName).fields.getByTitle(fieldName).delete().then((deletefield)=>{
+        console.log("Delete field : ",deletefield);
+        resolve(true);
+      }).catch(error=>{
+        console.log("Field deleted error message : ",error);
+        resolve(false);
+      });
+    });
+  }
   //List Delete End
 
   //Bulk Delete method
