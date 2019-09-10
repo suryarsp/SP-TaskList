@@ -34,6 +34,8 @@ export * from './components/taskListPanelConatiner/taskCommandBar/bulkEditDialog
 export * from './components/taskListPanelConatiner/taskCommandBar/bulkEditDialog/IBulkEditDialogState';
 export * from './components/taskListPanelConatiner/taskList/ITaskListDetailsProps';
 export * from './components/taskListPanelConatiner/taskList/ITaskListDetailsState';
+export * from './components/taskListPanelConatiner/taskCommandBar/slideOutPanels/colorPicker/IColorPickerProps';
+export * from './components/taskListPanelConatiner/taskCommandBar/slideOutPanels/colorPicker/IColorPickerState';
 
 
 // Services

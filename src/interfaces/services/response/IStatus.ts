@@ -5,4 +5,6 @@ export interface IStatus {
   FillColor: string;
   ID?: number;
   GUID?:string;
+  isExisting?:false;
+  isSaving ?: boolean;
 }
