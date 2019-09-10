@@ -1,5 +1,6 @@
 
 import { IPropertyPaneDropdownOption } from "@microsoft/sp-property-pane";
+import { IDoughnutChartData } from "../../interfaces/index";
 
 
 export const TaskListConstants :
@@ -14,8 +15,10 @@ export const TaskListConstants :
      saveError: string,
      updateSuccess: string,
      deleteSuccess: string;
-     deleteError: string
-      }} =
+     deleteError: string,
+    },
+    chartData: IDoughnutChartData
+  } =
    {
     columns : [
       {
@@ -61,7 +64,35 @@ export const TaskListConstants :
       updateSuccess: "Updated successfully",
       deleteSuccess: "Deleted successfully",
       deleteError: "Error occured while deletion"
+    },
+    chartData: {
+      datasets : [{
+        data:[10,20,30,40,10],
+        backgroundColor: [
+          '#CCC',
+          '#36A2EB',
+          '#FFCE56',
+          'skyblue',
+          'antiquewhite'
+        ],
+        hoverBackgroundColor:[
+          '#CCC',
+          '#36A2EB',
+          '#FFCE56',
+          'skyblue',
+          'antiquewhite'
+        ]
+      }],
+      labels: [
+        'Lender Coursel',
+        'Borrower Coursel',
+        'Lender',
+        'Third Party',
+        'Responsible Party'
+      ],
+     
     }
+
 };
 
 
