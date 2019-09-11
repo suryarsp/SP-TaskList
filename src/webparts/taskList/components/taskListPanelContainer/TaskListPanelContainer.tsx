@@ -1,5 +1,5 @@
 import * as React from 'react';
-import styles from './TaskPanelGrid.module.scss';
+import styles from './TaskListPanelContainer.module.scss';
 import { TaskCommandBar } from '../taskListPanelContainer/taskCommandBar/TaskCommandBar';
 import { ITaskListPanelContainerProps, ITaskListPanelContainerState } from '../../../../interfaces/index';
 export default class TaskListPanelContainer extends React.Component< ITaskListPanelContainerProps, ITaskListPanelContainerState> {

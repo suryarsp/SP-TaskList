@@ -10,7 +10,8 @@ import { MessageBarType, Dialog, DialogType, DialogFooter, Layer, TextField, Mes
 import { TaskListConstants } from '../../../../../../../common/defaults/taskList-constants';
 import * as _ from 'lodash';
 import ColorPicker from '../colorPicker/ColorPicker';
-import reactCSS from 'reactcss';
+import { IPermissions } from '../../../../../../../services';
+import { PermissionKind } from 'sp-pnp-js';
 
 const getItemStyle = (isDragging, draggableStyle) => {
   if (isDragging) {
@@ -39,43 +40,70 @@ const getItemStyle = (isDragging, draggableStyle) => {
 
 
 
-export default class StatusSettingsPanel extends React.Component< IStatusSettingsPanelProps, IStatusSettingsPanelState> {
+export default class StatusSettingsPanel extends React.Component<IStatusSettingsPanelProps, IStatusSettingsPanelState> {
   private isDirty: boolean;
   private clearTimeoutvalue: number;
   public dataProvider: IDataProvider;
   private statusListName = TaskDataProvider.listNames.statusListName;
-
+  private permissions: IPermissions[];
+  private canAddItem: boolean;
+  private canUpdateItem: boolean;
+  private canDeleteItem: boolean;
+  private canViewItem: boolean;
   constructor(props) {
     super(props);
     this.isDirty = false;
-    this.state={
-      status:[],
-      currentStatus:null,
-      isAddClicked:false,
-      isColor:false,
-      preventDelete:false,
-      statusMessage:"",
-      statusType:null,
-      fillColor:'',
-      fontColor:''
+    this.state = {
+      status: [],
+      currentStatus: null,
+      isAddClicked: false,
+      isColor: false,
+      preventDelete: false,
+      statusMessage: "",
+      statusType: null,
+      fillColor: '',
+      fontColor: ''
     };
+    this.canAddItem = false;
+    this.canUpdateItem = false;
+    this.canDeleteItem = false;
+    this.canViewItem = false;
   }
 
-  
+
   public componentDidMount() {
-    this.dataProvider = TaskDataProvider.Instance;     
-    this.dataProvider.getStatuses(this.statusListName).then((status)=>{
-      this.setState({
-        status: status
-      });
-      TaskDataProvider.statuses = status;
-    }).
-    catch((error) => {
-      console.log("Get Status", error);
+    this.dataProvider = TaskDataProvider.Instance;
+    this.dataProvider.getPermissions(this.statusListName).then((permissions) => {
+      this.permissions = permissions;
+      let canManageList = this.permissions.filter(item => item.permission == PermissionKind.ManageLists)[0].allowed;
+      let canAddItem = this.permissions.filter(item => item.permission == PermissionKind.AddListItems)[0].allowed;
+      let canEditItem = this.permissions.filter(item => item.permission == PermissionKind.EditListItems)[0].allowed;
+      let canApproveItem = this.permissions.filter(item => item.permission == PermissionKind.ApproveItems)[0].allowed;
+      let canDeleteItem = this.permissions.filter(item => item.permission == PermissionKind.DeleteListItems)[0].allowed;
+      this.canViewItem = this.permissions.filter(item => item.permission == PermissionKind.ViewListItems)[0].allowed;
+
+      if (canManageList || canAddItem) {
+        this.canAddItem = true;
+      }
+      if (canManageList || canEditItem) {
+        this.canUpdateItem = true;
+      }
+      if (canManageList || canDeleteItem) {
+        this.canDeleteItem = true;
+      }
+
+      this.dataProvider.getStatuses(this.statusListName).then((status) => {
+        this.setState({
+          status: status
+        });
+        TaskDataProvider.statuses = status;
+      }).
+        catch((error) => {
+          console.log("Get Status", error);
+        });
     });
   }
 
-  
   public resetStatus() {
     this.clearTimeoutvalue = setTimeout(() => {
       this.setState({
@@ -116,11 +144,11 @@ export default class StatusSettingsPanel extends React.Component< IStatusSetting
   public onClickAdd() {
     let currentStatus: IStatus = {
       Title: '',
-      ID: null,      
+      ID: null,
       SortOrder: this.state.status.length + 1,
       GUID: (this.state.status.length + 1).toString(),
-      FontColor:"",
-      FillColor:"",
+      FontColor: "",
+      FillColor: "",
       isNew: true
     };
     const status = _.cloneDeep(this.state.status);
@@ -137,7 +165,7 @@ export default class StatusSettingsPanel extends React.Component< IStatusSetting
     let updateStatus = statuses.filter(s => s.GUID !== status.GUID);
     updateStatus = updateStatus.map((s, index) => {
       if (!s.ID) {
-       s.SortOrder = index + 1;
+        s.SortOrder = index + 1;
         s.GUID = (index + 1).toString();
       }
       return s;
@@ -148,49 +176,49 @@ export default class StatusSettingsPanel extends React.Component< IStatusSetting
   }
 
   public onChangeFillColor(colorValue: string, status: IStatus) {
-      console.log("Fill Color : ",colorValue,status);
-      let statuses = _.cloneDeep(this.state.status);
-      status.FillColor = colorValue;
-      const isGroupAlreadyPresent = statuses.filter(s => s.Title.toLowerCase() === status.Title.toLowerCase()).length > 0;
-      if(status.ID){
-        if(isGroupAlreadyPresent){
-          console.log("Status Title",status.Title);
-          this.onUpdateGroup(status,status.Title);
-        }
-        else{
-          this.onChangeStatusTitle(status.Title,status);
-        }
-      }else{
-          this.forceUpdate();
+    console.log("Fill Color : ", colorValue, status);
+    let statuses = _.cloneDeep(this.state.status);
+    status.FillColor = colorValue;
+    const isGroupAlreadyPresent = statuses.filter(s => s.Title.toLowerCase() === status.Title.toLowerCase()).length > 0;
+    if (status.ID) {
+      if (isGroupAlreadyPresent) {
+        console.log("Status Title", status.Title);
+        this.onUpdateGroup(status, status.Title);
       }
-      
+      else {
+        this.onChangeStatusTitle(status.Title, status);
+      }
+    } else {
+      this.forceUpdate();
+    }
+
   }
 
-  public onChangeFontColor(colorValue:string, status:IStatus){
-    console.log("Font Color : ",colorValue,status);  
-    let statuses = _.cloneDeep(this.state.status); 
-    status.FontColor = colorValue; 
+  public onChangeFontColor(colorValue: string, status: IStatus) {
+    console.log("Font Color : ", colorValue, status);
+    let statuses = _.cloneDeep(this.state.status);
+    status.FontColor = colorValue;
     const isGroupAlreadyPresent = statuses.filter(s => s.Title.toLowerCase() === status.Title.toLowerCase()).length > 0;
-    if(status.ID){
-      if(isGroupAlreadyPresent){
-        console.log("Status Title",status.Title);
-        this.onUpdateGroup(status,status.Title);
+    if (status.ID) {
+      if (isGroupAlreadyPresent) {
+        console.log("Status Title", status.Title);
+        this.onUpdateGroup(status, status.Title);
       }
-      else{
-        this.onChangeStatusTitle(status.Title,status);
+      else {
+        this.onChangeStatusTitle(status.Title, status);
       }
-    }else{
-        this.forceUpdate();
+    } else {
+      this.forceUpdate();
     }
   }
 
-  public onDeleteGroup(status:IStatus){
+  public onDeleteGroup(status: IStatus) {
     let statuses = _.cloneDeep(this.state.status);
-    const { deleteSuccess, deleteError } = TaskListConstants.errorMessages;  
+    const { deleteSuccess, deleteError } = TaskListConstants.errorMessages;
     this.dataProvider.deleteItem(this.statusListName, status.ID)
       .then((isDeleted) => {
         if (isDeleted) {
-          let filterdStatus= statuses.filter(s => s.ID !== status.ID);
+          let filterdStatus = statuses.filter(s => s.ID !== status.ID);
           this.setState({
             status: filterdStatus,
             statusMessage: deleteSuccess,
@@ -210,7 +238,7 @@ export default class StatusSettingsPanel extends React.Component< IStatusSetting
           statusMessage: deleteError,
           statusType: ProgressStatusType.FAILURE
         });
-      });   
+      });
   }
 
   public onChangeStatusTitle(newValue: string, status: IStatus) {
@@ -350,7 +378,7 @@ export default class StatusSettingsPanel extends React.Component< IStatusSetting
     const destinationIndex = destination.index;
     const destinationStatus = statuses[destinationIndex < sourceIndex ? destinationIndex : destinationIndex + 1];
 
-    if(destinationStatus) {
+    if (destinationStatus) {
       sourceStatus.SortOrder = this.calculateGroupSort(statuses, _.findIndex(statuses, g => g.GUID === destinationStatus.GUID));
     } else {
       sourceStatus.SortOrder = this.calculateGroupSort(statuses, statuses.length);
@@ -395,64 +423,64 @@ export default class StatusSettingsPanel extends React.Component< IStatusSetting
 
   private calculateGroupSort(status: IStatus[], newIndex: number): number {
     if (newIndex === 0) { // at first position
-         if (status.length > 0) {
-              let newSortIndex = 1.00000000000;
-              for (let index = 0; index < status.length; index++) {
-                   if (status[index].SortOrder) {
-                        let firstSort = status[index].SortOrder;
-                        newSortIndex = firstSort - 1.00000000001;
-                        let nextSort = 1.00000000000;
-                        if (index + 1 < status.length - 1) {
-                             nextSort = status[index + 1].SortOrder;
-                        }
-                        if (newSortIndex > nextSort) {
-                             newSortIndex = nextSort - 1.00000000001;
-                        }
-                        break;
-                   }
-              }
-              return newSortIndex;
-         }
+      if (status.length > 0) {
+        let newSortIndex = 1.00000000000;
+        for (let index = 0; index < status.length; index++) {
+          if (status[index].SortOrder) {
+            let firstSort = status[index].SortOrder;
+            newSortIndex = firstSort - 1.00000000001;
+            let nextSort = 1.00000000000;
+            if (index + 1 < status.length - 1) {
+              nextSort = status[index + 1].SortOrder;
+            }
+            if (newSortIndex > nextSort) {
+              newSortIndex = nextSort - 1.00000000001;
+            }
+            break;
+          }
+        }
+        return newSortIndex;
+      }
     }
     else if (newIndex === status.length - 1) { // at one before to last
-         if (status.length > 1) {
-              let prevSortIndex = status[newIndex - 1].SortOrder;
-              let nextSortIndex = status[newIndex].SortOrder;
-              let newSortIndex = (Number(prevSortIndex) + Number(nextSortIndex)) / 2.00000000000;
-              return newSortIndex;
-         }
-         else {
-              return 1.00000000000;
-         }
+      if (status.length > 1) {
+        let prevSortIndex = status[newIndex - 1].SortOrder;
+        let nextSortIndex = status[newIndex].SortOrder;
+        let newSortIndex = (Number(prevSortIndex) + Number(nextSortIndex)) / 2.00000000000;
+        return newSortIndex;
+      }
+      else {
+        return 1.00000000000;
+      }
     }
     else if (newIndex === status.length) // at last position
     {
-         let newSortIndex = _.maxBy(status, (t) => t.SortOrder).SortOrder + 1.00000000001;
-         return newSortIndex;
+      let newSortIndex = _.maxBy(status, (t) => t.SortOrder).SortOrder + 1.00000000001;
+      return newSortIndex;
     }
     else {
-         let prevSortIndex = 1.00000000000;
-         if (newIndex - 1 < status.length) {
-              prevSortIndex = status[newIndex - 1].SortOrder;
-         }
-         let nextSortIndex = null;
-         if (newIndex < status.length) {
-              nextSortIndex = status[newIndex].SortOrder;
-         }
-         if (!nextSortIndex) {
-              for (let index = newIndex + 1; index < status.length; index++) {
-                   if (status[index].SortOrder) {
-                        nextSortIndex = status[index].SortOrder;
-                        break;
-                   }
-              }
-              if (!nextSortIndex) {
-                   nextSortIndex = prevSortIndex + 1.00000000000;
-              }
-         }
-         return (Number(prevSortIndex) + Number(nextSortIndex)) / 2.00000000000;
+      let prevSortIndex = 1.00000000000;
+      if (newIndex - 1 < status.length) {
+        prevSortIndex = status[newIndex - 1].SortOrder;
+      }
+      let nextSortIndex = null;
+      if (newIndex < status.length) {
+        nextSortIndex = status[newIndex].SortOrder;
+      }
+      if (!nextSortIndex) {
+        for (let index = newIndex + 1; index < status.length; index++) {
+          if (status[index].SortOrder) {
+            nextSortIndex = status[index].SortOrder;
+            break;
+          }
+        }
+        if (!nextSortIndex) {
+          nextSortIndex = prevSortIndex + 1.00000000000;
+        }
+      }
+      return (Number(prevSortIndex) + Number(nextSortIndex)) / 2.00000000000;
     }
-}
+  }
 
   public reorder(list: IStatus[], startIndex: number, endIndex: number) {
     const result = _.cloneDeep(list);
@@ -461,27 +489,25 @@ export default class StatusSettingsPanel extends React.Component< IStatusSetting
     return result;
   }
 
-  public onClickNoColor(status:IStatus){
+  public onClickNoColor(status: IStatus) {
     let statuses = _.cloneDeep(this.state.status);
     status.FontColor = null;
     status.FillColor = null;
     const isGroupAlreadyPresent = statuses.filter(s => s.Title.toLowerCase() === status.Title.toLowerCase()).length > 0;
-    if(status.ID){
-      if(isGroupAlreadyPresent){
-        console.log("Status Title",status.Title);
-        this.onUpdateGroup(status,status.Title);
+    if (status.ID) {
+      if (isGroupAlreadyPresent) {
+        console.log("Status Title", status.Title);
+        this.onUpdateGroup(status, status.Title);
       }
-      else{
-        this.onChangeStatusTitle(status.Title,status);
+      else {
+        this.onChangeStatusTitle(status.Title, status);
       }
-    }else{
-        this.forceUpdate();
+    } else {
+      this.forceUpdate();
     }
-    console.log(status.FillColor,status.FontColor);
+    console.log(status.FillColor, status.FontColor);
 
   }
-
-  
 
   public render(): React.ReactElement<IStatusSettingsPanelProps> {
     const { status, preventDelete, statusMessage, statusType } = this.state;
@@ -504,130 +530,174 @@ export default class StatusSettingsPanel extends React.Component< IStatusSetting
       </DialogFooter>
     </Dialog>) : null;
 
-    
-    return (
-      <Layer>
+    if (this.canViewItem) {
+      return (
+        <Layer>
           <div className={styles.slidePaneloverlay}>
             <div className={styles.statusPanel}>
               <div className={styles.header}>
-                    <div className={styles.closeButton}>
-                      <IconButton 
-                        iconProps={{ iconName: 'Cancel' }}
-                        onClick={() => { this.props.hidePanel(this.isDirty); }} />
-                    </div>
-                    <div className={styles.statusTitle}>Status settings</div>
-                    <div className={styles.verticalSeperator}></div>
+                <div className={styles.closeButton}>
+                  <IconButton
+                    iconProps={{ iconName: 'Cancel' }}
+                    onClick={() => { this.props.hidePanel(this.isDirty); }} />
+                </div>
+                <div className={styles.statusTitle}>Status settings</div>
+                <div className={styles.verticalSeperator}></div>
               </div>
               {preventDeletionDialog}
               {/* Disclaimer */}
               <div className={styles.disclaimer}>
                 <p>Changes made to these settings take effect immediately.</p>
                 <p>Statuses with no assigned color use the color specified for responsible party.</p>
-              </div>      
+              </div>
               <div className={styles.colorheader}>
                 <div className={styles.colortask}>Fill Color</div>
                 <div>Font Color</div>
-              </div>        
+              </div>
               <DragDropContext onDragEnd={this.onDragEnd.bind(this)}>
-              <Droppable droppableId="droppable">
-                {(p, s) => (
-                  <div
-                    ref={p.innerRef}
-                  >
-                    {status.map((cStatus, index) => (
-                      <Draggable
-                        key={cStatus.GUID}
-                        draggableId={cStatus.GUID}
-                        index={index}
-                        isDragDisabled={cStatus.Title.trim().length === 0 || statusType !== null}
-                      >
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
+                <Droppable droppableId="droppable">
+                  {(p, s) => (
+                    <div
+                      ref={p.innerRef}
+                    >
+                      {status.map((cStatus, index) => (
+                        <Draggable
+                          key={cStatus.GUID}
+                          draggableId={cStatus.GUID}
+                          index={index}
+                          isDragDisabled={!this.canUpdateItem || cStatus.Title.trim().length === 0 || cStatus.isSaving}
+                        >
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
 
-                            style={getItemStyle(
-                              snapshot.isDragging,
-                              provided.draggableProps.style
-                            )}
-                          >
-                            <div className={styles.statusContainer}>
+                              style={getItemStyle(
+                                snapshot.isDragging,
+                                provided.draggableProps.style
+                              )}
+                            >
+                              <div className={styles.statusContainer}>
 
-                              {/* <IconButton
+                                {/* <IconButton
                   iconProps={{ iconName: 'Move',  }}
                   disabled={ group.Title.trim().length === 0}>
                  </IconButton> */}
-                              <div {...provided.dragHandleProps}>
-                                <h6>Drag Handle</h6>
+                                <div {...provided.dragHandleProps}>
+                                  <h6>Drag Handle</h6>
+                                </div>
+
+                                <TextField
+                                  value={cStatus.Title}
+                                  disabled={!this.canUpdateItem || cStatus.isSaving}
+                                  style={{
+                                    width: 200,
+                                    color: cStatus.FontColor,
+                                    backgroundColor: cStatus.FillColor
+                                  }}
+                                  autoFocus={true}
+                                  onChange={(e, newValue) => { this.onChangeStatusTitle(newValue, cStatus); }}
+                                  errorMessage={cStatus.isExisting ? "Value already exists" : ""}
+                                />
+                                {
+                                  this.canUpdateItem || this.canAddItem ? (
+                                    <ColorPicker key={cStatus.GUID + "fill"} displayColor={cStatus.FillColor} onChangeColor={(value) => { this.onChangeFillColor(value, cStatus); }} />
+                                  ) : null
+                                }
+
+                                {
+                                  this.canUpdateItem || this.canAddItem ? (
+                                    <ColorPicker key={cStatus.GUID + "font"} displayColor={cStatus.FontColor} onChangeColor={(value) => { this.onChangeFontColor(value, cStatus); }} />
+                                  ) : null
+                                }
+
+                                {
+                                  this.canDeleteItem ? (<IconButton
+                                    disabled={cStatus.Title.trim().length === 0 || statusType !== null}
+                                    iconProps={{ iconName: 'Delete' }}
+                                    title = "Delete"
+                                    onClick={() => { this.onDeleteGroup(cStatus); }}
+                                  />) : null
+                                }
+
+
+                                {
+                                  this.canUpdateItem || this.canAddItem ? (
+                                    <IconButton
+                                      disabled={cStatus.Title.trim().length === 0 || statusType !== null}
+                                      iconProps={{ iconName: 'UnSetColor' }}
+                                      title = "No Color"
+                                      onClick={() => { this.onClickNoColor(cStatus); }}
+                                    />) : null
+                                }
+
+                                {!cStatus.ID ? <IconButton iconProps={{ iconName: 'Cancel' }} onClick={(e) => { this.onClickCancel(cStatus); }} /> : null}
+                                {
+                                  cStatus.isSaving ? <Spinner size={SpinnerSize.medium} hidden={!cStatus.isSaving} /> : null
+                                }
+
                               </div>
-                          
-                              <TextField
-                                value={cStatus.Title} 
-                                style={{ 
-                                  width:200,
-                                  color:cStatus.FontColor,
-                                  backgroundColor: cStatus.FillColor
-                                }}
-                                autoFocus={true}
-                                onChange={(e, newValue) => { this.onChangeStatusTitle(newValue, cStatus); }}
-                                errorMessage ={ cStatus.isExisting ? "Value already exists" : ""}
-                               />
-                                <ColorPicker key={cStatus.GUID+"fill"} displayColor={cStatus.FillColor} onChangeColor={ (value) => {this.onChangeFillColor(value, cStatus);}} />
-
-                                <ColorPicker key={cStatus.GUID+"font"} displayColor={cStatus.FontColor} onChangeColor={ (value) => {this.onChangeFontColor(value, cStatus);}}/>
-
-                                <IconButton
-                                  disabled={cStatus.Title.trim().length === 0 || statusType !== null}
-                                  iconProps={{ iconName: 'Delete' }}
-                                  onClick={() => { this.onDeleteGroup(cStatus); }} 
-                                  />
-
-                                  <IconButton
-                                   disabled={cStatus.Title.trim().length===0 || statusType !== null}
-                                   iconProps={{iconName:'UnSetColor'}}
-                                   onClick={()=>{this.onClickNoColor(cStatus);}}
-                                   />
-
-                            { !cStatus.ID ? <IconButton iconProps={{ iconName: 'Cancel' }} onClick={ (e) => {this.onClickCancel(cStatus);}} /> : null }
-                              {
-                                cStatus.isSaving ? <Spinner size={SpinnerSize.medium} hidden={!cStatus.isSaving} /> : null
-                    }
-                              
                             </div>
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {p.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </DragDropContext>
-              
+                          )}
+                        </Draggable>
+                      ))}
+                      {p.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </DragDropContext>
 
-            {/* Add Button */}
-            <div className={styles.addBtn}>
-              <PrimaryButton
-                data-automation-id="test"
-                text="Add Status"
-                allowDisabledFocus={true}
-                disabled={statusType !== null}
-                onClick={this.onClickAdd.bind(this)}
-                style={{ marginLeft: '15px' }}
-              />
-            </div>
 
-            {
-              statusType ? (<div className={styles.statusMessage}>
-                <MessageBar
-                  messageBarType={messageBarType}>
-                  {statusMessage}
-                </MessageBar>
-              </div>) : null
-            }
+              {/* Add Button */}
+              <div className={styles.addBtn}>
+                <PrimaryButton
+                  data-automation-id="test"
+                  text="Add Status"
+                  allowDisabledFocus={true}
+                  disabled={statusType !== null}
+                  onClick={this.onClickAdd.bind(this)}
+                  style={{ marginLeft: '15px' }}
+                />
+              </div>
+
+              {
+                statusType ? (<div className={styles.statusMessage}>
+                  <MessageBar
+                    messageBarType={messageBarType}>
+                    {statusMessage}
+                  </MessageBar>
+                </div>) : null
+              }
             </div>
-        </div>
-    </Layer>
-    );
+          </div>
+        </Layer>
+      );
+    }
+    else {
+      return (
+        <Layer>
+          <div className={styles.slidePaneloverlay}>
+            <div className={styles.statusPanel}>
+              <div className={styles.header}>
+                <div className={styles.closeButton}>
+                  <IconButton
+                    iconProps={{ iconName: 'Cancel' }}
+                    onClick={() => { this.props.hidePanel(this.isDirty); }} />
+                </div>
+                <div className={styles.statusTitle}>Group settings</div>
+                <div className={styles.verticalSeperator}></div>
+              </div>
+              {preventDeletionDialog}
+              {/* Disclaimer */}
+              <div className={styles.disclaimer}>
+                <p>
+                  No permissions to view this content
+                  </p>
+              </div>
+            </div>
+          </div>
+        </Layer>
+      );
+    }
   }
 }
