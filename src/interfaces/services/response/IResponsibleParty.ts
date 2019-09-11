@@ -4,5 +4,7 @@ export interface IResponsibleParty {
   FillColor: string;
   ID?: number;
   GUID?:string;
-
+  isExisting?:boolean;
+  isSaving ?: boolean;
+  isNew?: boolean;
 }

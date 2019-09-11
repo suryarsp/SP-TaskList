@@ -529,7 +529,7 @@ export default class StatusSettingsPanel extends React.Component<IStatusSettings
         <PrimaryButton onClick={this.onClosePreventDeleteDialog.bind(this)} text="OK" />
       </DialogFooter>
     </Dialog>) : null;
-
+  if(this.state.status.length > 0){
     if (this.canViewItem) {
       return (
         <Layer>
@@ -684,7 +684,7 @@ export default class StatusSettingsPanel extends React.Component<IStatusSettings
                     iconProps={{ iconName: 'Cancel' }}
                     onClick={() => { this.props.hidePanel(this.isDirty); }} />
                 </div>
-                <div className={styles.statusTitle}>Group settings</div>
+                <div className={styles.statusTitle}>Status settings</div>
                 <div className={styles.verticalSeperator}></div>
               </div>
               {preventDeletionDialog}
@@ -699,5 +699,34 @@ export default class StatusSettingsPanel extends React.Component<IStatusSettings
         </Layer>
       );
     }
+  }
+  else
+  {
+    return (
+      <Layer>
+        <div className={styles.slidePaneloverlay}>
+          <div className={styles.statusPanel}>
+            <div className={styles.header}>
+              <div className={styles.closeButton}>
+                <IconButton
+                  iconProps={{ iconName: 'Cancel' }}
+                  onClick={() => { this.props.hidePanel(this.isDirty); }} />
+              </div>
+              <div className={styles.statusTitle}>Status settings</div>
+              <div className={styles.verticalSeperator}></div>
+            </div>
+            {preventDeletionDialog}
+            {/* Disclaimer */}
+            <div className={styles.disclaimer}>
+              <p>
+                No data found
+                </p>
+            </div>
+          </div>
+        </div>
+      </Layer>
+    );
+  }
+    
   }
 }
