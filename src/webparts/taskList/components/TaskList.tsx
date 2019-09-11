@@ -118,7 +118,8 @@ export default class TaskList extends React.Component<ITaskListProps, ITaskListS
           chartData = {TaskListConstants.chartData}
         />
 
-        <TaskListPanelContainer/>
+        <TaskListPanelContainer
+        />
       </div>
     );
   }

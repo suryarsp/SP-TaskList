@@ -54,8 +54,23 @@ export class MockupDataProvider implements IDataProvider {
       {
         Title:"Category 1",
         SortOrder:1,
-        Group:{Id:1,Title:"Group 1"},
+        Group:{
+          Id:1,
+          Title:"Group 1"
+        },
+        children:[{
+          Title:"Category 1.1",
+        SortOrder:1,
+        Group:{
+          Id:1,
+          Title:"Group 1"
+        },
         children:[],
+        key:"1",
+        text:"Category 1",
+        ID:1,
+        GUID:"1"
+        }],
         key:"1",
         text:"Category 1",
         ID:1,
@@ -64,7 +79,10 @@ export class MockupDataProvider implements IDataProvider {
       {
         Title:"Category 2",
         SortOrder:2,
-        Group:{Id:1,Title:"Group 1"},
+        Group:{
+          Id:1,
+          Title:"Group 1"
+        },
         children:[],
         key:"2",
         text:"Category 2",
@@ -74,7 +92,10 @@ export class MockupDataProvider implements IDataProvider {
       {
         Title:"Category 3",
         SortOrder:3,
-        Group:{Id:2,Title:"Group 2"},
+        Group:{
+          Id:2,
+          Title:"Group 2"
+        },
         children:[],
         key:"3",
         text:"Category 3",
@@ -84,11 +105,14 @@ export class MockupDataProvider implements IDataProvider {
       {
         Title:"Category 4",
         SortOrder:4,
-        Group:{Id:3,Title:"Group 3"},
+        Group:{
+          Id:3,
+          Title:"Group 3"
+        },
         children:[],
         key:"4",
         text:"Category 4",
-        ID:4,
+        ID: 4,
         GUID:"4"
       }
     ]));

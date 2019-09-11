@@ -16,6 +16,7 @@ export default class TaskDataProvider  {
   public static groups: IGroup[] = [];
   public static responsibleParties: IResponsibleParty[] = [];
   public static statuses: IStatus[] = [];
+  public static isCategoryUniqueEnabled: boolean;
   public static listNames : {
     taskListName: string,
     commentsListName: string,

@@ -1,13 +1,42 @@
 import * as React from 'react';
 import styles from './CategorySettingsPanel.module.scss';
-import { ICategorySettingsPanelProps,  ICategorySettingsPanelState, IDataProvider} from '../../../../../../../interfaces/index';
-import { Panel, PanelType } from 'office-ui-fabric-react/lib/Panel';
-import { DefaultButton, IconButton, PrimaryButton } from 'office-ui-fabric-react/lib/Button';
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { ICategorySettingsPanelProps, ICategorySettingsPanelState, IDataProvider, ICategory } from '../../../../../../../interfaces/index';
+import { IconButton, PrimaryButton } from 'office-ui-fabric-react/lib/Button';
 import TaskDataProvider from '../../../../../../../services/TaskDataProvider';
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { ProgressStatusType } from '../../../../../../../interfaces/enums/progressStatusType';
 import { MessageBarType, DialogType, Dialog, DialogFooter, Layer, MessageBar, TextField, Checkbox } from 'office-ui-fabric-react';
 import { TaskListConstants } from '../../../../../../../common/defaults/taskList-constants';
+import { MockupDataProvider } from '../../../../../../../services';
+import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
+
+const DragHandle = SortableHandle(() => <span>::</span>);
+const CategorySortableItem = SortableElement((props: { category: ICategory, index: number }) => {
+  return (
+    <div className={styles.categoryContainer}>
+      <div style={{ paddingLeft: '10px', paddingRight: '5px' }}>
+        <h6>Drag Handle</h6>
+      </div>
+
+      <TextField
+        value={props.category.Title}
+        styles={{ fieldGroup: { width: 200 } }}
+        autoFocus={true}
+        //  onChange={(e, newValue) => { this.onChangeGroupTitle(newValue, group); }}
+        errorMessage={props.category.isExisting ? "Value already exists" : ""}
+      />
+      <IconButton
+        disabled={props.category.Title.trim().length === 0}
+        iconProps={{ iconName: 'Delete' }}
+      // onClick={() => { this.onDeleteGroup(group); }}
+      />
+    </div>
+  );
+});
+
+const CategorySortableContainer = SortableContainer(({ children }) => {
+  return <div>{children}</div>;
+});
 
 const getItemStyle = (isDragging, draggableStyle) => {
   if (isDragging) {
@@ -33,37 +62,43 @@ const getItemStyle = (isDragging, draggableStyle) => {
     };
   }
 };
-export default class CategorySettingsPanel extends React.Component< ICategorySettingsPanelProps, ICategorySettingsPanelState> {
+export default class CategorySettingsPanel extends React.Component<ICategorySettingsPanelProps, ICategorySettingsPanelState> {
   private isDirty: boolean;
   private clearTimeoutvalue: number;
   public dataProvider: IDataProvider;
-  private categoryListName = TaskDataProvider.listNames.categoryListName;
+  public categoryListName: string;
+  public isCategoryUniqueEnabled: boolean;
 
   constructor(props) {
     super(props);
     this.isDirty = false;
-    this.state={
-      CurrentCategory:null,
-      categorys:[],
-      IsSubCategory:false,
-      makeSubCategory:null,
-      isAddClicked:false,
-      preventDelete:false,
-      statusMessage:"",
-      statusType:null
+    this.state = {
+      categories: [],
+      isAddClicked: false,
+      preventDelete: false,
+      statusMessage: "",
+      statusType: null
     };
   }
 
   public componentDidMount() {
-    this.dataProvider = TaskDataProvider.Instance;     
-    this.dataProvider.getCategories(this.categoryListName).then((categorys)=>{
+    this.dataProvider = TaskDataProvider.Instance;
+    this.categoryListName = TaskDataProvider.listNames.categoryListName;
+    this.isCategoryUniqueEnabled = TaskDataProvider.isCategoryUniqueEnabled;
+    // this.dataProvider.getCategories(this.categoryListName).then((categories)=>{
+    //   this.setState({
+    //     categories: categories
+    //   });
+    // }).
+    // catch((error) => {
+    //   console.log("Get Categorys", error);
+    // });
+    const provider = new MockupDataProvider();
+    provider.getCategories('').then((categories) => {
       this.setState({
-        categorys: categorys
+        categories: categories
       });
-      TaskDataProvider.categories = categorys;
-    }).
-    catch((error) => {
-      console.log("Get Categorys", error);
+      TaskDataProvider.categories = categories;
     });
   }
 
@@ -97,17 +132,25 @@ export default class CategorySettingsPanel extends React.Component< ICategorySet
 
     return messageBarStatus;
   }
-  
-  
+
+
   public onClosePreventDeleteDialog() {
     this.setState({
       isAddClicked: false,
       preventDelete: false
     });
   }
-  
+
+  public onDragEnd(result) {
+    console.log(result);
+  }
+
+  public onSortEnd(result) {
+    console.log(result);
+  }
+
   public render(): React.ReactElement<ICategorySettingsPanelProps> {
-    const { categorys, preventDelete, statusMessage, statusType } = this.state;
+    const { categories, preventDelete, statusMessage, statusType } = this.state;
     const messageBarType = this.getMessageBarType(statusType);
     const preventDeletionDialog = preventDelete ? (<Dialog
       hidden={false}
@@ -128,41 +171,51 @@ export default class CategorySettingsPanel extends React.Component< ICategorySet
     </Dialog>) : null;
     return (
       <Layer>
-          <div className={styles.slidePaneloverlay}>
-            <div className={styles.categoryPanel}>
-              <div className={styles.header}>
-                    <div className={styles.closeButton}>
-                      <IconButton 
-                        iconProps={{ iconName: 'Cancel' }}
-                        onClick={() => { this.props.hidePanel(this.isDirty); }} />
-                    </div>
-                    <div className={styles.categoryTitle}>Category settings</div>
-                    <div className={styles.verticalSeperator}></div>
+        <div className={styles.slidePaneloverlay}>
+          <div className={styles.categoryPanel}>
+            <div className={styles.header}>
+              <div className={styles.closeButton}>
+                <IconButton
+                  iconProps={{ iconName: 'Cancel' }}
+                  onClick={() => { this.props.hidePanel(this.isDirty); }} />
               </div>
-              {preventDeletionDialog}
-              {/* Disclaimer */}
-              <div className={styles.disclaimer}>
-                <p>
-                  Changes made to these settings take effect immediately
+              <div className={styles.categoryTitle}>Category settings</div>
+              <div className={styles.verticalSeperator}></div>
+            </div>
+            {preventDeletionDialog}
+            {/* Disclaimer */}
+            <div className={styles.disclaimer}>
+              <p>
+                Changes made to these settings take effect immediately
                 </p>
+            </div>
+
+            <div>
+              Make subcategory
               </div>
 
-              <div>
-                Make subcategory
-              </div>
-              {/* onDragEnd={this.onDragEnd.bind(this)} */}
-              <DragDropContext >
+
+            <CategorySortableContainer onSortEnd={this.onSortEnd.bind(this)}>
+              { categories.map((category, index) => (
+                  <CategorySortableItem
+                      category = { category}
+                      index= { index}
+                      key = { category.ID}
+                    />
+              ))}
+            </CategorySortableContainer>
+            {/* <DragDropContext   onDragEnd={this.onDragEnd.bind(this)}>
               <Droppable droppableId="droppable">
                 {(p, s) => (
                   <div
                     ref={p.innerRef}
                   >
-                    {categorys.map((category, index) => (
+                    { categories.map((category, index) => (
                       <Draggable
                         key={category.GUID}
                         draggableId={category.GUID}
                         index={index}
-                        isDragDisabled={category.Title.trim().length === 0 || statusType !== null}
+                        isDragDisabled={category.Title.trim().length === 0}
                       >
                         {(provided, snapshot) => (
                           <div
@@ -175,19 +228,10 @@ export default class CategorySettingsPanel extends React.Component< ICategorySet
                             )}
                           >
                             <div className={styles.categoryContainer}>
-
-                              {/* <IconButton
-                  iconProps={{ iconName: 'Move',  }}
-                  disabled={ group.Title.trim().length === 0}>
-                 </IconButton> */}
-                              <div {...provided.dragHandleProps}>
+                              <div {...provided.dragHandleProps} style={{paddingLeft: '5px', paddingRight: '5px'}}>
                                 <h6>Drag Handle</h6>
                               </div>
 
-                              <IconButton 
-                                disabled={category.children.length === 0}
-                                iconProps={{iconName:"RevToggleKey"}}
-                              />
                               <TextField
                                 value={category.Title}
                                 styles={{ fieldGroup: { width: 200 } }}
@@ -197,28 +241,27 @@ export default class CategorySettingsPanel extends React.Component< ICategorySet
                                />
 
                                 <IconButton
-                                  disabled={category.Title.trim().length === 0 || statusType !== null}
-                                  iconProps={{ iconName: 'Tab' }}
-                                  //DependencyAdd
-                                 // onClick={() => { this.onsubtabGroup(group); }} 
+                                  disabled={ index === 0 }
+                                  iconProps={{ iconName: 'RowsChild' }}
+                                 // onClick={() => { this.onsubtabGroup(group); }}
                                   />
                                 <IconButton
-                                  disabled={category.Title.trim().length === 0 || statusType !== null}
+                                  disabled={category.Title.trim().length === 0 }
                                   iconProps={{ iconName: 'Delete' }}
-                                 // onClick={() => { this.onDeleteGroup(group); }} 
+                                 // onClick={() => { this.onDeleteGroup(group); }}
                                   />
-                              
                             </div>
                           </div>
                         )}
                       </Draggable>
+
                     ))}
                     {p.placeholder}
                   </div>
                 )}
               </Droppable>
-            </DragDropContext>
-              
+            </DragDropContext> */}
+
 
             {/* Add Button */}
             <div className={styles.addBtn}>
@@ -226,12 +269,9 @@ export default class CategorySettingsPanel extends React.Component< ICategorySet
                 data-automation-id="test"
                 text="Add Category"
                 allowDisabledFocus={true}
-                disabled={statusType !== null}
-                //onClick={this.onClickAdd.bind(this)}
                 style={{ marginLeft: '15px' }}
               />
             </div>
-
 
             {
               statusType ? (<div className={styles.statusMessage}>
@@ -241,9 +281,9 @@ export default class CategorySettingsPanel extends React.Component< ICategorySet
                 </MessageBar>
               </div>) : null
             }
-            </div>
+          </div>
         </div>
-    </Layer>
+      </Layer>
     );
   }
 }
