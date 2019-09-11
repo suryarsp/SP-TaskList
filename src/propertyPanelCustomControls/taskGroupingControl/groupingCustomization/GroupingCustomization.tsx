@@ -27,7 +27,8 @@ export default class GroupingCustomization extends React.Component<IGroupingCust
       showWarning: false,
       creationSuccess: false,
       isErrorOccured: false,
-      isListPresent: false
+      isListPresent: false,
+      isTaskAndCategoryPresent: false
     };
     this.isDirty = false;
   }
@@ -35,6 +36,33 @@ export default class GroupingCustomization extends React.Component<IGroupingCust
 
   public componentDidMount() {
     this.dataProvider = TaskDataProvider.Instance;
+    this.checkListMapping();
+  }
+
+
+  public async checkListMapping() {
+    const { categoryListName, taskListName }  = TaskDataProvider.listNames;
+    await Promise.all([this.dataProvider.listExists(categoryListName),this.dataProvider.listExists(taskListName)])
+    .then((results) => {
+      if(results[0] && results[1]) {
+        this.setState({
+          isTaskAndCategoryPresent: true
+        });
+        this.checkGroupList();
+      } else {
+        this.setState({
+          isTaskAndCategoryPresent: false
+        });
+      }
+    }).catch(() => {
+      this.setState({
+        isErrorOccured: true,
+        isTaskAndCategoryPresent: false
+      });
+    });
+  }
+
+  public checkGroupList() {
     if (this.props.groupListName) {
       this.dataProvider.listExists(this.props.groupListName).then((isPresent) => {
         if (isPresent) {
@@ -56,7 +84,6 @@ export default class GroupingCustomization extends React.Component<IGroupingCust
         isButtonDisabled: false
       });
     }
-
   }
 
   public enableOrDisableGroup(checked: boolean) {
@@ -153,11 +180,7 @@ export default class GroupingCustomization extends React.Component<IGroupingCust
               this.setErrorState();
           }
         }).catch(() => {
-          this.setState({
-            isButtonDisabled: true,
-            isErrorOccured: true,
-            isCreationInProgress: false
-          });
+          this.setErrorState();
         });
   }
 
@@ -191,8 +214,9 @@ export default class GroupingCustomization extends React.Component<IGroupingCust
   }
 
   public render() {
-    const { isGroupingEnabled, isCategoryUniqueEnabled, selectedViewType, groupListName, showWarning, isErrorOccured, creationSuccess, isListPresent } = this.state;
+    const { isTaskAndCategoryPresent, isGroupingEnabled, isCategoryUniqueEnabled, selectedViewType, groupListName, showWarning, isErrorOccured, creationSuccess, isListPresent } = this.state;
     const groupViewTypes = TaskListConstants.groupViewTypes;
+    if ( isTaskAndCategoryPresent) {
     if (isGroupingEnabled) {
       if (isErrorOccured) {
         return (<div>Something went wrong . Please try again alter</div>);
@@ -303,4 +327,5 @@ export default class GroupingCustomization extends React.Component<IGroupingCust
       );
     }
   }
+}
 }
