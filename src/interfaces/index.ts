@@ -65,3 +65,5 @@ export * from  './propertyPane/createButtonWithIndication/progressButton/IProgre
 export * from './other/DragDropResult';
 
 export * from './components/ITaskListWebPartProps';
+export * from './components/header/taskInProgressPieChart/DoughnutChart/IDoughnutChartData';
+export * from './components/header/taskInProgressPieChart/DoughnutChart/IDoughnutChartDataSet';

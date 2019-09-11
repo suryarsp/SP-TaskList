@@ -7,7 +7,8 @@ import { TaskCommandBar } from './taskListPanelContainer/taskCommandBar/TaskComm
 import TaskDataProvider from '../../../services/TaskDataProvider';
 import { ListDetailsConstants } from '../../../common/defaults/listView-constants';
 import { Spinner, SpinnerSize } from 'office-ui-fabric-react';
-
+import TaskInProgressPieChart from '../components/header/taskInProgressPieChart/TaskInProgressPieChart';
+import { TaskListConstants } from '../../../common/defaults/taskList-constants';
 export default class TaskList extends React.Component<ITaskListProps, ITaskListState> {
   private dataProvider: IDataProvider;
   private listName: string;
@@ -115,7 +116,7 @@ export default class TaskList extends React.Component<ITaskListProps, ITaskListS
                           />
                           <span>
                                Sorry, something went wrong !!!
-                               </span>
+                          </span>
                      </div>
                 </div>
            </div>
@@ -124,6 +125,9 @@ export default class TaskList extends React.Component<ITaskListProps, ITaskListS
  } else {
     return (
       <div className={styles.taskListWrapper}>
+        <TaskInProgressPieChart 
+          chartData = {TaskListConstants.chartData}
+        />
         <TaskCommandBar
           selectedCount={0}
           isAllItemsSelected={false}
