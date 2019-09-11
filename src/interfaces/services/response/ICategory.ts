@@ -1,7 +1,7 @@
 export interface ICategory {
   Group?: GroupOrParentCategory;
   Title: string;
-  CategorySort: number;
+  SortOrder: number;
   ID?: number;
   GUID?:string;
   children : ICategory[];

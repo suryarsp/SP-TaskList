@@ -16,8 +16,11 @@ export const TaskListConstants :
      updateSuccess: string,
      deleteSuccess: string;
      deleteError: string,
+     sortSuccess: string,
+     sortError: string
     },
-    chartData: IDoughnutChartData
+    chartData: IDoughnutChartData,
+    
   } =
    {
     columns : [
@@ -63,7 +66,9 @@ export const TaskListConstants :
       saveError: "Error occured while saving",
       updateSuccess: "Updated successfully",
       deleteSuccess: "Deleted successfully",
-      deleteError: "Error occured while deletion"
+      deleteError: "Error occured while deletion",
+      sortSuccess: "Sorted successfully",
+      sortError: "Error occured while sorting",
     },
     chartData: {
       datasets : [{
@@ -90,16 +95,7 @@ export const TaskListConstants :
         'Third Party',
         'Responsible Party'
       ],
-     
-    }
+    },
 
 };
-
-
-// private groupListView = ['Item', 'Title', 'GroupSort', 'IsDefault', 'ID', 'Created', 'Editor', 'Modified'];
-// private responsibleListView = ['Item', 'Title', 'FontColor', 'FillColor', 'ID', 'Created', 'Editor', 'Modified'];
-// private statusListView = ['Item', 'Title', 'StatusSort','FontColor', 'FillColor', 'ID', 'Created', 'Editor', 'Modified'];
-// private categoryListView = ['Item', 'Title', 'CategorySort','Parent', 'Group', 'ID', 'Created', 'Editor', 'Modified'];
-// private commentsListView = ['Item', 'Title', 'Comment','Task', 'Created', 'Editor', 'Modified'];
-// private taskListView = ['Item', 'Title', 'TaskSort','Parent', 'Group','Category', 'Status','Document','ID', 'Created', 'Editor', 'Modified'];
 

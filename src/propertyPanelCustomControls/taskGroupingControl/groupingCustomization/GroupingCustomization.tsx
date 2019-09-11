@@ -1,5 +1,5 @@
 import * as React from "react";
-import { IGroupingCustomizationProps, IGroupingCustomizationState, IDataProvider } from '../../../interfaces/index';
+import { IGroupingCustomizationProps, IGroupingCustomizationState, IDataProvider, IGroup } from '../../../interfaces/index';
 import { Toggle } from 'office-ui-fabric-react/lib/Toggle';
 import { ChoiceGroup, IChoiceGroupOption } from 'office-ui-fabric-react/lib/ChoiceGroup';
 import { TaskListConstants } from "../../../common/defaults/taskList-constants";
@@ -13,6 +13,7 @@ import TaskDataProvider from "../../../services/TaskDataProvider";
 export default class GroupingCustomization extends React.Component<IGroupingCustomizationProps, IGroupingCustomizationState
   > {
   private dataProvider: IDataProvider;
+  private isDirty: boolean;
   constructor(props: IGroupingCustomizationProps) {
     super(props);
     console.log(props);
@@ -28,7 +29,9 @@ export default class GroupingCustomization extends React.Component<IGroupingCust
       isErrorOccured: false,
       isListPresent: false
     };
+    this.isDirty = false;
   }
+
 
   public componentDidMount() {
     this.dataProvider = TaskDataProvider.Instance;
@@ -91,6 +94,7 @@ export default class GroupingCustomization extends React.Component<IGroupingCust
   }
 
   public onChangeGroupName(newValue: string) {
+    this.isDirty = true;
     this.setState({
       groupListName: newValue
     });
@@ -104,32 +108,65 @@ export default class GroupingCustomization extends React.Component<IGroupingCust
       isButtonDisabled: true,
       isCreationInProgress: true
     });
+    const { categoryListName, taskListName }  = TaskDataProvider.listNames;
     this.dataProvider.groupListCreation(this.state.groupListName)
-      .then((isCreated) => {
-        if (isCreated) {
-          this.setState({
-            isButtonDisabled: true,
-            creationSuccess: true,
-            isCreationInProgress: false
-          });
-          this.props.onChangeGroupListName(this.state.groupListName);
-          this.props.onEnableOrDisableGroup(true);
-        } else {
+      .then(
+        (isGroupCreated) => {
+          TaskDataProvider.listNames.groupListName = this.state.groupListName;
+          if(isGroupCreated){
+            const defaultGroup: IGroup = {
+              Title:"All tasks group",
+              SortOrder : 1.00000000001,
+              IsDefault:true
+            };
+            this.dataProvider.insertGroupItem(this.state.groupListName,defaultGroup)
+            .then((insertGroupItem) => {
+              if(insertGroupItem) {
+                this.dataProvider.categoryMappingAfterGroup(categoryListName,defaultGroup.Title)
+                .then(
+                  (isCategorymapping) => {
+                    if(isCategorymapping){
+                      this.dataProvider.taskMappingAfterGroup(taskListName,defaultGroup.Title)
+                      .then(
+                        (isTaskMapping) => {
+                          if(isTaskMapping){
+                            this.setState({
+                              isButtonDisabled: true,
+                              creationSuccess: true,
+                              isCreationInProgress: false
+                            });
+                            this.props.onChangeGroupListName(this.state.groupListName);
+                            this.props.onEnableOrDisableGroup(true);
+                          }
+                        }).catch(() => {
+                          this.setErrorState();
+                        });
+                    }
+                  }).catch(() => {
+                    this.setErrorState();
+                  });
+              }
+            }).catch(() => {
+              this.setErrorState();
+            });
+          } else {
+              this.setErrorState();
+          }
+        }).catch(() => {
           this.setState({
             isButtonDisabled: true,
             isErrorOccured: true,
             isCreationInProgress: false
           });
-        }
-
-      })
-      .catch(() => {
-        this.setState({
-          isButtonDisabled: true,
-          isErrorOccured: true,
-          isCreationInProgress: false
         });
-      });
+  }
+
+  public setErrorState() {
+    this.setState({
+      isButtonDisabled: true,
+      isErrorOccured: true,
+      isCreationInProgress: false
+    });
   }
 
   public onClearGroupData() {
@@ -140,6 +177,7 @@ export default class GroupingCustomization extends React.Component<IGroupingCust
             isGroupingEnabled: false,
             isListPresent: false
           });
+          this.props.onChangeGroupListName("");
           this.props.onEnableOrDisableGroup(false);
           this.props.onEnableOrDisableUniqueCategory(false);
         }
@@ -193,8 +231,15 @@ export default class GroupingCustomization extends React.Component<IGroupingCust
                 onChange={(e, checked) => this.enableOrDisableGroup(checked)} />
             </div>
             <div>
-                <TextField minLength={1} errorMessage={groupListName.trim().length === 0 ? "Value is required" : ""} label="Group list name" value={this.state.groupListName} onChange={(e, newValue) => { this.onChangeGroupName(newValue); }} />
+                <TextField
+                minLength={1}
+                 errorMessage={groupListName.trim().length === 0 && this.isDirty ? "Value is required" : ""}
+                 label="Group list name"
+                 value={this.state.groupListName}
+                 onChange={(e, newValue) => { this.onChangeGroupName(newValue); }} />
+
                 <PrimaryButton
+                  style={{marginTop: '10px'}}
                   disabled={this.state.isButtonDisabled}
                   text={"Create list"}
                   onClick={this.onCreateGroupList.bind(this)}
@@ -203,11 +248,11 @@ export default class GroupingCustomization extends React.Component<IGroupingCust
                     this.state.isCreationInProgress ? <Spinner size={SpinnerSize.medium} /> : null
                   }
                 </PrimaryButton>
-                <span>
+                <div style={{padding: "5px"}}>
                   {
-                    creationSuccess ? (<strong>Group list created successfully.Please reload the page to continue</strong>) : (isErrorOccured) ? (<div>Error occured during list creation</div>) : null
+                    creationSuccess ? (<strong style={{color: 'green'}}>Group list created successfully.Please reload the page to continue</strong>) : (isErrorOccured) ? (<strong style={{color: 'red'}}>Error occured during list creation</strong>) : null
                   }
-                </span>
+                </div>
 
               </div>
             {
