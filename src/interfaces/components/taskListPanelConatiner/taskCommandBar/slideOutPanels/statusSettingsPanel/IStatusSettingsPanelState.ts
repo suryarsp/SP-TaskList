@@ -9,5 +9,7 @@ export interface IStatusSettingsPanelState {
     statusMessage: string;
     statusType: ProgressStatusType;
     isColor:boolean;
+    fillColor:string;
+    fontColor:string;
 }
 

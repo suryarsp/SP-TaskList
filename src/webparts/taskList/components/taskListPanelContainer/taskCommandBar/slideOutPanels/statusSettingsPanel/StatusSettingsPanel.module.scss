@@ -34,6 +34,16 @@
     background-color: rgba(0,0,0,0.1);
 }
 
+.colorheader{
+    width: 100%;
+    position: absolute;
+    padding-left: 276px;
+    .colortask{
+        float: left;
+        padding-right: 9px;
+    }
+}
+
 $duration: 500ms;
 $width: 520px;
 $contentPadding: 0 17px 0 15px;
