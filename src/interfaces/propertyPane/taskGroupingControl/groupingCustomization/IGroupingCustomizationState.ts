@@ -9,4 +9,5 @@ export interface IGroupingCustomizationState {
   creationSuccess: boolean;
   isErrorOccured: boolean;
   isListPresent: boolean;
+  isTaskAndCategoryPresent: boolean;
 }
