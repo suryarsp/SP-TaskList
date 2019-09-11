@@ -14,10 +14,13 @@ export default class TaskInProgressPieChart extends React.Component< ITaskInProg
       <div>
         <h4> TaskInProgressPieChart</h4>
         <Doughnut 
-            data={this.props.chartData}                
+            data={this.props.chartData} 
+            width={75} 
+            height={15}               
             options={{
               legend: {
                 display: true,
+                maintainAspectRatio: false,
                 position:'right',
                 onClick: (event) => {                                                                                      
                   event.stopPropagation();
