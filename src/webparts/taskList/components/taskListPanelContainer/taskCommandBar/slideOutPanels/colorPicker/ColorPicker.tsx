@@ -7,13 +7,21 @@ import hexToRgba from 'hex-to-rgba';
 
 export default class ColorPicker extends React.Component<IColorPickerProps, IColorPickerState> {
     private isDirty: boolean;
+    private isDefaultColor : boolean;
     constructor(props) {
         super(props);
         this.isDirty = false;
         this.state = {
             displayColorPicker: false,
-            color: this.converthexTorbg(props.displayColor)
+            color: this.converthexTorbg(props.displayColor),
+            isDefaultColor:false
         };        
+    }
+
+    public componentWillReceiveProps(props){
+        this.setState({
+            color: this.converthexTorbg(props.displayColor)
+        });
     }
 
     public converthexTorbg(color:string){
@@ -31,9 +39,24 @@ export default class ColorPicker extends React.Component<IColorPickerProps, ICol
             rgba.b =splitColor[2];
             rgba.a =splitColor[3];
             console.log(colorColl);
-        }       
+            this.isDefaultColor=false;
+            // this.setState({
+            //     isDefaultColor:false
+            // });            
+        }    
+        else{
+            // this.setState({
+            //     isDefaultColor:true
+            // });
+            rgba = {  r: '255',
+                        g: '255',
+                        b: '255',
+                        a: '0.5'
+                    };
+            this.isDefaultColor=true;
+        }   
         return rgba;
-    }
+    } 
 
     public handleClick = () => {
         this.setState({ displayColorPicker: !this.state.displayColorPicker });
@@ -45,7 +68,9 @@ export default class ColorPicker extends React.Component<IColorPickerProps, ICol
 
     public handleChange = (color) => {
         this.props.onChangeColor(color.hex);
+        this.isDefaultColor=false;
         this.setState({ color: color.rgb });
+
     }
 
     public render(): React.ReactElement<IColorPickerProps> {
@@ -80,8 +105,9 @@ export default class ColorPicker extends React.Component<IColorPickerProps, ICol
           });
         return (
             <div>
-                <div style={ styles.swatch } onClick={ this.handleClick }>                    
-                    <div style={ styles.color } ></div>
+                <div style={ styles.swatch } onClick={ this.handleClick }>  
+                {this.isDefaultColor ?  <div style={ styles.color } >No Color</div> :  <div style={ styles.color } ></div>}                  
+                   
                 </div>
                 { this.state.displayColorPicker ? <div style={ styles.popover }>
                 <div style={ styles.cover } onClick={ this.handleClose }/>
