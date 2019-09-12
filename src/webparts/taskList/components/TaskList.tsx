@@ -3,7 +3,7 @@ import styles from './TaskList.module.scss';
 import { ITaskListProps } from '../../../interfaces/components/ITaskListProps';
 import { escape } from '@microsoft/sp-lodash-subset';
 import { ITaskListState, IDataProvider } from '../../../interfaces/index';
-import { TaskCommandBar } from './taskListPanelContainer/taskCommandBar/TaskCommandBar';
+
 import TaskDataProvider from '../../../services/TaskDataProvider';
 import { ListDetailsConstants } from '../../../common/defaults/listView-constants';
 import { Spinner, SpinnerSize } from 'office-ui-fabric-react';
@@ -11,6 +11,7 @@ import TaskInProgressPieChart from '../components/header/taskInProgressPieChart/
 import TaskFilter from '../components/header/taskFilter/TaskFilter';
 
 import { TaskListConstants } from '../../../common/defaults/taskList-constants';
+import TaskListPanelContainer from '../components/taskListPanelContainer/TaskListPanelContainer';
 export default class TaskList extends React.Component<ITaskListProps, ITaskListState> {
   private dataProvider: IDataProvider;
   private listName: string;
@@ -76,19 +77,7 @@ export default class TaskList extends React.Component<ITaskListProps, ITaskListS
          });
 }
 
-  public onClickDelete() {
-  }
-
-  public onRefreshPage() {
-  }
-
-  public onCancelSelection() {
-
-  }
-
   public render(): React.ReactElement<ITaskListProps> {
-
-
     if (this.state.isLoading) {
       return (
            <div className={styles.taskListWrapper}>
@@ -127,20 +116,13 @@ export default class TaskList extends React.Component<ITaskListProps, ITaskListS
  } else {
     return (
       <div className={styles.taskListWrapper}>
-        <TaskInProgressPieChart 
+        <TaskInProgressPieChart
           chartData = {TaskListConstants.chartData}
         />
         <div style={{padding: '5px'}}>
             <TaskFilter/>
         </div>
-        <TaskCommandBar
-          selectedCount={0}
-          isAllItemsSelected={false}
-          onCancelSelection={() => null}
-          onClickDelete={this.onClickDelete.bind(this)}
-          onRefreshPage={this.onRefreshPage.bind(this)}
-          totalItemCount={0}
-        />
+        <TaskListPanelContainer/>
       </div>
     );
   }
