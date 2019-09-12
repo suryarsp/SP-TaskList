@@ -326,6 +326,8 @@ export default class GroupingCustomization extends React.Component<IGroupingCust
           onChange={(e, checked) => this.enableOrDisableGroup(checked)} />
       );
     }
+  } else {
+    return null;
   }
 }
 }

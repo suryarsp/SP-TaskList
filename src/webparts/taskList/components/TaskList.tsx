@@ -119,6 +119,7 @@ export default class TaskList extends React.Component<ITaskListProps, ITaskListS
         />
 
         <TaskListPanelContainer
+        uniqueToGroupEnabled =  { this.props.isCategoryUniqueEnabled }
         />
       </div>
     );

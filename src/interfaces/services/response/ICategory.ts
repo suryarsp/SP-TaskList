@@ -9,6 +9,8 @@ export interface ICategory {
   ID?: number;
   GUID?:string;
   Parent?: Group | Category;
+  isNew ?: boolean;
+  isSaving ?: boolean;
 }
 
 

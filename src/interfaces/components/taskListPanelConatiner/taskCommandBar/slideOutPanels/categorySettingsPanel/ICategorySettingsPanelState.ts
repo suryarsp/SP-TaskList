@@ -7,4 +7,5 @@ export interface ICategorySettingsPanelState {
     preventDelete: boolean;
     statusMessage: string;
     statusType: ProgressStatusType;
+    isUniqueToGroupChecked: boolean;
 }

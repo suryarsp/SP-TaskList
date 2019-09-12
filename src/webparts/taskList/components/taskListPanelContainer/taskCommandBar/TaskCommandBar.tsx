@@ -383,6 +383,7 @@ export  class TaskCommandBar extends React.Component<
         case CommandTypes.CategorySettings: {
           commands = <CategorySettingsPanel
                        hidePanel = { this.hidePanel.bind(this)}
+                       uniqueToGroupEnabled = { this.props.uniqueToGroupEnabled}
                       />;
           break;
         }

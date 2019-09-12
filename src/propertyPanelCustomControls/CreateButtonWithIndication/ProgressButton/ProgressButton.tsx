@@ -96,7 +96,6 @@ export default class ProgressButton extends React.Component<IProgressButtonProps
                                         this.dataProvider.insertCategoryItem(categoryListName, defaultcategory).then(
                                           (isInsertCategory) => {
                                             if (isInsertCategory) {
-
                                               this.setState({
                                                 creationSuccess: true,
                                                 creationInProgress: false,
