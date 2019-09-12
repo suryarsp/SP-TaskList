@@ -11,6 +11,7 @@ import TaskInProgressPieChart from '../components/header/taskInProgressPieChart/
 import TaskFilter from '../components/header/taskFilter/TaskFilter';
 
 import { TaskListConstants } from '../../../common/defaults/taskList-constants';
+import { chartDataConstant} from '../../../common/defaults/chartData-constants';
 import TaskListPanelContainer from '../components/taskListPanelContainer/TaskListPanelContainer';
 export default class TaskList extends React.Component<ITaskListProps, ITaskListState> {
   private dataProvider: IDataProvider;
@@ -116,9 +117,11 @@ export default class TaskList extends React.Component<ITaskListProps, ITaskListS
  } else {
     return (
       <div className={styles.taskListWrapper}>
-        <TaskInProgressPieChart
-          chartData = {TaskListConstants.chartData}
-        />
+        <div className="responsiblePartyDoughnutChart">
+          <TaskInProgressPieChart
+            chartData = {chartDataConstant.chartData}
+          />
+        </div>        
         <div style={{padding: '5px'}}>
             <TaskFilter/>
         </div>
