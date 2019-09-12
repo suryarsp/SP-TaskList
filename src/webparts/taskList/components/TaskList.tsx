@@ -8,6 +8,8 @@ import TaskDataProvider from '../../../services/TaskDataProvider';
 import { ListDetailsConstants } from '../../../common/defaults/listView-constants';
 import { Spinner, SpinnerSize } from 'office-ui-fabric-react';
 import TaskInProgressPieChart from '../components/header/taskInProgressPieChart/TaskInProgressPieChart';
+import TaskFilter from '../components/header/taskFilter/TaskFilter';
+
 import { TaskListConstants } from '../../../common/defaults/taskList-constants';
 import TaskListPanelContainer from '../components/taskListPanelContainer/TaskListPanelContainer';
 export default class TaskList extends React.Component<ITaskListProps, ITaskListState> {
@@ -117,7 +119,9 @@ export default class TaskList extends React.Component<ITaskListProps, ITaskListS
         <TaskInProgressPieChart
           chartData = {TaskListConstants.chartData}
         />
-
+        <div style={{padding: '5px'}}>
+            <TaskFilter/>
+        </div>
         <TaskListPanelContainer/>
       </div>
     );

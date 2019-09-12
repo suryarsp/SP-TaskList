@@ -482,7 +482,9 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
       IsDefault: false,
       SortOrder: _.maxBy(groups, (t) => t.SortOrder).SortOrder + 1.00000000001,
       GUID: (this.state.groups.length + 1).toString(),
-      isNew: true
+      isNew: true,
+      key:'',
+      text:''
     };
     groups.push(currentGroup);
     this.setState({
