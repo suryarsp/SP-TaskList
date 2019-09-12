@@ -173,7 +173,9 @@ export class SharePointDataProvider implements IDataProvider {
             IsDefault: element.IsDefault,
             Title: element.Title ? element.Title:"",
             SortOrder: element.SortOrder,
-            GUID: element.GUID
+            GUID: element.GUID,
+            key: element.Title ? element.Title: "",
+            text: element.Title ? element.Title: ""
           };
           GroupListColl.push(items);
         });
@@ -250,8 +252,8 @@ export class SharePointDataProvider implements IDataProvider {
             Parent: element.Parent,
             children: [],
             key: element.ID.toString(),
-            text: element.Title,
-            GUID: element.GUID
+            text: element.Title ? element.Title :"",
+            GUID: element.Title ? element.Title :""
           };
           CategoryListColl.push(items);
         });
@@ -295,7 +297,9 @@ export class SharePointDataProvider implements IDataProvider {
             SortOrder: inserttask.data.SortOrder,
             ID: inserttask.data.ID,
             IsDefault: inserttask.data.IsDefault,
-            GUID: inserttask.data.GUID
+            GUID: inserttask.data.GUID,
+            key: inserttask.data.Title,
+            text: inserttask.data.Title
           };
           response(item);
         }

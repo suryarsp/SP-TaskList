@@ -179,11 +179,11 @@ export default class StatusSettingsPanel extends React.Component<IStatusSettings
     console.log("Fill Color : ", colorValue, status);
     let statuses = _.cloneDeep(this.state.status);
     status.FillColor = colorValue;
-    const isGroupAlreadyPresent = statuses.filter(s => s.Title.toLowerCase() === status.Title.toLowerCase()).length > 0;
+    const isStatusAlreadyPresent = statuses.filter(s => s.Title.toLowerCase() === status.Title.toLowerCase()).length > 0;
     if (status.ID) {
-      if (isGroupAlreadyPresent) {
+      if (isStatusAlreadyPresent) {
         console.log("Status Title", status.Title);
-        this.onUpdateGroup(status, status.Title);
+        this.onUpdateStatus(status, status.Title);
       }
       else {
         this.onChangeStatusTitle(status.Title, status);
@@ -198,11 +198,11 @@ export default class StatusSettingsPanel extends React.Component<IStatusSettings
     console.log("Font Color : ", colorValue, status);
     let statuses = _.cloneDeep(this.state.status);
     status.FontColor = colorValue;
-    const isGroupAlreadyPresent = statuses.filter(s => s.Title.toLowerCase() === status.Title.toLowerCase()).length > 0;
+    const isStatusAlreadyPresent = statuses.filter(s => s.Title.toLowerCase() === status.Title.toLowerCase()).length > 0;
     if (status.ID) {
-      if (isGroupAlreadyPresent) {
+      if (isStatusAlreadyPresent) {
         console.log("Status Title", status.Title);
-        this.onUpdateGroup(status, status.Title);
+        this.onUpdateStatus(status, status.Title);
       }
       else {
         this.onChangeStatusTitle(status.Title, status);
@@ -212,7 +212,7 @@ export default class StatusSettingsPanel extends React.Component<IStatusSettings
     }
   }
 
-  public onDeleteGroup(status: IStatus) {
+  public onDeleteStatus(status: IStatus) {
     let statuses = _.cloneDeep(this.state.status);
     const { deleteSuccess, deleteError } = TaskListConstants.errorMessages;
     this.dataProvider.deleteItem(this.statusListName, status.ID)
@@ -245,12 +245,12 @@ export default class StatusSettingsPanel extends React.Component<IStatusSettings
     let statuses = _.cloneDeep(this.state.status);
     status.Title = newValue;
     status.isSaving = true;
-    const isGroupAlreadyPresent = statuses.filter(s => s.Title.toLowerCase() === newValue.toLowerCase()).length > 0;
-    if (!isGroupAlreadyPresent) {
+    const isStatusAlreadyPresent = statuses.filter(s => s.Title.toLowerCase() === newValue.toLowerCase()).length > 0;
+    if (!isStatusAlreadyPresent) {
       if (status.isNew) {
-        this.onAddGroup(status, newValue);
+        this.onAddStatus(status, newValue);
       } else {
-        this.onUpdateGroup(status, newValue);
+        this.onUpdateStatus(status, newValue);
       }
     } else {
       if (this.clearTimeoutvalue) {
@@ -275,22 +275,22 @@ export default class StatusSettingsPanel extends React.Component<IStatusSettings
     }
   }
 
-  public onAddGroup(group: IStatus, title: string) {
+  public onAddStatus(status: IStatus, title: string) {
     if (this.clearTimeoutvalue) {
       clearTimeout(this.clearTimeoutvalue);
     }
     this.clearTimeoutvalue = setTimeout(() => {
       this.forceUpdate();
       let statuses = _.cloneDeep(this.state.status);
-      let newlyCreatedStatus = _.cloneDeep(statuses.filter(g => g.GUID === group.GUID)[0]);
+      let newlyCreatedStatus = _.cloneDeep(statuses.filter(g => g.GUID === status.GUID)[0]);
       newlyCreatedStatus.Title = title;
       this.dataProvider.insertStatusItem(this.statusListName, newlyCreatedStatus)
-        .then((newGroup) => {
-          newGroup.isExisting = false;
-          newGroup.isSaving = false;
+        .then((newStatus) => {
+          newStatus.isExisting = false;
+          newStatus.isSaving = false;
           statuses = statuses.map(g => {
-            if (g.GUID === group.GUID) {
-              return newGroup;
+            if (g.GUID === status.GUID) {
+              return newStatus;
             }
             g.isSaving = false;
             return g;
@@ -311,7 +311,7 @@ export default class StatusSettingsPanel extends React.Component<IStatusSettings
     }, 1000);
   }
 
-  public onUpdateGroup(status: IStatus, title: string) {
+  public onUpdateStatus(status: IStatus, title: string) {
     const { saveError, updateSuccess } = TaskListConstants.errorMessages;
     if (this.clearTimeoutvalue) {
       clearTimeout(this.clearTimeoutvalue);
@@ -379,9 +379,9 @@ export default class StatusSettingsPanel extends React.Component<IStatusSettings
     const destinationStatus = statuses[destinationIndex < sourceIndex ? destinationIndex : destinationIndex + 1];
 
     if (destinationStatus) {
-      sourceStatus.SortOrder = this.calculateGroupSort(statuses, _.findIndex(statuses, g => g.GUID === destinationStatus.GUID));
+      sourceStatus.SortOrder = this.calculateStatusSort(statuses, _.findIndex(statuses, g => g.GUID === destinationStatus.GUID));
     } else {
-      sourceStatus.SortOrder = this.calculateGroupSort(statuses, statuses.length);
+      sourceStatus.SortOrder = this.calculateStatusSort(statuses, statuses.length);
     }
 
     this.setState({
@@ -421,7 +421,7 @@ export default class StatusSettingsPanel extends React.Component<IStatusSettings
       });
   }
 
-  private calculateGroupSort(status: IStatus[], newIndex: number): number {
+  private calculateStatusSort(status: IStatus[], newIndex: number): number {
     if (newIndex === 0) { // at first position
       if (status.length > 0) {
         let newSortIndex = 1.00000000000;
@@ -493,11 +493,11 @@ export default class StatusSettingsPanel extends React.Component<IStatusSettings
     let statuses = _.cloneDeep(this.state.status);
     status.FontColor = null;
     status.FillColor = null;
-    const isGroupAlreadyPresent = statuses.filter(s => s.Title.toLowerCase() === status.Title.toLowerCase()).length > 0;
+    const isStatusAlreadyPresent = statuses.filter(s => s.Title.toLowerCase() === status.Title.toLowerCase()).length > 0;
     if (status.ID) {
-      if (isGroupAlreadyPresent) {
+      if (isStatusAlreadyPresent) {
         console.log("Status Title", status.Title);
-        this.onUpdateGroup(status, status.Title);
+        this.onUpdateStatus(status, status.Title);
       }
       else {
         this.onChangeStatusTitle(status.Title, status);
@@ -518,7 +518,7 @@ export default class StatusSettingsPanel extends React.Component<IStatusSettings
       dialogContentProps={{
         type: DialogType.normal,
         title: 'Delete not allowed',
-        subText: TaskListConstants.preventGroupDeletionText
+        subText: TaskListConstants.preventStatusDeletionText
       }}
       modalProps={{
         isBlocking: false,
@@ -616,7 +616,7 @@ export default class StatusSettingsPanel extends React.Component<IStatusSettings
                                     disabled={cStatus.Title.trim().length === 0 || statusType !== null}
                                     iconProps={{ iconName: 'Delete' }}
                                     title = "Delete"
-                                    onClick={() => { this.onDeleteGroup(cStatus); }}
+                                    onClick={() => { this.onDeleteStatus(cStatus); }}
                                   />) : null
                                 }
 
@@ -687,7 +687,6 @@ export default class StatusSettingsPanel extends React.Component<IStatusSettings
                 <div className={styles.statusTitle}>Status settings</div>
                 <div className={styles.verticalSeperator}></div>
               </div>
-              {preventDeletionDialog}
               {/* Disclaimer */}
               <div className={styles.disclaimer}>
                 <p>
@@ -715,13 +714,24 @@ export default class StatusSettingsPanel extends React.Component<IStatusSettings
               <div className={styles.statusTitle}>Status settings</div>
               <div className={styles.verticalSeperator}></div>
             </div>
-            {preventDeletionDialog}
             {/* Disclaimer */}
             <div className={styles.disclaimer}>
-              <p>
-                No data found
-                </p>
+              <p>Changes made to these settings take effect immediately.</p>
+              <p>Statuses with no assigned color use the color specified for responsible party.</p>
             </div>
+
+              {/* Add Button */}
+              <div className={styles.addBtn}>
+                <PrimaryButton
+                  data-automation-id="test"
+                  text="Add Status"
+                  allowDisabledFocus={true}
+                  disabled={statusType !== null}
+                  onClick={this.onClickAdd.bind(this)}
+                  style={{ marginLeft: '15px' }}
+                />
+              </div>
+
           </div>
         </div>
       </Layer>
