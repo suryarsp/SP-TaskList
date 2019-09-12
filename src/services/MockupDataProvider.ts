@@ -12,39 +12,49 @@ export class MockupDataProvider implements IDataProvider {
     return new Promise<IGroup[]>(resolve =>
       resolve([
         {
-          SortOrder: 1,
-          ID: 1,
+          SortOrder : 1,
+          ID : 1,
           IsDefault: true,
           Title: "Group 1",
-          GUID: "1"
+          GUID: "1",
+          key:"Group 1",
+          text:"Group 1"
         },
         {
-          SortOrder: 2,
-          ID: 2,
+          SortOrder : 2,
+          ID : 2,
           IsDefault: false,
           Title: "Group 2",
-          GUID: "2"
+          GUID: "2",
+          key:"Group 2",
+          text:"Group 2"
         },
         {
-          SortOrder: 3,
-          ID: 3,
+          SortOrder : 3,
+          ID : 3,
           IsDefault: false,
           Title: "Group 3",
-          GUID: "3"
+          GUID: "3",
+          key:"Group 3",
+          text:"Group 3"
         },
         {
-          SortOrder: 4,
-          ID: 4,
+          SortOrder : 4,
+          ID : 4,
           IsDefault: false,
           Title: "Group 4",
-          GUID: "4"
+          GUID: "4",
+          key:"Group 4",
+          text:"Group 4"
         },
         {
-          SortOrder: 5,
-          ID: 5,
+          SortOrder : 5,
+          ID : 5,
           IsDefault: false,
           Title: "Group 5",
-          GUID: "5"
+          GUID: "5",
+          key:"Group 5",
+          text:"Group 5"
         }
       ])
     );
