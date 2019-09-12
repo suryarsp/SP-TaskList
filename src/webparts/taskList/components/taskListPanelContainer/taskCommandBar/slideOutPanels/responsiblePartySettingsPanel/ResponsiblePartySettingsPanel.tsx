@@ -145,8 +145,8 @@ export default class ResponsiblePartySettingsPanel extends React.Component<IResp
       Title: '',
       ID: null,
       GUID: (this.state.responsibles.length + 1).toString(),
-      FontColor: "",
-      FillColor: "",
+      FontColor: "#ffffff",
+      FillColor: "#000000",
       isNew: true
     };
     const responsibles = _.cloneDeep(this.state.responsibles);
@@ -173,9 +173,187 @@ export default class ResponsiblePartySettingsPanel extends React.Component<IResp
   }
 
   public onChangeFillColor(colorValue: string, responsible: IResponsibleParty) {
+    console.log("Fill Color : ", colorValue, responsible);
+    let responsibles = _.cloneDeep(this.state.responsibles);
+    responsible.FillColor = colorValue;
+    const isResponsibleAlreadyPresent = responsibles.filter(r => r.Title.toLowerCase() === responsible.Title.toLowerCase()).length > 0;
+    if (responsible.ID) {
+      if (isResponsibleAlreadyPresent) {
+        console.log("responsible Title", responsible.Title);
+        this.onUpdateResponsible(responsible, responsible.Title);
+      }
+      else {
+        this.onChangeResponsibleTitle(responsible.Title, responsible);
+      }
+    } else {
+      this.forceUpdate();
+    }
+
   }
 
   public onChangeFontColor(colorValue: string, responsible: IResponsibleParty) {
+    console.log("Font Color : ", colorValue, responsible);
+    let responsibles = _.cloneDeep(this.state.responsibles);
+    responsible.FontColor = colorValue;
+    const isResponsibleAlreadyPresent = responsibles.filter(r => r.Title.toLowerCase() === responsible.Title.toLowerCase()).length > 0;
+    if (responsible.ID) {
+      if (isResponsibleAlreadyPresent) {
+        console.log("Responsible Title", responsible.Title);
+        this.onUpdateResponsible(responsible, responsible.Title);
+      }
+      else {
+        this.onChangeResponsibleTitle(responsible.Title, responsible);
+      }
+    } else {
+      this.forceUpdate();
+    }
+  }
+
+  public onDeleteResponsible(responsible: IResponsibleParty) {
+    let responsibles = _.cloneDeep(this.state.responsibles);
+    const { deleteSuccess, deleteError } = TaskListConstants.errorMessages;
+    this.dataProvider.deleteItem(this.responsibleListName, responsible.ID)
+      .then((isDeleted) => {
+        if (isDeleted) {
+          let filterdResponsible = responsibles.filter(s => s.ID !== responsible.ID);
+          this.setState({
+            responsibles: filterdResponsible,
+            responsibleMessage: deleteSuccess,
+            responsibleType: ProgressStatusType.FAILURE
+          }, () => TaskDataProvider.responsibleParties = filterdResponsible);
+          this.resetResponsible();
+        } else {
+          this.setState({
+            responsibles: responsibles,
+            responsibleMessage: deleteError,
+            responsibleType: ProgressStatusType.FAILURE
+          });
+        }
+      }).catch(() => {
+        this.setState({
+          responsibles: responsibles,
+          responsibleMessage: deleteError,
+          responsibleType: ProgressStatusType.FAILURE
+        });
+      });
+  }
+
+  public onChangeResponsibleTitle(newValue: string, responsible: IResponsibleParty) {
+    let responsibles = _.cloneDeep(this.state.responsibles);
+    responsible.Title = newValue;
+    responsible.isSaving = true;
+    const isResponsibleAlreadyPresent = responsibles.filter(s => s.Title.toLowerCase() === newValue.toLowerCase()).length > 0;
+    if (!isResponsibleAlreadyPresent) {
+      if (responsible.isNew) {
+        this.onAddResponsible(responsible, newValue);
+      } else {
+        this.onUpdateResponsible(responsible, newValue);
+      }
+    } else {
+      if (this.clearTimeoutvalue) {
+        clearTimeout(this.clearTimeoutvalue);
+      }
+      responsibles = responsibles.map(s => {
+        if (s.GUID === responsible.GUID) {
+          s.Title = newValue;
+          s.isExisting = true;
+        } else {
+          s.isExisting = false;
+        }
+        return s;
+      });
+      this.clearTimeoutvalue = setTimeout(() => {
+        this.setState({
+          responsibles: responsibles,
+          responsibleMessage: '',
+          responsibleType: null
+        });
+      }, 1000);
+    }
+  }
+
+  public onAddResponsible(responsible: IResponsibleParty, title: string) {
+    if (this.clearTimeoutvalue) {
+      clearTimeout(this.clearTimeoutvalue);
+    }
+    this.clearTimeoutvalue = setTimeout(() => {
+      this.forceUpdate();
+      let responsibles = _.cloneDeep(this.state.responsibles);
+      let newlyCreatedResponsible = _.cloneDeep(responsibles.filter(g => g.GUID === responsible.GUID)[0]);
+      newlyCreatedResponsible.Title = title;
+      this.dataProvider.insertResponsibleItem(this.responsibleListName, newlyCreatedResponsible)
+        .then((newResponsible) => {
+          newResponsible.isExisting = false;
+          newResponsible.isSaving = false;
+          responsibles = responsibles.map(g => {
+            if (g.GUID === responsible.GUID) {
+              return newResponsible;
+            }
+            g.isSaving = false;
+            return g;
+          });
+          this.setState({
+            responsibles: responsibles,
+            responsibleMessage: TaskListConstants.errorMessages.saveSuccess,
+            responsibleType: ProgressStatusType.SUCCESS
+          });
+          this.resetResponsible();
+        }).catch(() => {
+          this.setState({
+            responsibles: responsibles,
+            responsibleMessage: TaskListConstants.errorMessages.saveError,
+            responsibleType: ProgressStatusType.FAILURE
+          });
+        });
+    }, 1000);
+  }
+
+  public onUpdateResponsible(responsible: IResponsibleParty, title: string) {
+    const { saveError, updateSuccess } = TaskListConstants.errorMessages;
+    if (this.clearTimeoutvalue) {
+      clearTimeout(this.clearTimeoutvalue);
+    }
+    this.clearTimeoutvalue = setTimeout(() => {
+      this.forceUpdate();
+      let responsibles = _.cloneDeep(this.state.responsibles);
+      let updatedResponsible = responsibles.filter(g => g.ID === responsible.ID)[0];
+      updatedResponsible.Title = title;
+      updatedResponsible.isSaving = false;
+      this.dataProvider.updateResponsibleItem(this.responsibleListName, updatedResponsible.ID, updatedResponsible)
+        .then((isUpdated) => {
+          if (isUpdated) {
+            updatedResponsible.isExisting = false;
+            responsibles = responsibles.map(s => {
+              if (s.ID === responsible.ID) {
+                return updatedResponsible;
+              }
+              s.isSaving = false;
+              return s;
+            });
+            this.setState({
+              responsibles: responsibles,
+              responsibleMessage: updateSuccess,
+              responsibleType: ProgressStatusType.SUCCESS
+            }, () => {
+              TaskDataProvider.responsibleParties = responsibles;
+            });
+            this.resetResponsible();
+          } else {
+            this.setState({
+              responsibles: responsibles,
+              responsibleMessage: saveError,
+              responsibleType: ProgressStatusType.FAILURE
+            });
+          }
+        }).catch((error) => {
+          this.setState({
+            responsibles: responsibles,
+            responsibleMessage: saveError,
+            responsibleType: ProgressStatusType.FAILURE
+          });
+        });
+
+    }, 1000);
   }
 
 
@@ -188,7 +366,7 @@ export default class ResponsiblePartySettingsPanel extends React.Component<IResp
       dialogContentProps={{
         type: DialogType.normal,
         title: 'Delete not allowed',
-        subText: TaskListConstants.preventGroupDeletionText
+        subText: TaskListConstants.preventResponsibleDeletionText
       }}
       modalProps={{
         isBlocking: false,
@@ -236,7 +414,7 @@ export default class ResponsiblePartySettingsPanel extends React.Component<IResp
                                 backgroundColor: cResponsible.FillColor
                               }}
                               autoFocus={true}
-                              // onChange={(e, newValue) => { this.onChangeStatusTitle(newValue, cResponsible); }}
+                               onChange={(e, newValue) => { this.onChangeResponsibleTitle(newValue, cResponsible); }}
                               errorMessage={cResponsible.isExisting ? "Value already exists" : ""}
                             />
                             {
@@ -260,7 +438,7 @@ export default class ResponsiblePartySettingsPanel extends React.Component<IResp
                                 disabled={cResponsible.Title.trim().length === 0 || responsibleType !== null}
                                 iconProps={{ iconName: 'Delete' }}
                                 title="Delete"
-                              //onClick={() => { this.onDeleteGroup(cResponsible); }}
+                                onClick={() => { this.onDeleteResponsible(cResponsible); }}
                               />) : null
                             }
                             {!cResponsible.ID ? <IconButton iconProps={{ iconName: 'Cancel' }} onClick={(e) => { this.onClickCancel(cResponsible); }} /> : null}
@@ -313,7 +491,6 @@ export default class ResponsiblePartySettingsPanel extends React.Component<IResp
                   <div className={styles.responsibleTitle}>Responsible settings</div>
                   <div className={styles.verticalSeperator}></div>
                 </div>
-                {preventDeletionDialog}
                 {/* Disclaimer */}
                 <div className={styles.disclaimer}>
                   <p>
@@ -340,13 +517,23 @@ export default class ResponsiblePartySettingsPanel extends React.Component<IResp
                 <div className={styles.responsibleTitle}>Responsible settings</div>
                 <div className={styles.verticalSeperator}></div>
               </div>
-              {preventDeletionDialog}
               {/* Disclaimer */}
               <div className={styles.disclaimer}>
-                <p>
-                  No data found
-                </p>
+                <p>Changes made to these settings take effect immediately.</p>
+                <p>Statuses with no assigned color use the color specified for responsible party.</p>
               </div>
+
+                  {/* Add Button */}
+                  <div className={styles.addBtn}>
+                  <PrimaryButton
+                    data-automation-id="test"
+                    text="Add Responsible Party"
+                    allowDisabledFocus={true}
+                    disabled={responsibleType !== null}
+                    onClick={this.onClickAdd.bind(this)}
+                    style={{ marginLeft: '15px' }}
+                  />
+                </div>
             </div>
           </div>
         </Layer>

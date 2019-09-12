@@ -9,6 +9,8 @@ export const TaskListConstants :
    expandByValues: IPropertyPaneDropdownOption[];
    groupViewTypes: {[key: string]: string},
    preventGroupDeletionText: string,
+   preventStatusDeletionText: string,
+   preventResponsibleDeletionText: string,
    errorMessages : {
      saveProgress: string,
      saveSuccess: string,
@@ -60,6 +62,8 @@ export const TaskListConstants :
       tab : 'tab'
     },
     preventGroupDeletionText: "This group has categories associated with it.You must remove the relationship between the group",
+    preventStatusDeletionText: "This status has categories associated with it.You must remove the relationship between the status",
+    preventResponsibleDeletionText: "This responsible has categories associated with it.You must remove the relationship between the responsible",
     errorMessages: {
       saveProgress: "Saving...",
       saveSuccess: "Saved successfully",
