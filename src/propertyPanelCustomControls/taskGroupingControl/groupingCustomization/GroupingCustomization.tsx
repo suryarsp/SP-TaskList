@@ -117,7 +117,9 @@ export default class GroupingCustomization extends React.Component<IGroupingCust
             const defaultGroup: IGroup = {
               Title:"All tasks group",
               SortOrder : 1.00000000001,
-              IsDefault:true
+              IsDefault:true,
+              key:"All tasks group",
+              text:"All tasks group"
             };
             this.dataProvider.insertGroupItem(this.state.groupListName,defaultGroup)
             .then((insertGroupItem) => {

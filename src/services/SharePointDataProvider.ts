@@ -167,17 +167,19 @@ export class SharePointDataProvider implements IDataProvider {
       web.lists.configure(this.configOptions).getByTitle(listname).items.select("Title", "ID", "SortOrder", "IsDefault", "GUID").top(5000).get().then((groupitems: IGroup[]) => {
         console.log("Group : ", groupitems);
         console.log("Group JSON : ", JSON.stringify(groupitems));
-        groupitems.forEach(element => {
-          let items: IGroup = {
+        groupitems.map(element => {
+          let item: IGroup = {
             ID: element.ID,
             IsDefault: element.IsDefault,
             Title: element.Title ? element.Title:"",
             SortOrder: element.SortOrder,
-            GUID: element.GUID
+            GUID: element.GUID,
+            key: element.Title ? element.Title: "",
+            text: element.Title ? element.Title: ""
           };
-          GroupListColl.push(items);
-          resolve(GroupListColl);
+          GroupListColl.push(item);
         });
+        resolve(GroupListColl);
       });
     });
   }
@@ -243,8 +245,8 @@ export class SharePointDataProvider implements IDataProvider {
             Parent: element.Parent,
             children: [],
             key: element.ID.toString(),
-            text: element.Title,
-            GUID: element.GUID
+            text: element.Title ? element.Title :"",
+            GUID: element.Title ? element.Title :""
           };
           CategoryListColl.push(items);
           resolve(CategoryListColl);
@@ -288,7 +290,9 @@ export class SharePointDataProvider implements IDataProvider {
             SortOrder: inserttask.data.SortOrder,
             ID: inserttask.data.ID,
             IsDefault: inserttask.data.IsDefault,
-            GUID: inserttask.data.GUID
+            GUID: inserttask.data.GUID,
+            key: inserttask.data.Title,
+            text: inserttask.data.Title
           };
           response(item);
         }
