@@ -101,7 +101,16 @@ export default class GroupingCustomization extends React.Component<IGroupingCust
           showWarning: true
         });
       } else {
-        this.onClearGroupData();
+        if(this.state.isListPresent) {
+          this.onClearGroupData();
+        } else {
+          this.setState({
+            isGroupingEnabled: false
+          });
+          this.props.onEnableOrDisableGroup(false);
+          this.props.onEnableOrDisableUniqueCategory(false);
+        }
+
       }
     }
   }
@@ -328,6 +337,8 @@ export default class GroupingCustomization extends React.Component<IGroupingCust
           onChange={(e, checked) => this.enableOrDisableGroup(checked)} />
       );
     }
+  } else {
+    return null;
   }
 }
 }

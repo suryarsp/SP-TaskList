@@ -5,8 +5,6 @@ import { SearchBox } from 'office-ui-fabric-react/lib/SearchBox';
 import { ITaskFilterProps,ITaskFilterState, IDataProvider, IGroup } from '../../../../../interfaces/index'; 
 import _ from 'lodash';
 import {  css } from 'office-ui-fabric-react';
-require("../../../../../styles/main.css");
-
 const dropdownStyles: Partial<IDropdownStyles> = {
     dropdown: { width: 300 }
   };
@@ -55,8 +53,8 @@ export default class TaskFilter extends React.Component<ITaskFilterProps ,ITaskF
       return (
         <div className={css("ms-Fabric")}>                
             <div className={css("ms-Grid")}>    
-            <div className={css("ms-Grid-row")} style={{marginBottom:'10px'}}>
-                <div className={css("ms-Grid-col ms-sm2")} >
+                  <div className={css("ms-Grid-row") } style={{ marginBottom: '10px' }}>
+                      <div className={css("ms-Grid-col ms-sm2") } >
                     <Dropdown  
                         label="Task Group"
                         options={groups} 
@@ -64,13 +62,14 @@ export default class TaskFilter extends React.Component<ITaskFilterProps ,ITaskF
                         //styles={dropdownStyles} 
                     /> 
                 </div>
-                <div className={css("ms-Grid-col ms-sm3")} style={{marginTop:'29px',borderRadius:'5px'}}>
+                      <div className={css("ms-Grid-col ms-sm3") } style={{ marginTop: '29px', borderRadius: '5px' }}>
                     <SearchBox
                         placeholder="Search"
-                        value={searchedValue}                        
+                        value={searchedValue}
+                        style={{ borderRadius: '20px' }}
+                        //style={{padding: '20px'}}
                         onClear = {this.onClearSearchText.bind(this)}
                         onChange={this.onChangeSearch.bind(this)}
-                        style={{borderRadius:'20px'}}
                     />
                 </div>
             </div>

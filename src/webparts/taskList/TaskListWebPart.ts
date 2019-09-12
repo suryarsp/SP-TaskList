@@ -67,14 +67,17 @@ export default class TaskListWebPart extends BaseClientSideWebPart<ITaskListWebP
 
   public onEnableOrDisableGroup(checked: boolean) {
     this.properties.isGroupingEnabled = checked;
+    this.render();
   }
 
   public onEanbleOrDisableUniqueCategory(checked: boolean) {
     this.properties.isCategoryUniqueEnabled = checked;
+    TaskDataProvider.isCategoryUniqueEnabled = checked;
   }
 
   public onChangeGroupView(type: string) {
     this.properties.selectedViewType = type;
+    this.render();
   }
 
   public onChangeGroupListName(value: string) {

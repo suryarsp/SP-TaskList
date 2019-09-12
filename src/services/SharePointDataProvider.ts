@@ -168,7 +168,7 @@ export class SharePointDataProvider implements IDataProvider {
         console.log("Group : ", groupitems);
         console.log("Group JSON : ", JSON.stringify(groupitems));
         groupitems.map(element => {
-          let item: IGroup = {
+          let items: IGroup = {
             ID: element.ID,
             IsDefault: element.IsDefault,
             Title: element.Title ? element.Title:"",
@@ -177,7 +177,7 @@ export class SharePointDataProvider implements IDataProvider {
             key: element.Title ? element.Title: "",
             text: element.Title ? element.Title: ""
           };
-          GroupListColl.push(item);
+          GroupListColl.push(items);
         });
         resolve(GroupListColl);
       });
@@ -191,7 +191,7 @@ export class SharePointDataProvider implements IDataProvider {
       web.lists.configure(this.configOptions).getByTitle(listname).items.select("Title", "ID", "FontColor", "FillColor", "GUID").top(5000).get().then((responsibleitems: IResponsibleParty[]) => {
         console.log("responsibleitems : ", responsibleitems);
         console.log("responsibleitems JSON : ", JSON.stringify(responsibleitems));
-        responsibleitems.forEach(element => {
+        responsibleitems.map(element => {
           let items: IResponsibleParty = {
             ID: element.ID,
             Title: element.Title ? element.Title : "",
@@ -200,8 +200,8 @@ export class SharePointDataProvider implements IDataProvider {
             GUID: element.GUID
           };
           ResponsibleListColl.push(items);
-          resolve(ResponsibleListColl);
         });
+        resolve(ResponsibleListColl);
       });
     });
   }
@@ -213,7 +213,7 @@ export class SharePointDataProvider implements IDataProvider {
       web.lists.configure(this.configOptions).getByTitle(listname).items.select("Title", "ID", "SortOrder", "FontColor", "FillColor", "GUID").top(5000).get().then((Statusitems: IStatus[]) => {
         console.log("Status : ", Statusitems);
         console.log("Status JSON : ", JSON.stringify(Statusitems));
-        Statusitems.forEach(element => {
+        Statusitems.map(element => {
           let items: IStatus = {
             ID: element.ID,
             FontColor: element.FontColor,
@@ -223,20 +223,27 @@ export class SharePointDataProvider implements IDataProvider {
             GUID: element.GUID
           };
           StatusitemsListColl.push(items);
-          resolve(StatusitemsListColl);
         });
+        resolve(StatusitemsListColl);
       });
     });
   }
 
   public getCategories(listname: string): Promise<ICategory[]> {
+
+    let selectItem = ["Title", "ID", "SortOrder", "Parent/Title", "Parent/Id", "GUID"];
+    let expandItem = ["Parent"];
+    if(TaskDataProvider.listNames.groupListName) {
+      selectItem.push("Group/Title", "Group/Id");
+      expandItem.push("Group");
+    }
     let web: Web = new Web(this._absoluteUrl);
     let CategoryListColl: ICategory[] = [];
     return new Promise<ICategory[]>(resolve => {
-      web.lists.configure(this.configOptions).getByTitle(listname).items.select("Title", "ID", "SortOrder", "Parent/Title", "Parent/Id", "Group/Title", "Group/Id", "GUID").expand("Parent", "Group").top(5000).get().then((categoryitems: ICategory[]) => {
+      web.lists.configure(this.configOptions).getByTitle(listname).items.select(selectItem.toString()).expand(expandItem.toString()).top(5000).get().then((categoryitems: ICategory[]) => {
         console.log("category : ", categoryitems);
         console.log("category JSON : ", JSON.stringify(categoryitems));
-        categoryitems.forEach(element => {
+        categoryitems.map(element => {
           let items: ICategory = {
             ID: element.ID,
             Title: element.Title ? element.Title :"",
@@ -249,8 +256,8 @@ export class SharePointDataProvider implements IDataProvider {
             GUID: element.Title ? element.Title :""
           };
           CategoryListColl.push(items);
-          resolve(CategoryListColl);
         });
+        resolve(CategoryListColl);
       });
     });
   }
@@ -262,14 +269,14 @@ export class SharePointDataProvider implements IDataProvider {
       web.lists.configure(this.configOptions).getByTitle(listname).fields.get().then((taskField: IColumn[]) => {
         console.log("Task List Field : ", taskField);
         console.log("Task List Field JSON : ", JSON.stringify(taskField));
-        taskField.forEach(element => {
+        taskField.map(element => {
           let fields: IColumn = {
             key: element["InternalName"],
             text: element["Title"]
           };
           taskFieldsColl.push(fields);
-          resolve(taskFieldsColl);
         });
+        resolve(taskFieldsColl);
       });
     });
   }
@@ -451,28 +458,28 @@ export class SharePointDataProvider implements IDataProvider {
 
   //Category list method start
 
-  public insertCategoryItem(listName: string, items: ICategory): Promise<ICategory> {
+  public insertCategoryItem(listName: string, item: ICategory): Promise<ICategory> {
     let obj = {};
-    if(items.Group && items.Parent){
-      obj["Title"] = items.Title;
-      obj["SortOrder"] = items.SortOrder;
-      obj["ParentId"] = items.Parent.Id;
-      obj["GroupId"] = items.Group.Id;
+    if(item.Group && item.Parent){
+      obj["Title"] = item.Title;
+      obj["SortOrder"] = item.SortOrder;
+      obj["ParentId"] = item.Parent.Id;
+      obj["GroupId"] = item.Group.Id;
     }
-    if(items.Group)
+    if(item.Group)
     {
-      obj["Title"] = items.Title;
-      obj["SortOrder"] = items.SortOrder;
-      obj["GroupId"] = items.Group.Id;
+      obj["Title"] = item.Title;
+      obj["SortOrder"] = item.SortOrder;
+      obj["GroupId"] = item.Group.Id;
     }
-    else if(items.Parent){
-      obj["Title"] = items.Title;
-      obj["SortOrder"] = items.SortOrder;
-      obj["ParentId"] = items.Parent.Id;
+    else if(item.Parent){
+      obj["Title"] = item.Title;
+      obj["SortOrder"] = item.SortOrder;
+      obj["ParentId"] = item.Parent.Id;
     }
     else{
-      obj["Title"] = items.Title;
-      obj["SortOrder"] = items.SortOrder;
+      obj["Title"] = item.Title;
+      obj["SortOrder"] = item.SortOrder;
     }
 
     console.log(obj);
@@ -481,7 +488,7 @@ export class SharePointDataProvider implements IDataProvider {
       this.web.lists.configure(this.configOptions).getByTitle(listName).items.add(obj).then(insertCategory => {
         if (insertCategory) {
           console.log("Insert category item : ", insertCategory);
-          let item: ICategory = {
+          let category : ICategory = {
             Title: insertCategory.data.Title,
             SortOrder: insertCategory.data.SortOrder,
             Group: insertCategory.data.Group,
@@ -492,7 +499,7 @@ export class SharePointDataProvider implements IDataProvider {
             key: insertCategory.data.ID,
             text: insertCategory.data.Title
           };
-          response(item);
+          response(category);
         }
         else {
           response(null);

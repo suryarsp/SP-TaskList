@@ -1,21 +1,17 @@
 import * as React from 'react';
 import styles from './TaskList.module.scss';
 import { ITaskListProps } from '../../../interfaces/components/ITaskListProps';
-import { escape } from '@microsoft/sp-lodash-subset';
 import { ITaskListState, IDataProvider } from '../../../interfaces/index';
 
 import TaskDataProvider from '../../../services/TaskDataProvider';
-import { ListDetailsConstants } from '../../../common/defaults/listView-constants';
 import { Spinner, SpinnerSize } from 'office-ui-fabric-react';
 import TaskInProgressPieChart from '../components/header/taskInProgressPieChart/TaskInProgressPieChart';
 import TaskFilter from '../components/header/taskFilter/TaskFilter';
 
-import { TaskListConstants } from '../../../common/defaults/taskList-constants';
-import { chartDataConstant} from '../../../common/defaults/chartData-constants';
 import TaskListPanelContainer from '../components/taskListPanelContainer/TaskListPanelContainer';
+import { ChartDataConstant } from '../../../common/defaults/chartData-constants';
 export default class TaskList extends React.Component<ITaskListProps, ITaskListState> {
   private dataProvider: IDataProvider;
-  private listName: string;
 
   constructor(props) {
     super(props);
@@ -117,15 +113,15 @@ export default class TaskList extends React.Component<ITaskListProps, ITaskListS
  } else {
     return (
       <div className={styles.taskListWrapper}>
-        <div className="responsiblePartyDoughnutChart">
-          <TaskInProgressPieChart
-            chartData = {chartDataConstant.chartData}
-          />
-        </div>        
+        <TaskInProgressPieChart
+                chartData = {ChartDataConstant.chartData}
+        />
         <div style={{padding: '5px'}}>
             <TaskFilter/>
         </div>
-        <TaskListPanelContainer/>
+        <TaskListPanelContainer
+        uniqueToGroupEnabled =  { this.props.isCategoryUniqueEnabled }
+        />
       </div>
     );
   }

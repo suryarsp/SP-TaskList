@@ -8,9 +8,10 @@ export default class TaskInProgressPieChart extends React.Component< ITaskInProg
     super(props); 
   }
  
+
   public render(): React.ReactElement<ITaskInProgressPieChartProps> {
     return (
-      <div>        
+      <div>
         <Doughnut 
             data={this.props.chartData} 
             width={75} 

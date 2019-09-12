@@ -5,4 +5,5 @@ export interface ITaskCommandBarProps {
   totalItemCount: number;
   isAllItemsSelected: boolean;
   selectedCount: number;
+  uniqueToGroupEnabled: boolean;
 }

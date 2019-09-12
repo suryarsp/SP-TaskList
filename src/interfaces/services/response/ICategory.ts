@@ -1,19 +1,26 @@
 export interface ICategory {
-  Group?: GroupOrParentCategory;
   Title: string;
   SortOrder: number;
-  ID?: number;
-  GUID?:string;
-  children : ICategory[];
-  Parent?: GroupOrParentCategory;
   key : string;
   text : string;
+  children : ICategory[];
+  Group?: Group;
   isExisting?: boolean;
+  ID?: number;
+  GUID?:string;
+  Parent?: Group | Category;
+  isNew ?: boolean;
+  isSaving ?: boolean;
 }
 
 
 
-export interface GroupOrParentCategory {
+interface Group {
+  Title: string;
+  Id: number;
+}
+
+interface Category {
   Title: string;
   Id: number;
 }

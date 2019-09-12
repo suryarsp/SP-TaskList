@@ -12,6 +12,7 @@ export default class TaskListPanelContainer extends React.Component< ITaskListPa
       onClickDelete={this.onClickDelete.bind(this)}
       onRefreshPage={this.onRefreshPage.bind(this)}
       totalItemCount={0}
+      uniqueToGroupEnabled = { this.props.uniqueToGroupEnabled }
     />
     );
   }
