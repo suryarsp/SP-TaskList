@@ -157,7 +157,8 @@ export default class CategorySettingsPanel extends React.Component<ICategorySett
   }
 
   public onChangeCategoryTitle(newValue: string, category: ICategory) {
-    let categories = _.cloneDeep(this.state.categories);
+    const { isUniqueToGroupChecked } = this.state;
+    let categories = isUniqueToGroupChecked ? _.cloneDeep(this.state.allCategories) :  _.cloneDeep(this.state.categories);
     category.Title = newValue;
     category.isSaving = true;
     const isCategoryAlreadyPresent = categories.filter(g => g.Title.toLowerCase() === newValue.toLowerCase()).length > 0;
