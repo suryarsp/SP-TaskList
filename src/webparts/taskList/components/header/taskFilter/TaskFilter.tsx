@@ -5,6 +5,8 @@ import { SearchBox } from 'office-ui-fabric-react/lib/SearchBox';
 import { ITaskFilterProps,ITaskFilterState, IDataProvider, IGroup } from '../../../../../interfaces/index'; 
 import _ from 'lodash';
 import {  css } from 'office-ui-fabric-react';
+require("../../../../../styles/main.css");
+
 const dropdownStyles: Partial<IDropdownStyles> = {
     dropdown: { width: 300 }
   };
@@ -62,7 +64,7 @@ export default class TaskFilter extends React.Component<ITaskFilterProps ,ITaskF
                         //styles={dropdownStyles} 
                     /> 
                 </div>
-                      <div className={css("ms-Grid-col ms-sm3") } style={{ marginTop: '29px', borderRadius: '5px' }}>
+                    <div className={css("ms-Grid-col ms-sm3") } style={{ marginTop: '29px', borderRadius: '5px' }}>
                     <SearchBox
                         placeholder="Search"
                         value={searchedValue}
