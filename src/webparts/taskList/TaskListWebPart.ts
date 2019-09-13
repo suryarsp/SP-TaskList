@@ -201,6 +201,7 @@ export default class TaskListWebPart extends BaseClientSideWebPart<ITaskListWebP
                 PropertyPaneDropdown('defaultExpand', {
                   label: 'Default expanded by',
                   options: TaskListConstants.expandByValues,
+                  selectedKey: this.properties.isGroupingEnabled ? "Group" : "Category"
                 }),
 
                 PropertyPaneLabel("Blank", {

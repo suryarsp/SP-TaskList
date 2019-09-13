@@ -253,7 +253,7 @@ export class SharePointDataProvider implements IDataProvider {
             children: [],
             key: element.ID.toString(),
             text: element.Title ? element.Title :"",
-            GUID: element.Title ? element.Title :""
+            GUID: element.GUID
           };
           CategoryListColl.push(items);
         });
@@ -491,7 +491,9 @@ export class SharePointDataProvider implements IDataProvider {
           let category : ICategory = {
             Title: insertCategory.data.Title,
             SortOrder: insertCategory.data.SortOrder,
-            Group: insertCategory.data.Group,
+            Group: {
+              Id:insertCategory.data.GroupId
+            },
             Parent: insertCategory.data.Parent,
             ID: insertCategory.data.ID,
             GUID: insertCategory.data.GUID,
@@ -516,8 +518,8 @@ export class SharePointDataProvider implements IDataProvider {
       this.web.lists.configure(this.configOptions).getByTitle(listName).items.getById(itemId).update({
         Title: items.Title,
         SortOrder: items.SortOrder,
-        GroupId: items.Group.Id,
-        ParentId: items.Parent.Id
+        GroupId:  items.Group ? items.Group.Id : null,
+        ParentId: items.Parent ? items.Parent.Id : null
       }).then(updateCategory => {
         if (updateCategory) {
           console.log("Update category item : ", updateCategory);

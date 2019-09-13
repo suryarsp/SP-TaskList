@@ -9,6 +9,7 @@ export const TaskListConstants :
    expandByValues: IPropertyPaneDropdownOption[];
    groupViewTypes: {[key: string]: string},
    preventGroupDeletionText: string,
+   preventCategoryDeletionText: string;
    preventStatusDeletionText: string,
    preventResponsibleDeletionText: string,
    errorMessages : {
@@ -22,7 +23,7 @@ export const TaskListConstants :
      sortError: string
     },
     chartData: IDoughnutChartData,
-    
+
   } =
    {
     columns : [
@@ -62,6 +63,7 @@ export const TaskListConstants :
       tab : 'tab'
     },
     preventGroupDeletionText: "This group has categories associated with it.You must remove the relationship between the group",
+    preventCategoryDeletionText: "This category has sub categories associated with it.You must remove the relationship between the category",
     preventStatusDeletionText: "This status has categories associated with it.You must remove the relationship between the status",
     preventResponsibleDeletionText: "This responsible has categories associated with it.You must remove the relationship between the responsible",
     errorMessages: {
