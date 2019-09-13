@@ -7,7 +7,7 @@ import { TextField } from "office-ui-fabric-react/lib/TextField";
 import { PrimaryButton, DefaultButton } from "office-ui-fabric-react/lib/Button";
 import { Spinner, SpinnerSize } from "office-ui-fabric-react/lib/Spinner";
 import Dialog, { DialogFooter, DialogType } from "office-ui-fabric-react/lib/Dialog";
-import styles from "../../../webparts/taskList/components/header/taskProgressGraph/TaskProgressGraph.module.scss";
+import styles from "../../../webparts/taskList/components/header/statusBarChart/TaskProgressGraph.module.scss";
 import TaskDataProvider from "../../../services/TaskDataProvider";
 
 export default class GroupingCustomization extends React.Component<IGroupingCustomizationProps, IGroupingCustomizationState

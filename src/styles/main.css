@@ -8,3 +8,7 @@
 .ms-SearchBox {
   border-radius: 20px;
 }
+
+.apexcharts-grid {
+  display: none;
+}
