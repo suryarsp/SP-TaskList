@@ -2,36 +2,42 @@ export interface ITaskList {
   Category: Category;
   TaskStatus: TaskStatus;
   Responsible: Responsible;
-  Group ?: Group;  
+  Group ?: Group;
   Title: string;
   SortOrder: number;
   Parent:ParentTask;
   ID ?: number;
   GUID ?: string;
+  Documents ?: Document[];
 }
 
-export interface Category {
+ interface Category {
   Id: number;
   Title?: string;
 }
 
-
-export interface ParentTask {
+ interface ParentTask {
   Id: number;
   Title?: string;
 }
 
-export interface TaskStatus{
+interface TaskStatus{
     Id:number;
     Title?:string;
 }
 
-export interface Responsible{
+ interface Responsible{
     Id:number;
     Title?:string;
 }
 
-export interface Group{
+ interface Group{
     Id:number;
     Title?:string;
+}
+
+
+interface Document {
+	Title: string;
+	ID: number;
 }
