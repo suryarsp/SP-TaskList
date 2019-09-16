@@ -1,3 +1,5 @@
+import { ISubTaskList } from "../..";
+
 export interface ITaskList {
   Category: Category;
   TaskStatus: TaskStatus;
@@ -9,35 +11,42 @@ export interface ITaskList {
   ID ?: number;
   GUID ?: string;
   Documents ?: Document[];
+  Comments?:Comments[];
+  CommentsId?:number[];
+  children : ISubTaskList[];
 }
 
- interface Category {
+export interface Comments{
+  Id:number[];
+}
+
+export interface Category {
   Id: number;
   Title?: string;
 }
 
- interface ParentTask {
+export interface ParentTask {
   Id: number;
   Title?: string;
 }
 
-interface TaskStatus{
+export interface TaskStatus{
     Id:number;
     Title?:string;
 }
 
- interface Responsible{
+export interface Responsible{
     Id:number;
     Title?:string;
 }
 
- interface Group{
+export interface Group{
     Id:number;
     Title?:string;
 }
 
 
-interface Document {
+export interface Document {
 	Title: string;
 	ID: number;
 }
