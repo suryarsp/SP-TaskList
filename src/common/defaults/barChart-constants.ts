@@ -68,7 +68,7 @@ export const barChartConstants:
             },
             itemMargin: {
               horizontal: 10,
-              vertical: 10
+              vertical: 5
             },
             onItemHover: {
                 highlightDataSeries: true

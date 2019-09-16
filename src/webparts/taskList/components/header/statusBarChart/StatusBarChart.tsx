@@ -26,10 +26,10 @@ export default class StatusBarChart extends React.Component< IStatusBarChartProp
   public render(): React.ReactElement<StatusBarChart> {
     return ( 
       <div>        
-        <div className={css("ms-Grid")}>
+        {/* <div className={css("ms-Grid")}>
           <div className={css("ms-Grid-row") } >
-          <div className={css("ms-Grid-col ms-sm12") } style={{padding:'0px'}} >
-            <h4>Progress</h4>
+          <div className={css("ms-Grid-col ms-sm12") } style={{padding:'0px'}} > */}
+          <div style={{marginLeft:'10px'}}><h4>Progress</h4></div>
               <Chart
                     options={this.state.optionalBars}
                     height={150}
@@ -38,9 +38,9 @@ export default class StatusBarChart extends React.Component< IStatusBarChartProp
                     width={950}
               />
             </div>
-          </div> 
-        </div>
-      </div>
+      //     </div> 
+      //   </div>
+      // </div>
     );
   }
 }

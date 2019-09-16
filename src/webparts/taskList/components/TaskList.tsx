@@ -75,6 +75,10 @@ export default class TaskList extends React.Component<ITaskListProps, ITaskListS
          });
 }
 
+public onClickDoughnutChart(party:string){
+  console.log(party);  
+}
+
   public render(): React.ReactElement<ITaskListProps> {
     if (this.state.isLoading) {
       return (
@@ -115,13 +119,13 @@ export default class TaskList extends React.Component<ITaskListProps, ITaskListS
     return (
       <div className={css("ms-Fabric",styles.taskListWrapper)}>
         <div className={css("ms-Grid")}>
-          <div className={css("ms-Grid-row")}>
+          <div className={css("ms-Grid-row")} >
             <div className={css("ms-Grid-col ms-sm6")}>
-              <div className="StatusBarChart">
+              <div className={styles.statusBarChart}>
                 <StatusBarChart/>
               </div>
-              
-              <div className="TaskFilter" style={{padding: '5px'}}>
+
+              <div className={styles.TaskFilter}>
                 <TaskFilter/>
               </div>
             </div>
@@ -132,6 +136,7 @@ export default class TaskList extends React.Component<ITaskListProps, ITaskListS
               <div className="TaskInProgressPieChart">
                 <TaskInProgressPieChart
                       chartData = {ChartDataConstant.chartData}
+                      onClickChartView={this.onClickDoughnutChart.bind(this)}
                 />
               </div>
             </div>
