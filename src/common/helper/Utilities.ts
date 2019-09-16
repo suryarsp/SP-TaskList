@@ -2,16 +2,17 @@ import { ICategory } from "../../interfaces";
 import _ from "lodash";
 
 export class Utilties {
-     public static Instance: Utilties;
-     constructor() {
+     public static instance: Utilties;
 
-     }
+     public constructor() {
 
-     public static getInstance() {
-          if (!Utilties.Instance) {
-               Utilties.Instance = new Utilties();
+    }
+
+     public static get Instance() {
+          if (!Utilties.instance) {
+               Utilties.instance = new Utilties();
           }
-          return Utilties.Instance;
+          return Utilties.instance;
      }
 
      /**
@@ -272,7 +273,7 @@ export class Utilties {
        let newCategories: ICategory[] = [];
        categories.map((category) => {
         if(category.Parent) {
-          const parentIndex = _.findIndex(categories, c => c.ID === category.Parent.Id);
+          const parentIndex = _.findIndex(newCategories, c => c.ID === category.Parent.Id);
           newCategories[parentIndex].children.push(category);
         } else {
           newCategories.push(category);

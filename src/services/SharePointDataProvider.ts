@@ -16,7 +16,7 @@ export class SharePointDataProvider implements IDataProvider {
   public _context: IWebPartContext;
   public _relativeUrl: string;
   public web: Web;
-  public utility = new Utilties();
+  public utilities : Utilties;
   public DocumentsColumnTitle: string = "Documents";
   public static globalFileDownloadIndex: number = 1;
   private groupListGUID: string;
@@ -38,6 +38,7 @@ export class SharePointDataProvider implements IDataProvider {
     this._context = context;
     this.web = new Web(this._absoluteUrl);
     this._relativeUrl = context.pageContext.web.serverRelativeUrl;
+    this.utilities = Utilties.Instance;
   }
 
 
@@ -300,7 +301,7 @@ export class SharePointDataProvider implements IDataProvider {
             Title: element.Title ? element.Title :"",
             SortOrder: element.SortOrder,
             Group: element.Group,
-            Parent: element.Parent,          
+            Parent: element.Parent,
             GUID: element.GUID,
             Category:element.Category,
             TaskStatus:element.TaskStatus,
@@ -1301,7 +1302,7 @@ export class SharePointDataProvider implements IDataProvider {
             resolve(this.uploadFileWithValidFolderPath(folderRelativePath, file));
           }
           else {
-            this.createFolderInDocument(libraryName, this.utility.GetLeafName(folderRelativePath))
+            this.createFolderInDocument(libraryName, this.utilities.GetLeafName(folderRelativePath))
               .then((folderCreationResult) => {
                 resolve(this.uploadFileWithValidFolderPath(folderRelativePath, file));
               });
@@ -1330,8 +1331,8 @@ export class SharePointDataProvider implements IDataProvider {
           });
       }
       else {
-        let fileName = this.utility.EscapeSpecialCharacters(file.name);
-        folderRelativePath = this.utility.EscapeSpecialCharacters(folderRelativePath);
+        let fileName = this.utilities.EscapeSpecialCharacters(file.name);
+        folderRelativePath = this.utilities.EscapeSpecialCharacters(folderRelativePath);
         this.web.getFolderByServerRelativePath(folderRelativePath)
           .select("ID")
           .files
@@ -1365,8 +1366,8 @@ export class SharePointDataProvider implements IDataProvider {
         let fileGuid = util.getGUID();
         let postUrl: string = webAbsoluteUrl
           + "/_api/web/GetFolderByServerRelativePath(DecodedUrl=@a1)/Files/AddStubUsingPath(DecodedUrl=@a2)/StartUpload(uploadId=@a3)?@a1='"
-          + this.utility.EscapeSpecialCharacters(webRelativeUrl + "/" + folderRelativePath) + "'&@a2='"
-          + this.utility.EscapeSpecialCharacters(file.name) + "'&@a3=guid'" + fileGuid + "'";
+          + this.utilities.EscapeSpecialCharacters(webRelativeUrl + "/" + folderRelativePath) + "'&@a2='"
+          + this.utilities.EscapeSpecialCharacters(file.name) + "'&@a3=guid'" + fileGuid + "'";
         const spOpts: ISPHttpClientOptions = {
           headers: {
             "Content-Type": "application/json;odata=verbose",
@@ -1395,7 +1396,7 @@ export class SharePointDataProvider implements IDataProvider {
     return new Promise<any>((resolve) => {
       let postUrl: string = webAbsoluteUrl
         + "/_api/web/GetFileByServerRelativePath(DecodedUrl=@a1)/FinishUpload(uploadId=@a2,fileOffset=@a3)?@a1='"
-        + this.utility.EscapeSpecialCharacters(webRelativeUrl + "/" + folderRelativePath + "/" + file.name) + "'&@a2='"
+        + this.utilities.EscapeSpecialCharacters(webRelativeUrl + "/" + folderRelativePath + "/" + file.name) + "'&@a2='"
         + guid + "'&@a3='" + responseJSON.d.StartUpload + "'";
       const spOpts: ISPHttpClientOptions = {
         headers: {
@@ -1443,7 +1444,7 @@ export class SharePointDataProvider implements IDataProvider {
       }
       let web = new Web(this._absoluteUrl);
       let path = url + "/" + file.name;
-      path = this.utility.EscapeSpecialCharacters(path);
+      path = this.utilities.EscapeSpecialCharacters(path);
       web.getFileByServerRelativePath(path).get().then((result: any) => {
         if (result) {
           resolve(true);
@@ -1462,7 +1463,7 @@ export class SharePointDataProvider implements IDataProvider {
   public getFilesFromSpecificFolder(folderRelativePath: string, item: any, libraryName: string): Promise<any[]> {
     return new Promise<any[]>((resolve) => {
       let url: string;
-      url = this.utility.EscapeSpecialCharacters(folderRelativePath);
+      url = this.utilities.EscapeSpecialCharacters(folderRelativePath);
       this.web.getFolderByServerRelativePath(url)
         .files
         .top(5000)
@@ -1568,8 +1569,8 @@ export class SharePointDataProvider implements IDataProvider {
   ): Promise<boolean> {
     return new Promise<boolean>((resolve) => {
       let web = new Web(this._absoluteUrl);
-      let parentFolderPath = this.utility.GetParentFolderPath(foldeRelativePath);
-      let folderName = this.utility.GetLeafName(foldeRelativePath);
+      let parentFolderPath = this.utilities.GetParentFolderPath(foldeRelativePath);
+      let folderName = this.utilities.GetLeafName(foldeRelativePath);
       let path = webRelativeUrl + "/" + parentFolderPath;
       web.lists.getByTitle(libraryname)
         .renderListDataAsStream({
@@ -1637,8 +1638,8 @@ export class SharePointDataProvider implements IDataProvider {
   ): Promise<boolean> {
     return new Promise<boolean>((resolve) => {
       let web = new Web(this._absoluteUrl);
-      let parentFolderPath = this.utility.GetParentFolderPath(foldeRelativePath[0]);
-      let folderName = this.utility.GetLeafName(foldeRelativePath[0]);
+      let parentFolderPath = this.utilities.GetParentFolderPath(foldeRelativePath[0]);
+      let folderName = this.utilities.GetLeafName(foldeRelativePath[0]);
       let path = webRelativeUrl + "/" + parentFolderPath;
       web.lists.getByTitle(libraryname)
         .renderListDataAsStream({
@@ -1665,8 +1666,8 @@ export class SharePointDataProvider implements IDataProvider {
                   let requests: Promise<IDownloadItems>[] = [];
 
                   foldeRelativePath.forEach((relPath) => {
-                    parentFolderPath = this.utility.GetParentFolderPath(relPath);
-                    folderName = this.utility.GetLeafName(relPath);
+                    parentFolderPath = this.utilities.GetParentFolderPath(relPath);
+                    folderName = this.utilities.GetLeafName(relPath);
                     path = webRelativeUrl + "/" + parentFolderPath;
                     requests.push(this.getDownloadItem(libraryname, relPath, webRelativeUrl));
                   });
@@ -1698,8 +1699,8 @@ export class SharePointDataProvider implements IDataProvider {
     pagingText?: string): Promise<IDownloadItems> {
     return new Promise<IDownloadItems>((resolve) => {
       let web = new Web(this._absoluteUrl);
-      let parentFolderPath = this.utility.GetParentFolderPath(foldeRelativePath);
-      let folderName = this.utility.GetLeafName(foldeRelativePath);
+      let parentFolderPath = this.utilities.GetParentFolderPath(foldeRelativePath);
+      let folderName = this.utilities.GetLeafName(foldeRelativePath);
       let path = webRelativeUrl + "/" + parentFolderPath;
       web.lists.getByTitle(libraryname)
         .renderListDataAsStream({
