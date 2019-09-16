@@ -41,7 +41,6 @@ export class SharePointDataProvider implements IDataProvider {
     this.utilities = Utilties.Instance;
   }
 
-
   public getPermissions(listTitle: string): Promise<{ permission: import("sp-pnp-js").PermissionKind; allowed: boolean; }[]> {
     return new Promise<IPermissions[]>((resolve) => {
       let web = new Web(this._absoluteUrl);
@@ -159,7 +158,6 @@ export class SharePointDataProvider implements IDataProvider {
       }
     });
   }
-
 
   public getGroups(listname: string): Promise<IGroup[]> {
     let web: Web = new Web(this._absoluteUrl);
@@ -319,6 +317,38 @@ export class SharePointDataProvider implements IDataProvider {
     });
   }
 
+  public getTaskListItemById(listName:string,itemId:number):Promise<ITaskList>{
+    let taskStatusName = this.utilities.GetFieldInteralName("Task Status");
+    let selectItem = ["Title", "ID", "SortOrder", "Parent/Title", "Parent/Id", "GUID","Comments/Id","Category/Id","Category/Title","Responsible/Id","Responsible/Title",taskStatusName+"/Id",taskStatusName+"/Title"];
+    let expandItem = ["Parent",taskStatusName,"Responsible","Category","Comments"];
+    if(TaskDataProvider.listNames.groupListName && TaskDataProvider.isGroupingEnabled) {
+      selectItem.push("Group/Title", "Group/Id");
+      expandItem.push("Group");
+    }
+    return new Promise<ITaskList>((resolve)=>{
+      this.web.lists.getByTitle(listName).items.getById(itemId).select(selectItem.toString()).expand(expandItem.toString()).get().then(taskresult=>{
+        console.log("Task List : ", taskresult);
+        console.log("Task List JSON : ", JSON.stringify(taskresult));        
+          let items: ITaskList = {
+            ID: taskresult.ID,
+            Title: taskresult.Title ? taskresult.Title :"",
+            SortOrder: taskresult.SortOrder,
+            Group: taskresult.Group,
+            Parent: taskresult.Parent,
+            GUID: taskresult.GUID,
+            Category:taskresult.Category,
+            TaskStatus:taskresult.taskStatusName,
+            Responsible:taskresult.Responsible,
+            Comments:taskresult.Comments ? taskresult.Comments : [],
+            children:[]
+          };         
+        resolve(items);
+      }).catch(error=>{
+        console.log("Get task list item error message :",error);
+        resolve(null);
+      });
+    });
+  }
 
   public insertTaskListItem(listName:string,taskItem:ITaskList):Promise<ITaskList>{
     return new Promise<ITaskList>((response)=>{
@@ -381,7 +411,6 @@ export class SharePointDataProvider implements IDataProvider {
     });
   }
 
-
   public updateTaskListItem(listName:string,taskItem:ITaskList,itemId:number):Promise<boolean>{
     return new Promise<boolean>((response)=>{
       let taskStatusName = this.utilities.GetFieldInteralName("Task Status");
@@ -419,8 +448,6 @@ export class SharePointDataProvider implements IDataProvider {
       });
     });
   }
-
-
 
   //Group List Methods start
   public insertGroupItem(listName: string, group: IGroup): Promise<IGroup> {
@@ -487,8 +514,6 @@ export class SharePointDataProvider implements IDataProvider {
       });
     });
   }
-
-
 
   //Status list methods start
   public insertStatusItem(listName: string, items: IStatus): Promise<IStatus> {
@@ -597,7 +622,6 @@ export class SharePointDataProvider implements IDataProvider {
   //Responsible list method end
 
   //Category list method start
-
   public insertCategoryItem(listName: string, item: ICategory): Promise<ICategory> {
     let obj = {};
     if(item.Group && item.Parent){
@@ -674,7 +698,6 @@ export class SharePointDataProvider implements IDataProvider {
       });
     });
   }
-
   //Category list method end
 
   //Comment list method start
@@ -704,7 +727,6 @@ export class SharePointDataProvider implements IDataProvider {
     });
   }
 
-
   public updateCommentItem(listName: string, itemId: number, items: IComment): Promise<boolean> {
     return new Promise<boolean>((response) => {
       this.web.lists.configure(this.configOptions).getByTitle(listName).items.getById(itemId).update({
@@ -725,8 +747,6 @@ export class SharePointDataProvider implements IDataProvider {
     });
   }
   //comment list method end
-
-
 
   //List Creation start
   public async groupListCreation(listName: string): Promise<boolean> {
@@ -1313,6 +1333,7 @@ export class SharePointDataProvider implements IDataProvider {
       resolve(results);
     });
   }
+
   public getDocument_Files(libraryname: string, libraryitemId: number): Promise<IDocument[]> {
     return new Promise<IDocument[]>((resolve) => {
       let documentsColl: IDocument[] = [];
@@ -1353,6 +1374,7 @@ export class SharePointDataProvider implements IDataProvider {
         });
     });
   }
+
   public DeleteDocumentFolder(folderServerRelativeUrl: string): Promise<boolean> {
     return new Promise<boolean>((resolve) => {
       this.web.getFolderByServerRelativePath(folderServerRelativeUrl)
@@ -1365,6 +1387,7 @@ export class SharePointDataProvider implements IDataProvider {
         });
     });
   }
+
   public async createFolderInDocument(listname: string, foldername: string): Promise<ICreateFolder[]> {
     return new Promise<ICreateFolder[]>((resolve) => {
       let createFolderColl: ICreateFolder[] = [];
@@ -1664,6 +1687,7 @@ export class SharePointDataProvider implements IDataProvider {
       batch.execute().then(() => resolve(true)).catch((error) => { return resolve(false); });
     });
   }
+
   public downloadFolderFromDrive(
     libraryname: string,
     foldeRelativePath: string,
@@ -2041,22 +2065,22 @@ export class SharePointDataProvider implements IDataProvider {
                    resolve(false);
               });
     });
-}
+  }
 
-public async libraryExists(libraryName: string): Promise<boolean> {
-    return new Promise<boolean>((resolve) => {
-         this.web.lists.filter("Title eq '" + libraryName + "'").get().then((islibraryExists) => {
-              if (islibraryExists.length > 0) {
-                   resolve(true);
-              }
-              else {
-                   resolve(false);
-              }
-         }).catch(error => {
-              console.log("Document Library Exists Or Not : ", error);
-              resolve(false);
-         });
-    });
-}
+  public async libraryExists(libraryName: string): Promise<boolean> {
+      return new Promise<boolean>((resolve) => {
+          this.web.lists.filter("Title eq '" + libraryName + "'").get().then((islibraryExists) => {
+                if (islibraryExists.length > 0) {
+                    resolve(true);
+                }
+                else {
+                    resolve(false);
+                }
+          }).catch(error => {
+                console.log("Document Library Exists Or Not : ", error);
+                resolve(false);
+          });
+      });
+  }
 
 }
