@@ -145,8 +145,8 @@ export default class ResponsiblePartySettingsPanel extends React.Component<IResp
       Title: '',
       ID: null,
       GUID: (this.state.responsibles.length + 1).toString(),
-      FontColor: "#ffffff",
-      FillColor: "#000000",
+      FontColor: "#000000",
+      FillColor: "#ffffff",
       isNew: true
     };
     const responsibles = _.cloneDeep(this.state.responsibles);
@@ -407,7 +407,7 @@ export default class ResponsiblePartySettingsPanel extends React.Component<IResp
                   {responsibles.map((cResponsible, index) => (                       
                           <div className={styles.responsibleContainer}> <TextField
                               value={cResponsible.Title}
-                              disabled={!this.canUpdateItem || cResponsible.isSaving}
+                              disabled={!this.canUpdateItem}
                               style={{
                                 width: 200,
                                 color: cResponsible.FontColor,
@@ -435,7 +435,7 @@ export default class ResponsiblePartySettingsPanel extends React.Component<IResp
 
                             {
                               this.canDeleteItem ? (<IconButton
-                                disabled={cResponsible.Title.trim().length === 0 || responsibleType !== null}
+                                disabled={cResponsible.Title.trim().length === 0 || cResponsible.isSaving}
                                 iconProps={{ iconName: 'Delete' }}
                                 title="Delete"
                                 onClick={() => { this.onDeleteResponsible(cResponsible); }}
@@ -522,7 +522,7 @@ export default class ResponsiblePartySettingsPanel extends React.Component<IResp
                 <p>Changes made to these settings take effect immediately.</p>
                 <p>Statuses with no assigned color use the color specified for responsible party.</p>
               </div>
-
+              <div className={styles.noDataFound}>{TaskListConstants.errorMessages.noDataFound}</div>
                   {/* Add Button */}
                   <div className={styles.addBtn}>
                   <PrimaryButton

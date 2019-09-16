@@ -6,6 +6,7 @@ import { ITaskListState, IDataProvider } from '../../../interfaces/index';
 import TaskDataProvider from '../../../services/TaskDataProvider';
 import { Spinner, SpinnerSize } from 'office-ui-fabric-react';
 import TaskInProgressPieChart from '../components/header/taskInProgressPieChart/TaskInProgressPieChart';
+import StatusBarChart from '../components/header/statusBarChart/StatusBarChart';
 import TaskFilter from '../components/header/taskFilter/TaskFilter';
 
 import TaskListPanelContainer from '../components/taskListPanelContainer/TaskListPanelContainer';
@@ -113,6 +114,7 @@ export default class TaskList extends React.Component<ITaskListProps, ITaskListS
  } else {
     return (
       <div className={styles.taskListWrapper}>
+        <StatusBarChart/>
         <TaskInProgressPieChart
                 chartData = {ChartDataConstant.chartData}
         />

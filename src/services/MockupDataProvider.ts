@@ -61,7 +61,44 @@ export class MockupDataProvider implements IDataProvider {
   }
 
   public getResponsibleParties(listname: string): Promise<IResponsibleParty[]> {
-    return new Promise<IResponsibleParty[]>(resolve => resolve([]));
+    return new Promise<IResponsibleParty[]>((resolve) => resolve([
+      {
+        Title:"Borrower",
+        FontColor:"#ffffff",
+        FillColor:"#000000",
+        ID:1,
+        GUID:"f37cf4b4-e7bf-4ddc-9955-9f91e09799b5"
+      },
+      {
+        Title:"Borrower Counsel",
+        FontColor: "#fbf6f6",
+        FillColor: "#3738b9", 
+        ID:2,
+        GUID:"g37cf4b4-e7bf-4ddc-9955-9f91e09799b5"
+      },
+      {
+        Title:"Lender",
+        FontColor:"#ffffff",
+        FillColor:"#ac4e4e",
+        ID:3,
+        GUID:"h37cf4b4-e7bf-4ddc-9955-9f91e09799b5"
+      },
+      {
+        Title:"Lender Counsel",
+        FontColor: "#fbf6f6",
+        FillColor: "#3738b9", 
+        ID:4,
+        GUID:"i37cf4b4-e7bf-4ddc-9955-9f91e09799b5"
+      },
+      {
+        Title:"Thrid Party",
+        FontColor: '#161515',
+        FillColor: '#4f07f5',
+        ID:5,
+        GUID:"j37cf4b4-e7bf-4ddc-9955-9f91e09799b5"
+      }
+      
+      ]));
   }
 
   public getStatuses(listname: string): Promise<IStatus[]> {

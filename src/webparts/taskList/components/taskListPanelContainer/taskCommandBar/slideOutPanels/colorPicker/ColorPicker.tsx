@@ -95,7 +95,7 @@ export default class ColorPicker extends React.Component<IColorPickerProps, ICol
                 zIndex: '2',
               },
               cover: {
-                position: 'fixed',
+                 position: 'fixed',
                 top: '0px',
                 right: '0px',
                 bottom: '0px',
