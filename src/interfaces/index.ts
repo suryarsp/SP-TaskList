@@ -51,6 +51,7 @@ export * from './services/response/IColumn';
 export * from './services/response/ICreateFolder';
 export * from './services/response/IDownloadItems';
 export * from './services/response/ITaskList';
+export * from './services/response/ISubTaskList';
 
 // Property Pane
 export * from './propertyPane/taskGroupingControl/ITaskGroupingControlComponentProps';
