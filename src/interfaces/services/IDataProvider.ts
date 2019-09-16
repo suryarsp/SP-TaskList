@@ -1,5 +1,5 @@
 import { PermissionKind } from "sp-pnp-js";
-import { IGroup, IResponsibleParty, IStatus, IColumn, ICategory, IComment } from "../index";
+import { IGroup, IResponsibleParty, IStatus, IColumn, ICategory, IComment, ITaskList } from "../index";
 
 export interface IDataProvider {
   getPermissions?:(listTitle: string) => Promise<Array<{ permission: PermissionKind, allowed: boolean }>>;
@@ -35,5 +35,6 @@ export interface IDataProvider {
   updateResponsibleItem?: (listName: string, itemId: number, items: IResponsibleParty)=> Promise<boolean>;
   deleteListField?: (listName:string,fieldName:string)=>Promise<boolean>;
 
-  getTaskListItem?: (listName:string)=>Promise<any[]>;
+  getTaskListItem?: (listName:string)=>Promise<ITaskList[]>;
+  insertTaskListItem?:(listName:string,taskItem:ITaskList)=>Promise<ITaskList>;
 }
