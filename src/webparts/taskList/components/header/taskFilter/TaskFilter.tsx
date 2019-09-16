@@ -50,33 +50,31 @@ export default class TaskFilter extends React.Component<ITaskFilterProps ,ITaskF
     public render(): React.ReactElement<ITaskFilterProps> {
         const {groups,searchedValue} = this.state;
         const defaultKey  = groups.length > 0 ? groups.filter(c => c.IsDefault)[0].Title : "";
-
-      return (
-        <div className={css("ms-Fabric")}>
-            <div className={css("ms-Grid")}>
-                  <div className={css("ms-Grid-row") } style={{ marginBottom: '10px' }}>
-                      <div className={css("ms-Grid-col ms-sm2") } >
-                    <Dropdown
-                        label="Task Group"
-                        options={groups}
-                        selectedKey={defaultKey}
-                        //styles={dropdownStyles}
-                    />
-                </div>
-                    <div className={css("ms-Grid-col ms-sm3") } style={{ marginTop: '29px', borderRadius: '5px' }}>
-                    <SearchBox
-                        placeholder="Search"
-                        value={searchedValue}
-                        style={{ borderRadius: '20px' }}
-                        //style={{padding: '20px'}}
-                        onClear = {this.onClearSearchText.bind(this)}
-                        onChange={this.onChangeSearch.bind(this)}
-                    />
+        
+      return (       
+            <div className={css("ms-Grid")}>    
+                <div className={css("ms-Grid-row") } style={{ marginBottom: '10px' }}>
+                    <div className={css("ms-Grid-col ms-sm4") } >
+                        <Dropdown  
+                            label="Task Group"
+                            options={groups} 
+                            selectedKey={defaultKey}
+                            //styles={dropdownStyles} 
+                        /> 
+                    </div>
+                    <div className={css("ms-Grid-col ms-sm6") } style={{ marginTop: '29px', borderRadius: '5px' }}>
+                        <SearchBox
+                            placeholder="Search"
+                            value={searchedValue}
+                            style={{ borderRadius: '20px' }}
+                            //style={{padding: '20px'}}
+                            onClear = {this.onClearSearchText.bind(this)}
+                            onChange={this.onChangeSearch.bind(this)}
+                        />
+                    </div>
                 </div>
             </div>
-            </div>
-        </div>
-
-      );
+          
+        );
     }
   }
