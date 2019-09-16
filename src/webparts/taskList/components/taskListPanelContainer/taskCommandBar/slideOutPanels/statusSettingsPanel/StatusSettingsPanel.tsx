@@ -12,6 +12,7 @@ import * as _ from 'lodash';
 import ColorPicker from '../colorPicker/ColorPicker';
 import { IPermissions } from '../../../../../../../services';
 import { PermissionKind } from 'sp-pnp-js';
+import { ListDetailsConstants } from '../../../../../../../common/defaults/listView-constants';
 
 const getItemStyle = (isDragging, draggableStyle) => {
   if (isDragging) {
@@ -488,11 +489,17 @@ export default class StatusSettingsPanel extends React.Component<IStatusSettings
     result.splice(endIndex, 0, removed);
     return result;
   }
-
-  public onClickNoColor(status: IStatus) {
+ 
+  public onClickNoColor(status: IStatus,noColor:string) {
     let statuses = _.cloneDeep(this.state.status);
-    status.FontColor = null;
-    status.FillColor = null;
+    if(noColor === "Fill"){
+      status.FillColor = null;
+    }
+    else if(noColor === "Font"){
+      status.FontColor = null;
+    }
+    
+    
     const isStatusAlreadyPresent = statuses.filter(s => s.Title.toLowerCase() === status.Title.toLowerCase()).length > 0;
     if (status.ID) {
       if (isStatusAlreadyPresent) {
@@ -506,8 +513,8 @@ export default class StatusSettingsPanel extends React.Component<IStatusSettings
       this.forceUpdate();
     }
     console.log(status.FillColor, status.FontColor);
-
   }
+
 
   public render(): React.ReactElement<IStatusSettingsPanelProps> {
     const { status, preventDelete, statusMessage, statusType } = this.state;
@@ -589,13 +596,13 @@ export default class StatusSettingsPanel extends React.Component<IStatusSettings
 
                                 <TextField
                                   value={cStatus.Title}
-                                  disabled={!this.canUpdateItem || cStatus.isSaving}
+                                  disabled={!this.canUpdateItem}
                                   style={{
                                     width: 200,
                                     color: cStatus.FontColor,
                                     backgroundColor: cStatus.FillColor
                                   }}
-                                  autoFocus={true}
+                                  autoFocus={true}                                  
                                   onChange={(e, newValue) => { this.onChangeStatusTitle(newValue, cStatus); }}
                                   errorMessage={cStatus.isExisting ? "Value already exists" : ""}
                                 />
@@ -604,31 +611,38 @@ export default class StatusSettingsPanel extends React.Component<IStatusSettings
                                     <ColorPicker key={cStatus.GUID + "fill"} displayColor={cStatus.FillColor} onChangeColor={(value) => { this.onChangeFillColor(value, cStatus); }} />
                                   ) : null
                                 }
+                                 {
+                                  this.canUpdateItem || this.canAddItem ? (
+                                    <IconButton
+                                      disabled={cStatus.Title.trim().length === 0 || cStatus.isSaving}
+                                      iconProps={{ iconName: 'UnSetColor' }}
+                                      title = "No Color"
+                                      onClick={() => { this.onClickNoColor(cStatus,"Fill"); }}
+                                    />) : null
+                                }
 
                                 {
                                   this.canUpdateItem || this.canAddItem ? (
                                     <ColorPicker key={cStatus.GUID + "font"} displayColor={cStatus.FontColor} onChangeColor={(value) => { this.onChangeFontColor(value, cStatus); }} />
                                   ) : null
                                 }
+                                 {
+                                  this.canUpdateItem || this.canAddItem ? (
+                                    <IconButton
+                                      disabled={cStatus.Title.trim().length === 0 || cStatus.isSaving}
+                                      iconProps={{ iconName: 'UnSetColor' }}
+                                      title = "No Color"
+                                      onClick={() => { this.onClickNoColor(cStatus,"Font"); }}
+                                    />) : null
+                                }
 
                                 {
                                   this.canDeleteItem ? (<IconButton
-                                    disabled={cStatus.Title.trim().length === 0 || statusType !== null}
+                                    disabled={cStatus.Title.trim().length === 0 || cStatus.isSaving}
                                     iconProps={{ iconName: 'Delete' }}
                                     title = "Delete"
                                     onClick={() => { this.onDeleteStatus(cStatus); }}
                                   />) : null
-                                }
-
-
-                                {
-                                  this.canUpdateItem || this.canAddItem ? (
-                                    <IconButton
-                                      disabled={cStatus.Title.trim().length === 0 || statusType !== null}
-                                      iconProps={{ iconName: 'UnSetColor' }}
-                                      title = "No Color"
-                                      onClick={() => { this.onClickNoColor(cStatus); }}
-                                    />) : null
                                 }
 
                                 {!cStatus.ID ? <IconButton iconProps={{ iconName: 'Cancel' }} onClick={(e) => { this.onClickCancel(cStatus); }} /> : null}
@@ -719,6 +733,8 @@ export default class StatusSettingsPanel extends React.Component<IStatusSettings
               <p>Changes made to these settings take effect immediately.</p>
               <p>Statuses with no assigned color use the color specified for responsible party.</p>
             </div>
+
+            <div className={styles.noDataFound}>{TaskListConstants.errorMessages.noDataFound}</div>
 
 
               {/* Add Button */}

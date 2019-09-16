@@ -19,7 +19,8 @@ export const TaskListConstants :
      deleteSuccess: string;
      deleteError: string,
      sortSuccess: string,
-     sortError: string
+     sortError: string,
+     noDataFound : string
     },
     chartData: IDoughnutChartData,
     
@@ -73,6 +74,7 @@ export const TaskListConstants :
       deleteError: "Error occured while deletion",
       sortSuccess: "Sorted successfully",
       sortError: "Error occured while sorting",
+      noDataFound:"No data found"
     },
     chartData: {
       datasets : [{
