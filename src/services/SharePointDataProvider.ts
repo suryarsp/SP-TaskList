@@ -282,9 +282,9 @@ export class SharePointDataProvider implements IDataProvider {
   }
 
   public getTaskListItem(listName:string):Promise<ITaskList[]>{
-
-    let selectItem = ["Title", "ID", "SortOrder", "Parent/Title", "Parent/Id", "GUID","Category/Id","Category/Title","Responsible/Id","Responsible/Title","TaskStatus/Id","TaskStatus/Title"];
-    let expandItem = ["Parent","TaskStatus","Responsible","Category"];
+    let taskStatusName = "Task_x0020_Status";//this.utility.GetFieldInteralName("Task Status");
+    let selectItem = ["Title", "ID", "SortOrder", "Parent/Title", "Parent/Id", "GUID","Category/Id","Category/Title","Responsible/Id","Responsible/Title",taskStatusName+"/Id",taskStatusName+"/Title"];
+    let expandItem = ["Parent",taskStatusName,"Responsible","Category"];
     if(TaskDataProvider.listNames.groupListName) {
       selectItem.push("Group/Title", "Group/Id");
       expandItem.push("Group");
@@ -303,7 +303,7 @@ export class SharePointDataProvider implements IDataProvider {
             Parent: element.Parent,          
             GUID: element.GUID,
             Category:element.Category,
-            TaskStatus:element.TaskStatus,
+            TaskStatus:element.taskStatusName,
             Responsible:element.Responsible
           };
           TaskListColl.push(items);
@@ -316,6 +316,64 @@ export class SharePointDataProvider implements IDataProvider {
     });
   }
 
+
+  public insertTaskListItem(listName:string,taskItem:ITaskList):Promise<ITaskList>{
+    return new Promise<ITaskList>((response)=>{
+      let taskStatusName = "Task_x0020_Status";//this.utility.GetFieldInteralName("Task Status");
+      let obj = {};
+      if(taskItem.Group && taskItem.Parent){
+        obj["ParentId"] = taskItem.Parent.Id;
+        obj["GroupId"] = taskItem.Group.Id;
+      }
+      if(taskItem.Group)
+      {
+        obj["GroupId"] = taskItem.Group.Id;    
+      }
+      else if(taskItem.Parent){      
+        obj["ParentId"] = taskItem.Parent.Id;       
+      }
+     
+      obj["Title"] = taskItem.Title;
+      obj["SortOrder"] = taskItem.SortOrder;     
+      obj["CategoryId"] = taskItem.Category.Id;
+      obj["ResponsibleId"] = taskItem.Responsible.Id;
+      obj[taskStatusName+"Id"] = taskItem.TaskStatus.Id;
+
+      this.web.lists.getByTitle(listName).items.add(obj).then((insertTask)=>{
+        if (insertTask) {
+          console.log("Insert category item : ", insertTask);
+          let taskList : ITaskList = {
+            Title: insertTask.data.Title,
+            SortOrder: insertTask.data.SortOrder,
+            Group: {
+              Id:insertTask.data.GroupId
+            },
+            Parent: {
+              Id:insertTask.data.ParentId
+            },
+            ID: insertTask.data.ID,
+            GUID: insertTask.data.GUID,
+            Category:{
+              Id:insertTask.data.CategoryId
+            },
+            Responsible:{
+              Id:insertTask.data.ResponsibleId
+            },
+            TaskStatus:{
+              Id:insertTask.data.Task_x0020_Status
+            }
+          };
+          response(taskList);
+        }
+        else {
+          response(null);
+        }
+      }).catch(error=>{
+        console.log("Insert Task list item error message : ", error);
+        response(null);
+      });
+    });
+  }
 
   //Group List Methods start
   public insertGroupItem(listName: string, group: IGroup): Promise<IGroup> {
@@ -1035,7 +1093,7 @@ export class SharePointDataProvider implements IDataProvider {
 
           await this.web.lists.configure(this.configOptions)
             .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("TaskStatus")
+            .fields.getByInternalNameOrTitle("Task Status")
             .get()
             .then(isItem => {
             })
@@ -1045,7 +1103,7 @@ export class SharePointDataProvider implements IDataProvider {
                 .getByTitle(listName)
                 .fields.inBatch(batch)
                 .createFieldAsXml(
-                  '<Field Type="Lookup" DisplayName="TaskStatus" Name="TaskStatus" Required="TRUE" List="' +
+                  '<Field Type="Lookup" DisplayName="Task Status" Name="Task Status" Required="TRUE" List="' +
                   this.statusListGUID +
                   '" ShowField="Title" RelationshipDeleteBehavior="None"/>'
                 );

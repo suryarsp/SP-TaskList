@@ -37,6 +37,12 @@ export class Utilties {
           return this.GetImgUrlByFileExtension(fileExtenstion);
      }
 
+     public GetFieldInteralName(fileName:string):string{
+          if(fileName){
+               return fileName.replace("_x0020_", " ");     
+          }
+     }
+
 
      /**
         * Returns image url for the given extension.
