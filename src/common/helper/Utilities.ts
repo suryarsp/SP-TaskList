@@ -38,9 +38,9 @@ export class Utilties {
           return this.GetImgUrlByFileExtension(fileExtenstion);
      }
 
-     public GetFieldInteralName(fileName:string):string{
+     public GetFieldInteralName(fileName:string):string{          
           if(fileName){
-               return fileName.replace("_x0020_", " ");     
+               return fileName.toString().replace(" ", "_x0020_");     
           }
      }
 

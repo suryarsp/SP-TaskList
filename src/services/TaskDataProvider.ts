@@ -12,6 +12,7 @@ export default class TaskDataProvider  {
   public static listPermissions : IPermissions[];
   public static libraryPermissions : IPermissions[];
   public static documentLibraryUniqueID: string;
+  public static isGroupingEnabled:boolean;
   public static categories: ICategory[] = [];
   public static groups: IGroup[] = [];
   public static responsibleParties: IResponsibleParty[] = [];

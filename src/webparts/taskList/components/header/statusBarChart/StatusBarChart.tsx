@@ -24,25 +24,23 @@ export default class StatusBarChart extends React.Component< IStatusBarChartProp
     });
   }
   public render(): React.ReactElement<StatusBarChart> {
-    return (
-      <div>
-        <div className={css("ms-Fabric")}>                
-          <div className={css("ms-Grid")}>    
-            <div className={css("ms-Grid-row") } style={{ marginBottom: '10px' }}>
-              <div className={css("ms-Grid-col ms-sm6") } >
-                <h4>Progress</h4>
-                <Chart
-                      options={this.state.optionalBars}
-                      height={120}
-                      series={this.state.seriesBars}
-                      type="bar"
-                      width={500}
-                />
-                </div>
+    return ( 
+      <div>        
+        {/* <div className={css("ms-Grid")}>
+          <div className={css("ms-Grid-row") } >
+          <div className={css("ms-Grid-col ms-sm12") } style={{padding:'0px'}} > */}
+          <div style={{marginLeft:'10px'}}><h4>Progress</h4></div>
+              <Chart
+                    options={this.state.optionalBars}
+                    height={150}
+                    series={this.state.seriesBars}
+                    type="bar"
+                    width={950}
+              />
             </div>
-          </div>
-        </div>
-      </div>
+      //     </div> 
+      //   </div>
+      // </div>
     );
   }
 }

@@ -2,7 +2,7 @@ import * as React from 'react';
 import styles from './TaskList.module.scss';
 import { ITaskListProps } from '../../../interfaces/components/ITaskListProps';
 import { ITaskListState, IDataProvider } from '../../../interfaces/index';
-
+import {  css } from 'office-ui-fabric-react';
 import TaskDataProvider from '../../../services/TaskDataProvider';
 import { Spinner, SpinnerSize } from 'office-ui-fabric-react';
 import TaskInProgressPieChart from '../components/header/taskInProgressPieChart/TaskInProgressPieChart';
@@ -54,6 +54,7 @@ export default class TaskList extends React.Component<ITaskListProps, ITaskListS
     ];
     if(isGroupingEnabled && groupListName) {
       promises.push(this.dataProvider.listExists(groupListName));
+      TaskDataProvider.isGroupingEnabled = isGroupingEnabled;
     }
       Promise.all(promises).then((values) => {
               if (values.filter(v => !v).length === 0) {
@@ -73,6 +74,10 @@ export default class TaskList extends React.Component<ITaskListProps, ITaskListS
             isLoading: false
           });
          });
+}
+
+public onClickDoughnutChart(party:string){
+  console.log(party);  
 }
 
   public render(): React.ReactElement<ITaskListProps> {
@@ -113,13 +118,30 @@ export default class TaskList extends React.Component<ITaskListProps, ITaskListS
       );
  } else {
     return (
-      <div className={styles.taskListWrapper}>
-        <StatusBarChart/>
-        <TaskInProgressPieChart
-                chartData = {ChartDataConstant.chartData}
-        />
-        <div style={{padding: '5px'}}>
-            <TaskFilter/>
+      <div className={css("ms-Fabric",styles.taskListWrapper)}>
+        <div className={css("ms-Grid")}>
+          <div className={css("ms-Grid-row")} >
+            <div className={css("ms-Grid-col ms-sm6")}>
+              <div className={styles.statusBarChart}>
+                <StatusBarChart/>
+              </div>
+
+              <div className={styles.TaskFilter}>
+                <TaskFilter/>
+              </div>
+            </div>
+            <div className={css("ms-Grid-col ms-sm2")}>
+
+            </div>
+            <div className={css("ms-Grid-col ms-sm4")}>
+              <div className="TaskInProgressPieChart">
+                <TaskInProgressPieChart
+                      chartData = {ChartDataConstant.chartData}
+                      onClickChartView={this.onClickDoughnutChart.bind(this)}
+                />
+              </div>
+            </div>
+          </div>
         </div>
         <TaskListPanelContainer
         uniqueToGroupEnabled =  { this.props.isCategoryUniqueEnabled }

@@ -6,12 +6,11 @@ export const barChartConstants:
     seriesBar:IBarChartSeriesBar[];
 } = {
     optionsBar: {
+      
         tooltip: {
             enabled: true,
           },
           chart: {
-            height: '20%',
-            width: '100%',
             stacked: true,
             stackType: "100%",
             toolbar: {
@@ -68,12 +67,15 @@ export const barChartConstants:
   
             },
             itemMargin: {
-              horizontal: 20,
+              horizontal: 10,
               vertical: 5
             },
             onItemHover: {
                 highlightDataSeries: true
             },
+        },
+        grid: {
+          show: false,
         }
     },
     seriesBar: [

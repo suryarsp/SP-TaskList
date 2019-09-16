@@ -37,4 +37,5 @@ export interface IDataProvider {
 
   getTaskListItem?: (listName:string)=>Promise<ITaskList[]>;
   insertTaskListItem?:(listName:string,taskItem:ITaskList)=>Promise<ITaskList>;
+  updateTaskListItem?:(listName:string,taskItem:ITaskList,itemId:number)=>Promise<boolean>;
 }
