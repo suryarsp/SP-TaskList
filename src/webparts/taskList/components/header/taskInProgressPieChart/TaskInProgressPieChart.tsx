@@ -18,13 +18,25 @@ export default class TaskInProgressPieChart extends React.Component< ITaskInProg
             width={100} 
             height={40}               
             options={{
+              onClick:(event, items) =>{
+                if(!items && !Array.isArray(items)) {
+                  return;
+                }
+                const item = items[0];  
+                if(item) {
+                const view = item._view;
+                  if(view && view['label']) {
+                      this.props.onClickChartView(view.label);
+                  } 
+                }
+              },
               legend: {
                 display: true,
-                padding:50,
                 maintainAspectRatio: true,
                 position:'right',
                 onClick: (event) => {                                                                                      
                   event.stopPropagation();
+
                 } 
               },
               cutoutPercentage: 55,

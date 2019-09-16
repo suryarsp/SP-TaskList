@@ -18,6 +18,7 @@ export default class TaskFilter extends React.Component<ITaskFilterProps ,ITaskF
         super(props);
         this.state = {
             groups:[],
+            selectedGroup:null,
             searchedValue:''
         };
     }
@@ -40,6 +41,11 @@ export default class TaskFilter extends React.Component<ITaskFilterProps ,ITaskF
                 this.onClearSearchText();
             }
     }
+    private onChangeGroup(event: React.FormEvent<HTMLDivElement>, option?: IDropdownOption, index?: number){        
+        this.setState({
+            selectedGroup:option
+        })       
+    }
 
     private onClearSearchText() {
         this.setState({
@@ -48,8 +54,9 @@ export default class TaskFilter extends React.Component<ITaskFilterProps ,ITaskF
     }
 
     public render(): React.ReactElement<ITaskFilterProps> {
-        const {groups,searchedValue} = this.state;
+        const {groups,searchedValue, selectedGroup} = this.state;
         const defaultKey  = groups.length > 0 ? groups.filter(c => c.IsDefault)[0].Title : "";
+        
         
       return (       
             <div className={css("ms-Grid")}>    
@@ -58,7 +65,10 @@ export default class TaskFilter extends React.Component<ITaskFilterProps ,ITaskF
                         <Dropdown  
                             label="Task Group"
                             options={groups} 
-                            selectedKey={defaultKey}
+                            selectedKey={selectedGroup ? selectedGroup.title : ""}
+                            defaultSelectedKey={defaultKey}
+                            onChange={this.onChangeGroup.bind(this)}
+                            //value={this.state.selectedGroup}
                             //styles={dropdownStyles} 
                         /> 
                     </div>
