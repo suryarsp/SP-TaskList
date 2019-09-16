@@ -6,8 +6,8 @@ export * from './components/taskListPanelConatiner/taskCommandBar/ITaskCommandBa
 export * from './components/taskListPanelConatiner/taskCommandBar/ITaskCommandBarState';
 export * from './components/header/taskInProgressPieChart/ITaskInProgressPieChartProps';
 export * from './components/header/taskInProgressPieChart/ITaskInProgressPieChartState';
-export * from './components/header/taskProgressGraph/ITaskProgressGraphProps';
-export * from './components/header/taskProgressGraph/ITaskProgressGraphState';
+export * from './components/header/statusBarChart/IStatusBarChartProps';
+export * from './components/header/statusBarChart/IStatusBarChartState';
 export * from './components/taskListPanelConatiner/ITaskListPanelContainerProps';
 export * from './components/taskListPanelConatiner/ITaskListPanelContainerState';
 export * from './components/taskListPanelConatiner/taskCommandBar/slideOutPanels/newTaskPanel/INewTaskPanelProps';
@@ -70,3 +70,4 @@ export * from './components/header/taskInProgressPieChart/DoughnutChart/IDoughnu
 export * from './components/header/taskInProgressPieChart/DoughnutChart/IDoughnutChartDataSet';
 export * from './components/header/taskFilter/ITaskFilterProps';
 export * from './components/header/taskFilter/ITaskFilterState';
+export * from '../common/defaults/barChart-constants';

@@ -51,4 +51,4 @@ export const ChartDataConstant:
                 'Responsible Party'
             ],
         }
-    }
+    };

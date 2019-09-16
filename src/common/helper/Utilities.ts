@@ -1,14 +1,16 @@
+import { ICategory } from "../../interfaces";
+
 export class Utilties {
-     public static instance: Utilties;
+     public static Instance: Utilties;
      constructor() {
 
      }
 
      public static getInstance() {
-          if (!Utilties.instance) {
-               Utilties.instance = new Utilties();
+          if (!Utilties.Instance) {
+               Utilties.Instance = new Utilties();
           }
-          return Utilties.instance;
+          return Utilties.Instance;
      }
 
      /**
@@ -263,5 +265,19 @@ export class Utilties {
           else {
                return "";
           }
+     }
+
+     public mapCategotyItems(categories: ICategory[]) {
+       let newCategories: ICategory[] = [];
+       categories.map((category) => {
+        if(category.Parent) {
+          const parentIndex = _.findIndex(categories, c => c.ID === category.Parent.Id);
+          newCategories[parentIndex].children.push(category);
+        } else {
+          newCategories.push(category);
+        }
+      });
+
+       return newCategories;
      }
 }

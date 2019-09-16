@@ -12,6 +12,7 @@ import CategoryChildDraggable from './CategoryChildDraggable';
 
 import { Dropdown} from 'office-ui-fabric-react/lib/Dropdown';
 import _ from 'lodash';
+import { Utilties } from '../../../../../../../common/helper/Utilities';
 
 
 const getItemStyle = (isDragging, draggableStyle) => {
@@ -50,52 +51,56 @@ export default class CategorySettingsPanel extends React.Component<ICategorySett
   public categoryListName: string;
   public groupListName: string;
   public isCategoryUniqueEnabled: boolean;
+  public utilities: Utilties;
 
   constructor(props) {
     super(props);
     this.isDirty = false;
     this.state = {
       categories: [],
+      allCategories: [],
       isAddClicked: false,
       preventDelete: false,
       statusMessage: "",
       statusType: null,
       isUniqueToGroupChecked: false,
       currentSelectedGroup: null,
-      groups: TaskDataProvider.groups
+      groups: []
     };
   }
 
   public componentDidMount() {
     this.dataProvider = TaskDataProvider.Instance;
+    this.utilities = Utilties.Instance;
     this.categoryListName = TaskDataProvider.listNames.categoryListName;
     this.groupListName = TaskDataProvider.listNames.groupListName;
     this.isCategoryUniqueEnabled = TaskDataProvider.isCategoryUniqueEnabled;
-    this.dataProvider.getCategories(this.categoryListName).then((categories)=>{
-      this.setState({
-        categories: categories
-      });
-      TaskDataProvider.categories = categories;
+    this.dataProvider.getCategories(this.categoryListName).then((categories)=> {
+      let newCategories: ICategory[] = this.utilities.mapCategotyItems(categories);
+        if(this.props.uniqueToGroupEnabled) {
+          this.dataProvider.getGroups(this.groupListName).then((groups) => {
+            TaskDataProvider.groups = groups;
+            const defaultGroup = groups.filter(c => c.IsDefault)[0];
+            const displayCategories = newCategories.filter(c => !c.Group);
+              this.setState({
+                  groups:  groups,
+                  allCategories: newCategories,
+                  categories: displayCategories,
+                  currentSelectedGroup: defaultGroup
+              }, () => TaskDataProvider.categories = newCategories);
+          }).catch((error) => {
+            console.log("Get Groups", error);
+          });
+        } else {
+          this.setState({
+            categories: newCategories,
+            allCategories: newCategories
+          });
+        }
     }).
     catch((error) => {
       console.log("Get Categorys", error);
     });
-
-    this.dataProvider.getGroups(this.groupListName).then((groups) => {
-      this.setState({
-        groups:  groups
-      }, () => TaskDataProvider.groups = groups);
-    })
-    .catch((error) => {
-      console.log("Get Groups", error);
-    });
-    // const provider = new MockupDataProvider();
-    // provider.getCategories('').then((categories) => {
-    //   this.setState({
-    //     categories: categories
-    //   });
-    //   TaskDataProvider.categories = categories;
-    // });
   }
 
   public resetStatus() {
@@ -146,7 +151,8 @@ export default class CategorySettingsPanel extends React.Component<ICategorySett
   }
 
   public onChangeCategoryTitle(newValue: string, category: ICategory) {
-    let categories = _.cloneDeep(this.state.categories);
+    const { isUniqueToGroupChecked } = this.state;
+    let categories = isUniqueToGroupChecked ? _.cloneDeep(this.state.allCategories) :  _.cloneDeep(this.state.categories);
     category.Title = newValue;
     category.isSaving = true;
     const isCategoryAlreadyPresent = categories.filter(g => g.Title.toLowerCase() === newValue.toLowerCase()).length > 0;
@@ -188,6 +194,7 @@ export default class CategorySettingsPanel extends React.Component<ICategorySett
     this.clearTimeoutvalue = setTimeout(() => {
       this.forceUpdate();
       let categories = _.cloneDeep(this.state.categories);
+      let allCategories = _.cloneDeep(this.state.allCategories);
       let updatedCategory = categories.filter(c => c.ID === category.ID)[0];
       updatedCategory.Title = title;
       updatedCategory.isSaving = false;
@@ -202,8 +209,15 @@ export default class CategorySettingsPanel extends React.Component<ICategorySett
               c.isSaving = false;
               return c;
             });
+            allCategories = allCategories.map(c => {
+              if (c.ID === category.ID) {
+                return updatedCategory;
+              }
+              return c;
+            });
             this.setState({
               categories: updatedCategories,
+              allCategories: allCategories,
               statusMessage: updateSuccess,
               statusType: ProgressStatusType.SUCCESS
             }, () => {
@@ -218,6 +232,7 @@ export default class CategorySettingsPanel extends React.Component<ICategorySett
             });
           }
         }).catch((error) => {
+          console.log(error);
           this.setState({
             categories: categories,
             statusMessage: saveError,
@@ -227,6 +242,67 @@ export default class CategorySettingsPanel extends React.Component<ICategorySett
     }, 1000);
   }
 
+  public calculateCategorySort(categories: ICategory[], newIndex: number): number {
+    if (newIndex === 0) { // at first position
+      if (categories.length > 0) {
+        let newSortIndex = 1.00000000000;
+        for (let index = 0; index < categories.length; index++) {
+          if (categories[index].SortOrder) {
+            let firstSort = categories[index].SortOrder;
+            newSortIndex = firstSort - 1.00000000001;
+            let nextSort = 1.00000000000;
+            if (index + 1 < categories.length - 1) {
+              nextSort = categories[index + 1].SortOrder;
+            }
+            if (newSortIndex > nextSort) {
+              newSortIndex = nextSort - 1.00000000001;
+            }
+            break;
+          }
+        }
+        return newSortIndex;
+      }
+    }
+    else if (newIndex === categories.length - 1) { // at one before to last
+      if (categories.length > 1) {
+        let prevSortIndex = categories[newIndex - 1].SortOrder;
+        let nextSortIndex = categories[newIndex].SortOrder;
+        let newSortIndex = (Number(prevSortIndex) + Number(nextSortIndex)) / 2.00000000000;
+        return newSortIndex;
+      }
+      else {
+        return 1.00000000000;
+      }
+    }
+    else if (newIndex === categories.length) // at last position
+    {
+      let newSortIndex = _.maxBy(categories, (t) => t.SortOrder).SortOrder + 1.00000000001;
+      return newSortIndex;
+    }
+    else {
+      let prevSortIndex = 1.00000000000;
+      if (newIndex - 1 < categories.length) {
+        prevSortIndex = categories[newIndex - 1].SortOrder;
+      }
+      let nextSortIndex = null;
+      if (newIndex < categories.length) {
+        nextSortIndex = categories[newIndex].SortOrder;
+      }
+      if (!nextSortIndex) {
+        for (let index = newIndex + 1; index < categories.length; index++) {
+          if (categories[index].SortOrder) {
+            nextSortIndex = categories[index].SortOrder;
+            break;
+          }
+        }
+        if (!nextSortIndex) {
+          nextSortIndex = prevSortIndex + 1.00000000000;
+        }
+      }
+      return (Number(prevSortIndex) + Number(nextSortIndex)) / 2.00000000000;
+    }
+  }
+
   public onAddCategory(category: ICategory, title: string) {
     if (this.clearTimeoutvalue) {
       clearTimeout(this.clearTimeoutvalue);
@@ -234,24 +310,38 @@ export default class CategorySettingsPanel extends React.Component<ICategorySett
     this.clearTimeoutvalue = setTimeout(() => {
       this.forceUpdate();
       let  categories = _.cloneDeep(this.state.categories);
+      let { currentSelectedGroup , isUniqueToGroupChecked}= this.state;
+      let allCategories = _.cloneDeep(this.state.allCategories);
       let newlyCreatedCategory = _.cloneDeep(categories.filter(c => c.GUID === category.GUID)[0]);
       newlyCreatedCategory.Title = title;
+      newlyCreatedCategory.Group = isUniqueToGroupChecked ?  {
+        Id: currentSelectedGroup.ID,
+        Title: currentSelectedGroup.Title
+      } : null;
       this.dataProvider.insertCategoryItem(this.categoryListName, newlyCreatedCategory)
         .then((newCategory) => {
           newCategory.isExisting = false;
           newCategory.isSaving = false;
-          let updatedCategories = categories.map(c => {
-            if (c.GUID === c.GUID) {
-              return newCategory;
-            }
-            c.isSaving = false;
-            return c;
-          });
+          let updatedCategories = [];
+          allCategories.push(newCategory);
+          if(categories.length > 0) {
+             updatedCategories = categories.map(c => {
+              if (c.GUID === category.GUID) {
+                return newCategory;
+              }
+              c.isSaving = false;
+              return c;
+            });
+          } else {
+            updatedCategories.push(newCategory);
+          }
+
           this.setState({
             categories: updatedCategories,
+            allCategories: allCategories,
             statusMessage: TaskListConstants.errorMessages.saveSuccess,
             statusType: ProgressStatusType.SUCCESS
-          });
+          }, () => TaskDataProvider.categories = allCategories);
           this.resetStatus();
         }).catch(() => {
           this.setState({
@@ -265,36 +355,133 @@ export default class CategorySettingsPanel extends React.Component<ICategorySett
 
 
   public onDragEnd(result: DragDropResult) {
+    const { source, destination} =  result;
     if (!result.destination) {
       return;
     }
+    let allCategories = _.cloneDeep(this.state.allCategories);
     if (result.type === "droppableItem") {
+      let categories = _.cloneDeep(this.state.categories);
+      const sourceGroup = categories[source.index];
+      const sourceIndex = source.index;
+      const destinationIndex = destination.index;
+      const destinationGroup = categories[destinationIndex < sourceIndex ? destinationIndex : destinationIndex + 1];
+
+      if (destinationGroup) {
+        sourceGroup.SortOrder = this.calculateCategorySort(categories, _.findIndex(categories, g => g.GUID === destinationGroup.GUID));
+      } else {
+        sourceGroup.SortOrder = this.calculateCategorySort(categories, categories.length);
+      }
+
+      this.setState({
+        statusMessage: 'Sorting...',
+        statusType: ProgressStatusType.INPROGRESS
+      });
+
       const updatedCategories = this.reorder(
         _.cloneDeep(this.state.categories),
         result.source.index,
         result.destination.index
       );
 
-      this.setState({
-        categories: updatedCategories
+      let allUpdatedCategories = allCategories.map((c) => {
+        if(c.ID === sourceGroup.ID) {
+          return sourceGroup;
+        }
+        return c;
+      });
+
+      this.dataProvider.updateCategoryItem(this.categoryListName, sourceGroup.ID, sourceGroup).
+      then((isUpdated) => {
+        if(isUpdated) {
+          this.setState({
+            categories: updatedCategories,
+            statusMessage: TaskListConstants.errorMessages.sortSuccess,
+            statusType: ProgressStatusType.SUCCESS
+          });
+          this.resetStatus();
+        } else {
+          this.setState({
+            categories: categories,
+            allCategories: allUpdatedCategories,
+            statusMessage: TaskListConstants.errorMessages.sortError,
+            statusType: ProgressStatusType.FAILURE
+          }, () => TaskDataProvider.categories = allCategories);
+        }
+      })
+      .catch((e) => {
+        console.log(e);
+        this.setState({
+          categories: categories,
+          statusMessage: TaskListConstants.errorMessages.sortError,
+            statusType: ProgressStatusType.FAILURE
+        });
       });
     } else if (_.includes(result.type,"droppableSubItem")) {
-      const parentCategoryId = parseInt(result.type.split("-")[1]);
       let categories = _.cloneDeep(this.state.categories);
+      const parentCategoryId = parseInt(result.type.split("-")[1]);
       const childrenForCorrespondingParent = categories.filter(c => c.ID === parentCategoryId)[0].children;
       const reorderedChildren = this.reorder(
         childrenForCorrespondingParent,
         result.source.index,
         result.destination.index
       );
+
+      const sourceGroup = childrenForCorrespondingParent[source.index];
+      const sourceIndex = source.index;
+      const destinationIndex = destination.index;
+      const destinationGroup = childrenForCorrespondingParent[destinationIndex < sourceIndex ? destinationIndex : destinationIndex + 1];
+
+      if (destinationGroup) {
+        sourceGroup.SortOrder = this.calculateCategorySort(childrenForCorrespondingParent, _.findIndex(childrenForCorrespondingParent, g => g.ID === destinationGroup.ID));
+      } else {
+        sourceGroup.SortOrder = this.calculateCategorySort(childrenForCorrespondingParent, childrenForCorrespondingParent.length);
+      }
+
+      this.setState({
+        statusMessage: 'Sorting...',
+        statusType: ProgressStatusType.INPROGRESS
+      });
+
       let updatedCategories = categories.map(item => {
         if (item.ID === parentCategoryId) {
           item.children = reorderedChildren;
         }
         return item;
       });
-      this.setState({
-        categories : updatedCategories
+
+      let allUpdatedCategories = allCategories.map(item => {
+        if (item.ID === parentCategoryId) {
+          item.children = reorderedChildren;
+        }
+        return item;
+      });
+
+      this.dataProvider.updateCategoryItem(this.categoryListName, sourceGroup.ID, sourceGroup).
+      then((isUpdated) => {
+        if(isUpdated) {
+          this.setState({
+            categories: updatedCategories,
+            allCategories: allCategories,
+            statusMessage: TaskListConstants.errorMessages.sortSuccess,
+            statusType: ProgressStatusType.SUCCESS
+          }, () => TaskDataProvider.categories = allUpdatedCategories);
+          this.resetStatus();
+        } else {
+          this.setState({
+            categories: categories,
+            statusMessage: TaskListConstants.errorMessages.sortError,
+            statusType: ProgressStatusType.FAILURE
+          });
+        }
+      })
+      .catch((e) => {
+        console.log(e);
+        this.setState({
+          categories: categories,
+          statusMessage: TaskListConstants.errorMessages.sortError,
+            statusType: ProgressStatusType.FAILURE
+        });
       });
     }
   }
@@ -304,7 +491,7 @@ export default class CategorySettingsPanel extends React.Component<ICategorySett
     let currentCategory: ICategory = {
       Title: '',
       ID: null,
-      SortOrder: _.maxBy(categories, (t) => t.SortOrder).SortOrder + 1.00000000001,
+      SortOrder: categories.length > 0 ? _.maxBy(categories.filter(c => c.SortOrder), (t) => t.SortOrder).SortOrder + 1.00000000001: 1.0000000000,
       GUID: (categories.length + 1).toString(),
       isNew: true,
       key: '',
@@ -335,8 +522,9 @@ export default class CategorySettingsPanel extends React.Component<ICategorySett
 
   public onDeleteCategory(category : ICategory) {
     let categories = _.cloneDeep(this.state.categories);
+    let allCategories = _.cloneDeep(this.state.allCategories);
     const { deleteSuccess, deleteError } = TaskListConstants.errorMessages;
-    if (category.Group) {
+    if (category.children.length > 0) {
       this.setState({
         preventDelete: true
       });
@@ -345,11 +533,13 @@ export default class CategorySettingsPanel extends React.Component<ICategorySett
         .then((isDeleted) => {
           if (isDeleted) {
             let filterdCategories = categories.filter(c => c.ID !== category.ID);
+            allCategories = allCategories.filter(c => c.ID !== category.ID);
             this.setState({
               categories: filterdCategories,
+              allCategories: allCategories,
               statusMessage: deleteSuccess,
-              statusType: ProgressStatusType.FAILURE
-            }, () => TaskDataProvider.categories = filterdCategories);
+              statusType: ProgressStatusType.SUCCESS
+            }, () => TaskDataProvider.categories = allCategories);
             this.resetStatus();
           } else {
             this.setState({
@@ -370,24 +560,245 @@ export default class CategorySettingsPanel extends React.Component<ICategorySett
 
   public onCheckUniqueToGroup(checked: boolean) {
     const groups = _.cloneDeep(this.state.groups);
+    let allCategories = _.cloneDeep(this.state.allCategories);
+    let newCategories: ICategory[] = [];
     if(checked) {
       const defaultGroup = groups.filter(g => g.IsDefault)[0];
+      const filtered = allCategories.filter(c => c.Group);
+      let displayed = [];
+      if(filtered.length > 0) {
+         displayed = filtered.filter(c => c.Group.Id === defaultGroup.ID);
+         newCategories = this.utilities.mapCategotyItems(displayed);
+      }
       this.setState({
         isUniqueToGroupChecked: true,
-        currentSelectedGroup : defaultGroup
+        currentSelectedGroup : defaultGroup,
+        categories: filtered.length > 0 ? displayed : filtered
+      });
+    } else {
+      allCategories = allCategories.filter(c => !c.Group);
+      this.setState({
+        isUniqueToGroupChecked: false,
+        currentSelectedGroup: null,
+        categories: allCategories
       });
     }
-    this.setState({
-      isUniqueToGroupChecked: false,
-      currentSelectedGroup: null
+  }
+
+  public onClickMakeSubCategory(category: ICategory, index: number) {
+      const categories = _.cloneDeep(this.state.categories);
+      const parent = categories[index - 1];
+      const subcategory = _.cloneDeep(category);
+      subcategory.Parent = {
+        Id : parent.ID,
+        Title:parent.Title
+      };
+      this.dataProvider.updateCategoryItem(this.categoryListName,subcategory.ID,subcategory)
+      .then((isUpdated) => {
+        if(isUpdated) {
+          const updatedCategories = _.cloneDeep(this.state.categories);
+          const [removed] = updatedCategories.splice(index, 1);
+          removed.Parent = {
+            Id: parent.ID,
+            Title:parent.Title
+          };
+          updatedCategories[index - 1].children.push(removed);
+          this.setState({
+            statusMessage: TaskListConstants.errorMessages.updateSuccess,
+            statusType: ProgressStatusType.SUCCESS,
+            categories: updatedCategories
+          });
+          this.resetStatus();
+        } else {
+          this.setState({
+            statusMessage: TaskListConstants.errorMessages.saveError,
+            statusType: ProgressStatusType.FAILURE,
+            categories: categories
+          });
+        }
+      })
+      .catch((e) => {
+        console.log(e);
+        this.setState({
+          statusMessage: TaskListConstants.errorMessages.saveError,
+          statusType: ProgressStatusType.FAILURE,
+          categories: categories
+        });
+      });
+  }
+
+  public onChangeCurrentGroup(option) {
+      const selectionOption: IGroup = option;
+      const categories = _.cloneDeep(this.state.allCategories);
+      const filtered = categories.filter(c => c.Group);
+      let newCategories: ICategory[] = [];
+      let displayed = [];
+      if(filtered.length > 0) {
+        displayed = filtered.filter(c => c.Group.Id === selectionOption.ID);
+        newCategories = this.utilities.mapCategotyItems(displayed);
+      }
+      this.setState({
+        categories: filtered.length > 0 ? newCategories : filtered,
+        currentSelectedGroup: option
+      });
+  }
+
+  public onRevokeSubCategory(category: ICategory, index: number) {
+    const categories = _.cloneDeep(this.state.categories);
+    const updatedCategories = _.cloneDeep(this.state.categories);
+    const allCategories = _.cloneDeep(this.state.allCategories);
+    const subCategory = _.cloneDeep(category);
+    const parentIndex = _.findIndex(updatedCategories, c => c.ID === subCategory.Parent.Id);
+    const [removed]  = updatedCategories[parentIndex].children.splice(index, 1);
+    removed.Parent = null;
+    subCategory.Parent = null;
+    this.dataProvider.updateCategoryItem(this.categoryListName, subCategory.ID, subCategory)
+    .then((isUpdated) => {
+      if(isUpdated) {
+        updatedCategories.push(removed);
+        allCategories.push(removed);
+        this.setState({
+          statusMessage: TaskListConstants.errorMessages.updateSuccess,
+          statusType: ProgressStatusType.SUCCESS,
+          categories: updatedCategories,
+          allCategories: allCategories
+        }, () => TaskDataProvider.categories = allCategories);
+        this.resetStatus();
+      } else {
+        this.setState({
+            statusMessage: TaskListConstants.errorMessages.saveError,
+            statusType: ProgressStatusType.FAILURE,
+            categories: categories
+          });
+        }
+    })
+    .catch((e) => {
+      console.log(e);
+      this.setState({
+        statusMessage: TaskListConstants.errorMessages.saveError,
+        statusType: ProgressStatusType.FAILURE,
+        categories: categories
+      });
     });
   }
 
+  public onDeleteSubCategory(category: ICategory, index: number) {
+    const categories = _.cloneDeep(this.state.categories);
+    const updatedCategories = _.cloneDeep(this.state.categories);
+    const allCategories = _.cloneDeep(this.state.allCategories);
+    const parentIndex = _.findIndex(updatedCategories, c => c.ID === category.Parent.Id);
+    const indexInAllCategories = _.findIndex(allCategories, c => c.ID === category.Parent.Id);
 
-  public onChangeCurrentGroup(option) {
+    this.dataProvider.deleteItem(this.categoryListName, category.ID)
+    .then((isDeleted) =>  {
+        if(isDeleted) {
+          updatedCategories[parentIndex].children.splice(index, 1);
+          allCategories[parentIndex].children.splice(index, 1);
+          this.setState({
+            statusMessage: TaskListConstants.errorMessages.deleteSuccess,
+            statusType: ProgressStatusType.SUCCESS,
+            categories: updatedCategories,
+            allCategories: allCategories
+          }, () => TaskDataProvider.categories = allCategories);
+          this.resetStatus();
+        } else {
+          this.setState({
+            statusMessage: TaskListConstants.errorMessages.deleteError,
+            statusType: ProgressStatusType.FAILURE,
+            categories: categories
+          });
+        }
+    }).catch((e) => {
+      console.log(e);
       this.setState({
-        currentSelectedGroup: option
+        statusMessage: TaskListConstants.errorMessages.deleteError,
+        statusType: ProgressStatusType.FAILURE,
+        categories: categories
       });
+    });
+  }
+
+  public onChangeSubCategoryName(category: ICategory, newValue: string) {
+    let categories = _.cloneDeep(this.state.categories);
+    let allCategories = _.cloneDeep(this.state.allCategories);
+    let parentCategory  = categories.filter(c => c.ID === category.Parent.Id)[0];
+    const index = _.findIndex(parentCategory.children, c => c.ID === category.ID);
+    category.Title = newValue;
+    category.isSaving = true;
+    const isCategoryAlreadyPresent = categories.filter(g => g.Title.toLowerCase() === newValue.toLowerCase()).length > 0;
+    if (!isCategoryAlreadyPresent) {
+      if (this.clearTimeoutvalue) {
+        clearTimeout(this.clearTimeoutvalue);
+      }
+      this.clearTimeoutvalue = setTimeout(() => {
+        this.forceUpdate();
+        this.dataProvider.updateCategoryItem(this.categoryListName, category.ID, category)
+        .then((isUpdated) => {
+          category.isSaving = false;
+          if(isUpdated) {
+            parentCategory.children[index] = category;
+            let updatedCategories = categories.map((c) => {
+              if(c.ID === parentCategory.ID) {
+                return parentCategory;
+              }
+              return c;
+            });
+            allCategories = allCategories.map((c) => {
+              if(c.ID === parentCategory.ID) {
+                return parentCategory;
+              }
+              return c;
+            });
+            this.setState({
+              statusMessage: TaskListConstants.errorMessages.updateSuccess,
+              statusType: ProgressStatusType.SUCCESS,
+              categories: updatedCategories,
+              allCategories: allCategories
+            }, () => TaskDataProvider.categories = allCategories);
+            this.resetStatus();
+          } else {
+            this.setState({
+              statusMessage: TaskListConstants.errorMessages.saveError,
+              statusType: ProgressStatusType.FAILURE,
+              categories: categories,
+              allCategories: allCategories
+            });
+          }
+        }).catch((e) => {
+          console.log(e);
+          this.setState({
+            statusMessage: TaskListConstants.errorMessages.saveError,
+            statusType: ProgressStatusType.FAILURE,
+            categories: categories
+          });
+        });
+      }, 1000);
+    } else {
+      if (this.clearTimeoutvalue) {
+        clearTimeout(this.clearTimeoutvalue);
+      }
+      categories = categories.map(c => {
+        if(c.ID === parentCategory.ID) {
+          c.children  = c.children.map((child) => {
+            if (child.GUID === category.GUID) {
+              child.Title = newValue;
+              child.isExisting = true;
+            } else {
+              child.isExisting = false;
+            }
+            return child;
+          });
+        }
+        return c;
+      });
+      this.clearTimeoutvalue = setTimeout(() => {
+        this.setState({
+          categories: categories,
+          statusMessage: '',
+          statusType: null
+        });
+      }, 1000);
+    }
   }
 
   public render(): React.ReactElement<ICategorySettingsPanelProps> {
@@ -399,7 +810,7 @@ export default class CategorySettingsPanel extends React.Component<ICategorySett
       dialogContentProps={{
         type: DialogType.normal,
         title: 'Delete not allowed',
-        subText: TaskListConstants.preventGroupDeletionText
+        subText: TaskListConstants.preventCategoryDeletionText
       }}
       modalProps={{
         isBlocking: false,
@@ -434,6 +845,7 @@ export default class CategorySettingsPanel extends React.Component<ICategorySett
             {
               this.props.uniqueToGroupEnabled ? (
               <Checkbox
+                  style={{margin: '10px'}}
                   label="Unique to Group"
                   checked = {isUniqueToGroupChecked}
                   onChange={ (e,checked) => {this.onCheckUniqueToGroup(checked);}} />)
@@ -444,10 +856,11 @@ export default class CategorySettingsPanel extends React.Component<ICategorySett
               isUniqueToGroupChecked ?
               (
               <Dropdown
-                      label="Disabled example with defaultSelectedKey"
-                      // defaultSelectedKey={ currentSelectedGroup.Title }
+                      style={{margin: '10px'}}
+                      label="Group"
+                      defaultSelectedKey={ currentSelectedGroup.Title }
                       options={this.state.groups}
-                      onChange={ (e, option, index) => {this.onChangeCurrentGroup(option);} }
+                      onChange={ (e, option) => {this.onChangeCurrentGroup(option);} }
               />
               ) : null
             }
@@ -466,7 +879,7 @@ export default class CategorySettingsPanel extends React.Component<ICategorySett
                         key={category.GUID}
                         draggableId={category.GUID}
                         index={index}
-                        isDragDisabled={category.Title.trim().length === 0}
+                        isDragDisabled={category.Title.trim().length === 0 || category.isSaving}
                       >
                         {(provided, snapshot) => (
                           <div>
@@ -491,12 +904,12 @@ export default class CategorySettingsPanel extends React.Component<ICategorySett
                                />
 
                                 <IconButton
-                                  disabled={ index === 0 || category.Title.length === 0}
+                                  disabled={ index === 0 || category.Title.length === 0 || category.isSaving}
                                   iconProps={{ iconName: 'RowsChild' }}
-                                 // onClick={() => { this.onsubtabGroup(group); }}
+                                  onClick={() => { this.onClickMakeSubCategory(category, index); }}
                                   />
                                 <IconButton
-                                  disabled={category.Title.trim().length === 0 }
+                                  disabled={category.Title.trim().length === 0 || category.isSaving}
                                   iconProps={{ iconName: 'Delete' }}
                                   onClick={() => { this.onDeleteCategory(category); }}
                                   />
@@ -519,6 +932,9 @@ export default class CategorySettingsPanel extends React.Component<ICategorySett
                                 key= { category.GUID }
                                 droppableId = { category.ID }
                                 subItems = { category.children}
+                                onRevokeSubCategory = { this.onRevokeSubCategory.bind(this)}
+                                onDeleteSubCategory = { this.onDeleteSubCategory.bind(this)}
+                                onChangeSubCategoryTitle = { this.onChangeSubCategoryName.bind(this)}
                                 />
                               ) : null
                             }

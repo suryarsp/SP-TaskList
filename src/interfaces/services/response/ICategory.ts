@@ -8,7 +8,7 @@ export interface ICategory {
   isExisting?: boolean;
   ID?: number;
   GUID?:string;
-  Parent?: Group | Category;
+  Parent?: ParentCategory;
   isNew ?: boolean;
   isSaving ?: boolean;
 }
@@ -16,11 +16,11 @@ export interface ICategory {
 
 
 interface Group {
-  Title: string;
+  Title ?: string;
   Id: number;
 }
 
-interface Category {
-  Title: string;
+interface ParentCategory {
+  Title ?: string;
   Id: number;
 }

@@ -4,6 +4,7 @@ import { IGroup } from "../../../../../services/response/IGroup";
 
 export interface ICategorySettingsPanelState {
     categories: ICategory[];
+    allCategories: ICategory[];
     isAddClicked : boolean;
     preventDelete: boolean;
     statusMessage: string;
@@ -11,4 +12,5 @@ export interface ICategorySettingsPanelState {
     isUniqueToGroupChecked: boolean;
     currentSelectedGroup: IGroup;
     groups: IGroup[];
+
 }
