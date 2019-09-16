@@ -12,20 +12,22 @@ export default class TaskInProgressPieChart extends React.Component< ITaskInProg
   public render(): React.ReactElement<ITaskInProgressPieChartProps> {
     return (
       <div>
+        <h4>Task In Progress by Responsible Party</h4>
         <Doughnut 
             data={this.props.chartData} 
-            width={75} 
-            height={15}               
+            width={100} 
+            height={40}               
             options={{
               legend: {
                 display: true,
-                maintainAspectRatio: false,
+                padding:50,
+                maintainAspectRatio: true,
                 position:'right',
                 onClick: (event) => {                                                                                      
                   event.stopPropagation();
                 } 
               },
-              cutoutPercentage: 40,
+              cutoutPercentage: 55,
               responsive: true,               
             }}                
         />
