@@ -34,4 +34,6 @@ export interface IDataProvider {
   insertResponsibleItem?: (listName: string, items: IResponsibleParty)=> Promise<IResponsibleParty>;
   updateResponsibleItem?: (listName: string, itemId: number, items: IResponsibleParty)=> Promise<boolean>;
   deleteListField?: (listName:string,fieldName:string)=>Promise<boolean>;
+
+  getTaskListItem?: (listName:string)=>Promise<any[]>;
 }

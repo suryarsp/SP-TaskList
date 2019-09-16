@@ -1,4 +1,4 @@
-import { IDataProvider, IGroup, IStatus, ICategory, IColumn, IResponsibleParty, IComment, IDocument, ICreateFolder } from "../interfaces/index";
+import { IDataProvider, IGroup, IStatus, ICategory, IColumn, IResponsibleParty, IComment, IDocument, ICreateFolder, ITaskList } from "../interfaces/index";
 
 import { IWebPartContext } from "@microsoft/sp-webpart-base";
 
@@ -277,6 +277,41 @@ export class SharePointDataProvider implements IDataProvider {
           taskFieldsColl.push(fields);
         });
         resolve(taskFieldsColl);
+      });
+    });
+  }
+
+  public getTaskListItem(listName:string):Promise<ITaskList[]>{
+
+    let selectItem = ["Title", "ID", "SortOrder", "Parent/Title", "Parent/Id", "GUID","Category/Id","Category/Title","Responsible/Id","Responsible/Title","TaskStatus/Id","TaskStatus/Title"];
+    let expandItem = ["Parent","TaskStatus","Responsible","Category"];
+    if(TaskDataProvider.listNames.groupListName) {
+      selectItem.push("Group/Title", "Group/Id");
+      expandItem.push("Group");
+    }
+    let TaskListColl: ITaskList[] = [];
+    return new Promise<ITaskList[]>((resolve)=>{
+      this.web.lists.getByTitle(listName).items.top(5000).select(selectItem.toString()).expand(expandItem.toString()).get().then(taskresult=>{
+        console.log("Task List : ", taskresult);
+        console.log("Task List JSON : ", JSON.stringify(taskresult));
+        taskresult.map(element => {
+          let items: ITaskList = {
+            ID: element.ID,
+            Title: element.Title ? element.Title :"",
+            SortOrder: element.SortOrder,
+            Group: element.Group,
+            Parent: element.Parent,          
+            GUID: element.GUID,
+            Category:element.Category,
+            TaskStatus:element.TaskStatus,
+            Responsible:element.Responsible
+          };
+          TaskListColl.push(items);
+        });
+        resolve(TaskListColl);
+      }).catch(error=>{
+        console.log("Get task list item error message :",error);
+        resolve(null);
       });
     });
   }
@@ -946,7 +981,7 @@ export class SharePointDataProvider implements IDataProvider {
 
           await this.web.lists.configure(this.configOptions)
             .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("TaskSort")
+            .fields.getByInternalNameOrTitle("SortOrder")
             .get()
             .then(isItem => {
             })
@@ -956,7 +991,7 @@ export class SharePointDataProvider implements IDataProvider {
                 .getByTitle(listName)
                 .fields.inBatch(batch)
                 .createFieldAsXml(
-                  '<Field Type="Number" DisplayName="TaskSort" Name="TaskSort" Required="TRUE" />'
+                  '<Field Type="Number" DisplayName="SortOrder" Name="SortOrder" Required="TRUE" />'
                 );
             });
 
@@ -998,7 +1033,7 @@ export class SharePointDataProvider implements IDataProvider {
 
           await this.web.lists.configure(this.configOptions)
             .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("Status")
+            .fields.getByInternalNameOrTitle("TaskStatus")
             .get()
             .then(isItem => {
             })
@@ -1008,7 +1043,7 @@ export class SharePointDataProvider implements IDataProvider {
                 .getByTitle(listName)
                 .fields.inBatch(batch)
                 .createFieldAsXml(
-                  '<Field Type="Lookup" DisplayName="Status" Name="Status" Required="TRUE" List="' +
+                  '<Field Type="Lookup" DisplayName="TaskStatus" Name="TaskStatus" Required="TRUE" List="' +
                   this.statusListGUID +
                   '" ShowField="Title" RelationshipDeleteBehavior="None"/>'
                 );
