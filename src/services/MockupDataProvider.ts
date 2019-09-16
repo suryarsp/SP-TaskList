@@ -67,37 +67,47 @@ export class MockupDataProvider implements IDataProvider {
         FontColor:"#ffffff",
         FillColor:"#000000",
         ID:1,
-        GUID:"f37cf4b4-e7bf-4ddc-9955-9f91e09799b5"
+        GUID:"f37cf4b4-e7bf-4ddc-9955-9f91e09799b5",
+        key: "Borrower",
+        text: "Borrower"
       },
       {
         Title:"Borrower Counsel",
         FontColor: "#fbf6f6",
-        FillColor: "#3738b9", 
+        FillColor: "#3738b9",
         ID:2,
-        GUID:"g37cf4b4-e7bf-4ddc-9955-9f91e09799b5"
+        GUID:"g37cf4b4-e7bf-4ddc-9955-9f91e09799b5",
+        key: "Borrower Counsel",
+        text: "Borrower Counsel"
       },
       {
         Title:"Lender",
         FontColor:"#ffffff",
         FillColor:"#ac4e4e",
         ID:3,
-        GUID:"h37cf4b4-e7bf-4ddc-9955-9f91e09799b5"
+        GUID:"h37cf4b4-e7bf-4ddc-9955-9f91e09799b5",
+        key: "Lender",
+        text: "Lender"
       },
       {
         Title:"Lender Counsel",
         FontColor: "#fbf6f6",
-        FillColor: "#3738b9", 
+        FillColor: "#3738b9",
         ID:4,
-        GUID:"i37cf4b4-e7bf-4ddc-9955-9f91e09799b5"
+        GUID:"i37cf4b4-e7bf-4ddc-9955-9f91e09799b5",
+        key: "Lender Counsel",
+        text: "Lender Counsel"
       },
       {
         Title:"Thrid Party",
         FontColor: '#161515',
         FillColor: '#4f07f5',
         ID:5,
-        GUID:"j37cf4b4-e7bf-4ddc-9955-9f91e09799b5"
+        GUID:"j37cf4b4-e7bf-4ddc-9955-9f91e09799b5",
+        key: "Thrid Party",
+        text: "Thrid Party"
       }
-      
+
       ]));
   }
 
@@ -110,7 +120,9 @@ export class MockupDataProvider implements IDataProvider {
           FontColor: "#161515",
           FillColor: "#4f07f5",
           ID: 1,
-          GUID: "9627a854-b28e-4d3f-8fd7-73b077b6a22e"
+          GUID: "9627a854-b28e-4d3f-8fd7-73b077b6a22e",
+          key: "Not Started",
+          text: "Not Started"
         },
         {
           Title: "In Progress",
@@ -118,7 +130,9 @@ export class MockupDataProvider implements IDataProvider {
           FontColor: null,
           FillColor: null,
           ID: 2,
-          GUID: "06d53485-d96d-4a6b-92d7-44e813d9048c"
+          GUID: "06d53485-d96d-4a6b-92d7-44e813d9048c",
+          key: "In Progress",
+          text: "In Progress"
         },
         {
           Title: "c",
@@ -126,7 +140,9 @@ export class MockupDataProvider implements IDataProvider {
           FontColor: "#fcf8f8",
           FillColor: "#1e08f2",
           ID: 4,
-          GUID: "e9a43205-f48f-4090-987b-955dbe7b3681"
+          GUID: "e9a43205-f48f-4090-987b-955dbe7b3681",
+          key: "c",
+          text: "c"
         },
         {
           Title: "Name",
@@ -134,7 +150,9 @@ export class MockupDataProvider implements IDataProvider {
           FontColor: "#fbf6f6",
           FillColor: "#3738b9",
           ID: 5,
-          GUID: "17300e12-2856-4665-8fdf-f855bce2b268"
+          GUID: "17300e12-2856-4665-8fdf-f855bce2b268",
+          key: "Name",
+          text: "Name"
         }
       ])
     );

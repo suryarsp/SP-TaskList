@@ -70,6 +70,18 @@ export default class ProgressButton extends React.Component<IProgressButtonProps
                 this.dataProvider.categoryListCreation(categoryListName).then(
                   (isCategoryCreated) => {
                     if (isCategoryCreated) {
+                      if(isCategoryCreated) {
+                        const defaultcategory: ICategory = {
+                          Title: "All tasks category",
+                          SortOrder: 1.00000000001,
+                          children: [],
+                          key: "1",
+                          text: "All tasks category"
+                        };
+                        this.dataProvider.insertCategoryItem(categoryListName, defaultcategory).then(
+                          () => {
+                          }).catch((e) => console.log(e));
+                      }
                       this.dataProvider.documentLibraryCreation(libraryName).then(
                         (isLibraryCreated) => {
                           if (isLibraryCreated) {
@@ -86,25 +98,12 @@ export default class ProgressButton extends React.Component<IProgressButtonProps
                                           statusListName: statusListName,
                                           taskListName: taskListName
                                         };
-                                        const defaultcategory: ICategory = {
-                                          Title: "All tasks category",
-                                          SortOrder: 1.00000000001,
-                                          children: [],
-                                          key: "1",
-                                          text: "All tasks category"
-                                        };
-                                        this.dataProvider.insertCategoryItem(categoryListName, defaultcategory).then(
-                                          (isInsertCategory) => {
-                                            if (isInsertCategory) {
                                               this.setState({
                                                 creationSuccess: true,
                                                 creationInProgress: false,
                                                 disabled: true,
                                                 creationFailed: false
                                               });
-
-                                            }
-                                          });
                                       }
                                     });
                                 }

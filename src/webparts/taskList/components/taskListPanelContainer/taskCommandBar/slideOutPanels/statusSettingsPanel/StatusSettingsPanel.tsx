@@ -150,7 +150,9 @@ export default class StatusSettingsPanel extends React.Component<IStatusSettings
       GUID: (this.state.status.length + 1).toString(),
       FontColor: "",
       FillColor: "",
-      isNew: true
+      isNew: true,
+      key: '',
+      text: ''
     };
     const status = _.cloneDeep(this.state.status);
     status.push(currentStatus);
@@ -489,7 +491,7 @@ export default class StatusSettingsPanel extends React.Component<IStatusSettings
     result.splice(endIndex, 0, removed);
     return result;
   }
- 
+
   public onClickNoColor(status: IStatus,noColor:string) {
     let statuses = _.cloneDeep(this.state.status);
     if(noColor === "Fill"){
@@ -498,8 +500,8 @@ export default class StatusSettingsPanel extends React.Component<IStatusSettings
     else if(noColor === "Font"){
       status.FontColor = null;
     }
-    
-    
+
+
     const isStatusAlreadyPresent = statuses.filter(s => s.Title.toLowerCase() === status.Title.toLowerCase()).length > 0;
     if (status.ID) {
       if (isStatusAlreadyPresent) {
@@ -602,7 +604,7 @@ export default class StatusSettingsPanel extends React.Component<IStatusSettings
                                     color: cStatus.FontColor,
                                     backgroundColor: cStatus.FillColor
                                   }}
-                                  autoFocus={true}                                  
+                                  autoFocus={true}
                                   onChange={(e, newValue) => { this.onChangeStatusTitle(newValue, cStatus); }}
                                   errorMessage={cStatus.isExisting ? "Value already exists" : ""}
                                 />

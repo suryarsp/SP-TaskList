@@ -196,7 +196,9 @@ export class SharePointDataProvider implements IDataProvider {
             Title: element.Title ? element.Title : "",
             FontColor: element.FontColor,
             FillColor: element.FillColor,
-            GUID: element.GUID
+            GUID: element.GUID,
+            key : element.ID,
+            text :  element.Title ? element.Title : ""
           };
           ResponsibleListColl.push(items);
         });
@@ -219,7 +221,9 @@ export class SharePointDataProvider implements IDataProvider {
             Title: element.Title ? element.Title : "",
             FillColor: element.FillColor,
             SortOrder: element.SortOrder,
-            GUID: element.GUID
+            GUID: element.GUID,
+            key : element.ID,
+            text :  element.Title ? element.Title : ""
           };
           StatusitemsListColl.push(items);
         });
@@ -328,7 +332,7 @@ export class SharePointDataProvider implements IDataProvider {
     return new Promise<ITaskList>((resolve)=>{
       this.web.lists.getByTitle(listName).items.getById(itemId).select(selectItem.toString()).expand(expandItem.toString()).get().then(taskresult=>{
         console.log("Task List : ", taskresult);
-        console.log("Task List JSON : ", JSON.stringify(taskresult));        
+        console.log("Task List JSON : ", JSON.stringify(taskresult));
           let items: ITaskList = {
             ID: taskresult.ID,
             Title: taskresult.Title ? taskresult.Title :"",
@@ -341,7 +345,7 @@ export class SharePointDataProvider implements IDataProvider {
             Responsible:taskresult.Responsible,
             Comments:taskresult.Comments ? taskresult.Comments : [],
             children:[]
-          };         
+          };
         resolve(items);
       }).catch(error=>{
         console.log("Get task list item error message :",error);
@@ -360,14 +364,14 @@ export class SharePointDataProvider implements IDataProvider {
       }
       if(taskItem.Group)
       {
-        obj["GroupId"] = taskItem.Group.Id;    
+        obj["GroupId"] = taskItem.Group.Id;
       }
-      else if(taskItem.Parent){      
-        obj["ParentId"] = taskItem.Parent.Id;       
+      else if(taskItem.Parent){
+        obj["ParentId"] = taskItem.Parent.Id;
       }
-     
+
       obj["Title"] = taskItem.Title;
-      obj["SortOrder"] = taskItem.SortOrder;     
+      obj["SortOrder"] = taskItem.SortOrder;
       obj["CategoryId"] = taskItem.Category.Id;
       obj["ResponsibleId"] = taskItem.Responsible.Id;
       obj["CommentsId"] = { results : taskItem.CommentsId};
@@ -397,7 +401,7 @@ export class SharePointDataProvider implements IDataProvider {
               Id:insertTask.data.Task_x0020_Status
             },
             Comments:insertTask.data.CommentsId,
-            children:[]            
+            children:[]
           };
           response(taskList);
         }
@@ -421,14 +425,14 @@ export class SharePointDataProvider implements IDataProvider {
       }
       if(taskItem.Group)
       {
-        obj["GroupId"] = taskItem.Group.Id;    
+        obj["GroupId"] = taskItem.Group.Id;
       }
-      else if(taskItem.Parent){      
-        obj["ParentId"] = taskItem.Parent.Id;       
+      else if(taskItem.Parent){
+        obj["ParentId"] = taskItem.Parent.Id;
       }
-     
+
       obj["Title"] = taskItem.Title;
-      obj["SortOrder"] = taskItem.SortOrder;     
+      obj["SortOrder"] = taskItem.SortOrder;
       obj["CategoryId"] = taskItem.Category.Id;
       obj["ResponsibleId"] = taskItem.Responsible.Id;
       obj["CommentsId"] = { results : taskItem.CommentsId};
@@ -532,7 +536,9 @@ export class SharePointDataProvider implements IDataProvider {
             FontColor: insertstatus.data.FontColor,
             FillColor: insertstatus.data.FillColor,
             ID: insertstatus.data.ID,
-            GUID: insertstatus.data.GUID
+            GUID: insertstatus.data.GUID,
+            key : insertstatus.data.ID,
+            text :  insertstatus.data.Title
           };
           response(item);
         }
@@ -584,7 +590,9 @@ export class SharePointDataProvider implements IDataProvider {
             FontColor: insertResponsible.data.FontColor,
             FillColor: insertResponsible.data.FillColor,
             ID: insertResponsible.data.ID,
-            GUID: insertResponsible.data.GUID
+            GUID: insertResponsible.data.GUID,
+            key : insertResponsible.data.ID,
+            text :  insertResponsible.data.Title
           };
           response(item);
         }

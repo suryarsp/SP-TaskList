@@ -147,7 +147,9 @@ export default class ResponsiblePartySettingsPanel extends React.Component<IResp
       GUID: (this.state.responsibles.length + 1).toString(),
       FontColor: "#000000",
       FillColor: "#ffffff",
-      isNew: true
+      isNew: true,
+      key: '',
+      text: ''
     };
     const responsibles = _.cloneDeep(this.state.responsibles);
     responsibles.push(currentResponsible);
@@ -403,8 +405,8 @@ export default class ResponsiblePartySettingsPanel extends React.Component<IResp
                   <div className={styles.colortask}>Fill Color</div>
                   <div>Font Color</div>
                 </div>
-                      
-                  {responsibles.map((cResponsible, index) => (                       
+
+                  {responsibles.map((cResponsible, index) => (
                           <div className={styles.responsibleContainer}> <TextField
                               value={cResponsible.Title}
                               disabled={!this.canUpdateItem}
@@ -446,10 +448,10 @@ export default class ResponsiblePartySettingsPanel extends React.Component<IResp
                               cResponsible.isSaving ? <Spinner size={SpinnerSize.medium} hidden={!cResponsible.isSaving} /> : null
                             }
 
-                          </div>                              
-                      ))} 
-                      
-                   
+                          </div>
+                      ))}
+
+
 
 
                 {/* Add Button */}
@@ -541,4 +543,3 @@ export default class ResponsiblePartySettingsPanel extends React.Component<IResp
     }
   }
 }
- 
