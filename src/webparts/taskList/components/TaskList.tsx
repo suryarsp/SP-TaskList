@@ -53,8 +53,7 @@ export default class TaskList extends React.Component<ITaskListProps, ITaskListS
       this.dataProvider.listExists(taskListName)
     ];
     if(isGroupingEnabled && groupListName) {
-      promises.push(this.dataProvider.listExists(groupListName));
-      TaskDataProvider.isGroupingEnabled = isGroupingEnabled;
+      promises.push(this.dataProvider.listExists(groupListName));      
     }
       Promise.all(promises).then((values) => {
               if (values.filter(v => !v).length === 0) {
