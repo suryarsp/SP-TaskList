@@ -1,3 +1,6 @@
+import { ITaskList } from '../../../../interfaces/index';
+import { IPermissions } from '../../../../services';
+
 export interface ITaskCommandBarProps {
   onClickDelete: () => void;
   onCancelSelection: () => void;
@@ -6,4 +9,8 @@ export interface ITaskCommandBarProps {
   isAllItemsSelected: boolean;
   selectedCount: number;
   uniqueToGroupEnabled: boolean;
+  isGroupingEnabled: boolean;
+  selectedItem: ITaskList;
+  listPermissions: IPermissions[];
+  libraryPermissions : IPermissions[];
 }
