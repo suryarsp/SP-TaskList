@@ -595,9 +595,10 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
 
                                 <TextField
                                   value={group.Title}
-                                  disabled={!this.canUpdateItem || group.IsDefault || group.isSaving}
+                                  disabled={!this.canUpdateItem || group.IsDefault}
                                   styles={{ fieldGroup: { width: 200 } }}
                                   autoFocus={true}
+                                  onBlur= { (e) => { console.log(e.target.value);}}
                                   onChange={(e, newValue) => { this.onChangeGroupTitle(newValue, group); }}
                                   errorMessage={group.isExisting ? "Value already exists" : ""} />
 

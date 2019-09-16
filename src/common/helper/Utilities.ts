@@ -1,10 +1,14 @@
+import { ICategory } from "../../interfaces";
+import _ from "lodash";
+
 export class Utilties {
      public static instance: Utilties;
-     constructor() {
 
-     }
+     public constructor() {
 
-     public static getInstance() {
+    }
+
+     public static get Instance() {
           if (!Utilties.instance) {
                Utilties.instance = new Utilties();
           }
@@ -32,6 +36,12 @@ export class Utilties {
           let fileNameItems = fileName.split('.');
           let fileExtenstion = fileNameItems[fileNameItems.length - 1];
           return this.GetImgUrlByFileExtension(fileExtenstion);
+     }
+
+     public GetFieldInteralName(fileName:string):string{
+          if(fileName){
+               return fileName.replace("_x0020_", " ");     
+          }
      }
 
 
@@ -263,5 +273,19 @@ export class Utilties {
           else {
                return "";
           }
+     }
+
+     public mapCategotyItems(categories: ICategory[]) {
+       let newCategories: ICategory[] = [];
+       categories.map((category) => {
+        if(category.Parent) {
+          const parentIndex = _.findIndex(newCategories, c => c.ID === category.Parent.Id);
+          newCategories[parentIndex].children.push(category);
+        } else {
+          newCategories.push(category);
+        }
+      });
+
+       return newCategories;
      }
 }

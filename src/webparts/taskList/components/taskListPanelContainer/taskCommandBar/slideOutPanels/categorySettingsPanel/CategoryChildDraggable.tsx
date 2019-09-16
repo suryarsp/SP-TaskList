@@ -1,18 +1,12 @@
 import * as React from 'react';
 import styles from './CategorySettingsPanel.module.scss';
-import { ICategorySettingsPanelProps, ICategorySettingsPanelState, IDataProvider, ICategory } from '../../../../../../../interfaces/index';
-import { IconButton, PrimaryButton } from 'office-ui-fabric-react/lib/Button';
-import TaskDataProvider from '../../../../../../../services/TaskDataProvider';
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { ProgressStatusType } from '../../../../../../../interfaces/enums/progressStatusType';
-import { MessageBarType, DialogType, Dialog, DialogFooter, Layer, MessageBar, TextField, Checkbox } from 'office-ui-fabric-react';
-import { TaskListConstants } from '../../../../../../../common/defaults/taskList-constants';
-import { MockupDataProvider } from '../../../../../../../services';
-import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
+import { ICategory } from '../../../../../../../interfaces/index';
+import { IconButton } from 'office-ui-fabric-react/lib/Button';
+import { Droppable, Draggable } from "react-beautiful-dnd";
+import { TextField, Spinner, SpinnerSize } from 'office-ui-fabric-react';
 
 
 
-const grid = 8;
 
 const getItemStyle = (isDragging, draggableStyle) => {
   if (isDragging) {
@@ -42,11 +36,12 @@ const getItemStyle = (isDragging, draggableStyle) => {
 };
 
 
-const getListStyle = isDraggingOver => ({
-  background: isDraggingOver ? "lightblue" : "#FFFFF"
+const getListStyle = () => ({
+  // background: isDraggingOver ? "lightblue" : "#FFFFF"
 });
 
 export default class CategoryChildDraggable extends React.Component<ICategoryChildDraggableProps> {
+
 
   public render() {
 
@@ -58,10 +53,12 @@ export default class CategoryChildDraggable extends React.Component<ICategoryChi
       {(provided, snapshot) => (
         <div
           ref={provided.innerRef}
-          style={getListStyle(snapshot.isDraggingOver)}
         >
           {this.props.subItems.map((item, index) => (
-            <Draggable key={item.GUID} draggableId={item.GUID} index={index}>
+            <Draggable
+            key={item.GUID}
+            draggableId={item.GUID} index={index}
+            >
               {(p, s) => (
                 <div style={{ display: "flex" }}>
                   <div
@@ -80,22 +77,29 @@ export default class CategoryChildDraggable extends React.Component<ICategoryChi
                               <IconButton
                                   disabled={item.Title.trim().length === 0 }
                                   iconProps={{ iconName: 'RevToggleKey' }}
-                                 // onClick={() => { this.onDeleteGroup(group); }}
+                                  onClick={() => { this.props.onRevokeSubCategory(item, index);}}
                                   />
 
                               <TextField
                                 value={item.Title}
                                 styles={{ fieldGroup: { width: 200 } }}
                                 autoFocus={true}
-                              //  onChange={(e, newValue) => { this.onChangeGroupTitle(newValue, group); }}
+                                onBlur= {(e) => {console.log(e);}}
+                                onChange={(e, newValue) => { this.props.onChangeSubCategoryTitle(item, newValue); }}
                                 errorMessage ={ item.isExisting ? "Value already exists" : ""}
                                />
 
                                 <IconButton
                                   disabled={item.Title.trim().length === 0 }
                                   iconProps={{ iconName: 'Delete' }}
-                                 // onClick={() => { this.onDeleteGroup(group); }}
+                                 onClick={() => { this.props.onDeleteSubCategory(item,index); }}
                                   />
+
+                                   {
+                                    item.isSaving ?
+                                    (<Spinner
+                                    size={SpinnerSize.medium}/>) : null
+                                }
                             </div>
                   </div>
                   {provided.placeholder}
@@ -114,4 +118,7 @@ export default class CategoryChildDraggable extends React.Component<ICategoryChi
 export interface ICategoryChildDraggableProps {
   subItems: ICategory[];
   droppableId: number;
+  onRevokeSubCategory: (subCategory: ICategory, index: number) => void;
+  onDeleteSubCategory: ( subCategory: ICategory, index: number) => void;
+  onChangeSubCategoryTitle: (category: ICategory, newValue: string) => void;
 }

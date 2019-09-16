@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Dropdown, IDropdownStyles, IDropdownOption } from 'office-ui-fabric-react/lib/Dropdown';
 import TaskDataProvider from  '../../../../../services/TaskDataProvider';
 import { SearchBox } from 'office-ui-fabric-react/lib/SearchBox';
-import { ITaskFilterProps,ITaskFilterState, IDataProvider, IGroup } from '../../../../../interfaces/index'; 
+import { ITaskFilterProps,ITaskFilterState, IDataProvider, IGroup } from '../../../../../interfaces/index';
 import _ from 'lodash';
 import {  css } from 'office-ui-fabric-react';
 require("../../../../../styles/main.css");
@@ -10,7 +10,7 @@ require("../../../../../styles/main.css");
 const dropdownStyles: Partial<IDropdownStyles> = {
     dropdown: { width: 300 }
   };
-  
+
 export default class TaskFilter extends React.Component<ITaskFilterProps ,ITaskFilterState> {
     private dataProvider: IDataProvider;
     private options: IDropdownOption[]=[];
@@ -21,8 +21,7 @@ export default class TaskFilter extends React.Component<ITaskFilterProps ,ITaskF
             searchedValue:''
         };
     }
-    public componentDidMount(){    
-        debugger;    
+    public componentDidMount() {
         this.dataProvider = TaskDataProvider.Instance;
         const {groupListName}=TaskDataProvider.listNames;
         this.dataProvider.getGroups(groupListName).then((groups)=>{

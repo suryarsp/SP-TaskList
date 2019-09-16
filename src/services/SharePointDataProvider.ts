@@ -1,4 +1,4 @@
-import { IDataProvider, IGroup, IStatus, ICategory, IColumn, IResponsibleParty, IComment, IDocument, ICreateFolder } from "../interfaces/index";
+import { IDataProvider, IGroup, IStatus, ICategory, IColumn, IResponsibleParty, IComment, IDocument, ICreateFolder, ITaskList } from "../interfaces/index";
 
 import { IWebPartContext } from "@microsoft/sp-webpart-base";
 
@@ -16,7 +16,7 @@ export class SharePointDataProvider implements IDataProvider {
   public _context: IWebPartContext;
   public _relativeUrl: string;
   public web: Web;
-  public utility = new Utilties();
+  public utilities : Utilties;
   public DocumentsColumnTitle: string = "Documents";
   public static globalFileDownloadIndex: number = 1;
   private groupListGUID: string;
@@ -38,6 +38,7 @@ export class SharePointDataProvider implements IDataProvider {
     this._context = context;
     this.web = new Web(this._absoluteUrl);
     this._relativeUrl = context.pageContext.web.serverRelativeUrl;
+    this.utilities = Utilties.Instance;
   }
 
 
@@ -253,7 +254,7 @@ export class SharePointDataProvider implements IDataProvider {
             children: [],
             key: element.ID.toString(),
             text: element.Title ? element.Title :"",
-            GUID: element.Title ? element.Title :""
+            GUID: element.GUID
           };
           CategoryListColl.push(items);
         });
@@ -281,6 +282,99 @@ export class SharePointDataProvider implements IDataProvider {
     });
   }
 
+  public getTaskListItem(listName:string):Promise<ITaskList[]>{
+    let taskStatusName = "Task_x0020_Status";//this.utility.GetFieldInteralName("Task Status");
+    let selectItem = ["Title", "ID", "SortOrder", "Parent/Title", "Parent/Id", "GUID","Category/Id","Category/Title","Responsible/Id","Responsible/Title",taskStatusName+"/Id",taskStatusName+"/Title"];
+    let expandItem = ["Parent",taskStatusName,"Responsible","Category"];
+    if(TaskDataProvider.listNames.groupListName) {
+      selectItem.push("Group/Title", "Group/Id");
+      expandItem.push("Group");
+    }
+    let TaskListColl: ITaskList[] = [];
+    return new Promise<ITaskList[]>((resolve)=>{
+      this.web.lists.getByTitle(listName).items.top(5000).select(selectItem.toString()).expand(expandItem.toString()).get().then(taskresult=>{
+        console.log("Task List : ", taskresult);
+        console.log("Task List JSON : ", JSON.stringify(taskresult));
+        taskresult.map(element => {
+          let items: ITaskList = {
+            ID: element.ID,
+            Title: element.Title ? element.Title :"",
+            SortOrder: element.SortOrder,
+            Group: element.Group,
+            Parent: element.Parent,
+            GUID: element.GUID,
+            Category:element.Category,
+            TaskStatus:element.taskStatusName,
+            Responsible:element.Responsible
+          };
+          TaskListColl.push(items);
+        });
+        resolve(TaskListColl);
+      }).catch(error=>{
+        console.log("Get task list item error message :",error);
+        resolve(null);
+      });
+    });
+  }
+
+
+  public insertTaskListItem(listName:string,taskItem:ITaskList):Promise<ITaskList>{
+    return new Promise<ITaskList>((response)=>{
+      let taskStatusName = "Task_x0020_Status";//this.utility.GetFieldInteralName("Task Status");
+      let obj = {};
+      if(taskItem.Group && taskItem.Parent){
+        obj["ParentId"] = taskItem.Parent.Id;
+        obj["GroupId"] = taskItem.Group.Id;
+      }
+      if(taskItem.Group)
+      {
+        obj["GroupId"] = taskItem.Group.Id;    
+      }
+      else if(taskItem.Parent){      
+        obj["ParentId"] = taskItem.Parent.Id;       
+      }
+     
+      obj["Title"] = taskItem.Title;
+      obj["SortOrder"] = taskItem.SortOrder;     
+      obj["CategoryId"] = taskItem.Category.Id;
+      obj["ResponsibleId"] = taskItem.Responsible.Id;
+      obj[taskStatusName+"Id"] = taskItem.TaskStatus.Id;
+
+      this.web.lists.getByTitle(listName).items.add(obj).then((insertTask)=>{
+        if (insertTask) {
+          console.log("Insert category item : ", insertTask);
+          let taskList : ITaskList = {
+            Title: insertTask.data.Title,
+            SortOrder: insertTask.data.SortOrder,
+            Group: {
+              Id:insertTask.data.GroupId
+            },
+            Parent: {
+              Id:insertTask.data.ParentId
+            },
+            ID: insertTask.data.ID,
+            GUID: insertTask.data.GUID,
+            Category:{
+              Id:insertTask.data.CategoryId
+            },
+            Responsible:{
+              Id:insertTask.data.ResponsibleId
+            },
+            TaskStatus:{
+              Id:insertTask.data.Task_x0020_Status
+            }
+          };
+          response(taskList);
+        }
+        else {
+          response(null);
+        }
+      }).catch(error=>{
+        console.log("Insert Task list item error message : ", error);
+        response(null);
+      });
+    });
+  }
 
   //Group List Methods start
   public insertGroupItem(listName: string, group: IGroup): Promise<IGroup> {
@@ -491,7 +585,9 @@ export class SharePointDataProvider implements IDataProvider {
           let category : ICategory = {
             Title: insertCategory.data.Title,
             SortOrder: insertCategory.data.SortOrder,
-            Group: insertCategory.data.Group,
+            Group: {
+              Id:insertCategory.data.GroupId
+            },
             Parent: insertCategory.data.Parent,
             ID: insertCategory.data.ID,
             GUID: insertCategory.data.GUID,
@@ -516,8 +612,8 @@ export class SharePointDataProvider implements IDataProvider {
       this.web.lists.configure(this.configOptions).getByTitle(listName).items.getById(itemId).update({
         Title: items.Title,
         SortOrder: items.SortOrder,
-        GroupId: items.Group.Id,
-        ParentId: items.Parent.Id
+        GroupId:  items.Group ? items.Group.Id : null,
+        ParentId: items.Parent ? items.Parent.Id : null
       }).then(updateCategory => {
         if (updateCategory) {
           console.log("Update category item : ", updateCategory);
@@ -946,7 +1042,7 @@ export class SharePointDataProvider implements IDataProvider {
 
           await this.web.lists.configure(this.configOptions)
             .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("TaskSort")
+            .fields.getByInternalNameOrTitle("SortOrder")
             .get()
             .then(isItem => {
             })
@@ -956,7 +1052,7 @@ export class SharePointDataProvider implements IDataProvider {
                 .getByTitle(listName)
                 .fields.inBatch(batch)
                 .createFieldAsXml(
-                  '<Field Type="Number" DisplayName="TaskSort" Name="TaskSort" Required="TRUE" />'
+                  '<Field Type="Number" DisplayName="SortOrder" Name="SortOrder" Required="TRUE" />'
                 );
             });
 
@@ -998,7 +1094,7 @@ export class SharePointDataProvider implements IDataProvider {
 
           await this.web.lists.configure(this.configOptions)
             .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("Status")
+            .fields.getByInternalNameOrTitle("Task Status")
             .get()
             .then(isItem => {
             })
@@ -1008,7 +1104,7 @@ export class SharePointDataProvider implements IDataProvider {
                 .getByTitle(listName)
                 .fields.inBatch(batch)
                 .createFieldAsXml(
-                  '<Field Type="Lookup" DisplayName="Status" Name="Status" Required="TRUE" List="' +
+                  '<Field Type="Lookup" DisplayName="Task Status" Name="Task Status" Required="TRUE" List="' +
                   this.statusListGUID +
                   '" ShowField="Title" RelationshipDeleteBehavior="None"/>'
                 );
@@ -1264,7 +1360,7 @@ export class SharePointDataProvider implements IDataProvider {
             resolve(this.uploadFileWithValidFolderPath(folderRelativePath, file));
           }
           else {
-            this.createFolderInDocument(libraryName, this.utility.GetLeafName(folderRelativePath))
+            this.createFolderInDocument(libraryName, this.utilities.GetLeafName(folderRelativePath))
               .then((folderCreationResult) => {
                 resolve(this.uploadFileWithValidFolderPath(folderRelativePath, file));
               });
@@ -1293,8 +1389,8 @@ export class SharePointDataProvider implements IDataProvider {
           });
       }
       else {
-        let fileName = this.utility.EscapeSpecialCharacters(file.name);
-        folderRelativePath = this.utility.EscapeSpecialCharacters(folderRelativePath);
+        let fileName = this.utilities.EscapeSpecialCharacters(file.name);
+        folderRelativePath = this.utilities.EscapeSpecialCharacters(folderRelativePath);
         this.web.getFolderByServerRelativePath(folderRelativePath)
           .select("ID")
           .files
@@ -1328,8 +1424,8 @@ export class SharePointDataProvider implements IDataProvider {
         let fileGuid = util.getGUID();
         let postUrl: string = webAbsoluteUrl
           + "/_api/web/GetFolderByServerRelativePath(DecodedUrl=@a1)/Files/AddStubUsingPath(DecodedUrl=@a2)/StartUpload(uploadId=@a3)?@a1='"
-          + this.utility.EscapeSpecialCharacters(webRelativeUrl + "/" + folderRelativePath) + "'&@a2='"
-          + this.utility.EscapeSpecialCharacters(file.name) + "'&@a3=guid'" + fileGuid + "'";
+          + this.utilities.EscapeSpecialCharacters(webRelativeUrl + "/" + folderRelativePath) + "'&@a2='"
+          + this.utilities.EscapeSpecialCharacters(file.name) + "'&@a3=guid'" + fileGuid + "'";
         const spOpts: ISPHttpClientOptions = {
           headers: {
             "Content-Type": "application/json;odata=verbose",
@@ -1358,7 +1454,7 @@ export class SharePointDataProvider implements IDataProvider {
     return new Promise<any>((resolve) => {
       let postUrl: string = webAbsoluteUrl
         + "/_api/web/GetFileByServerRelativePath(DecodedUrl=@a1)/FinishUpload(uploadId=@a2,fileOffset=@a3)?@a1='"
-        + this.utility.EscapeSpecialCharacters(webRelativeUrl + "/" + folderRelativePath + "/" + file.name) + "'&@a2='"
+        + this.utilities.EscapeSpecialCharacters(webRelativeUrl + "/" + folderRelativePath + "/" + file.name) + "'&@a2='"
         + guid + "'&@a3='" + responseJSON.d.StartUpload + "'";
       const spOpts: ISPHttpClientOptions = {
         headers: {
@@ -1406,7 +1502,7 @@ export class SharePointDataProvider implements IDataProvider {
       }
       let web = new Web(this._absoluteUrl);
       let path = url + "/" + file.name;
-      path = this.utility.EscapeSpecialCharacters(path);
+      path = this.utilities.EscapeSpecialCharacters(path);
       web.getFileByServerRelativePath(path).get().then((result: any) => {
         if (result) {
           resolve(true);
@@ -1425,7 +1521,7 @@ export class SharePointDataProvider implements IDataProvider {
   public getFilesFromSpecificFolder(folderRelativePath: string, item: any, libraryName: string): Promise<any[]> {
     return new Promise<any[]>((resolve) => {
       let url: string;
-      url = this.utility.EscapeSpecialCharacters(folderRelativePath);
+      url = this.utilities.EscapeSpecialCharacters(folderRelativePath);
       this.web.getFolderByServerRelativePath(url)
         .files
         .top(5000)
@@ -1531,8 +1627,8 @@ export class SharePointDataProvider implements IDataProvider {
   ): Promise<boolean> {
     return new Promise<boolean>((resolve) => {
       let web = new Web(this._absoluteUrl);
-      let parentFolderPath = this.utility.GetParentFolderPath(foldeRelativePath);
-      let folderName = this.utility.GetLeafName(foldeRelativePath);
+      let parentFolderPath = this.utilities.GetParentFolderPath(foldeRelativePath);
+      let folderName = this.utilities.GetLeafName(foldeRelativePath);
       let path = webRelativeUrl + "/" + parentFolderPath;
       web.lists.getByTitle(libraryname)
         .renderListDataAsStream({
@@ -1600,8 +1696,8 @@ export class SharePointDataProvider implements IDataProvider {
   ): Promise<boolean> {
     return new Promise<boolean>((resolve) => {
       let web = new Web(this._absoluteUrl);
-      let parentFolderPath = this.utility.GetParentFolderPath(foldeRelativePath[0]);
-      let folderName = this.utility.GetLeafName(foldeRelativePath[0]);
+      let parentFolderPath = this.utilities.GetParentFolderPath(foldeRelativePath[0]);
+      let folderName = this.utilities.GetLeafName(foldeRelativePath[0]);
       let path = webRelativeUrl + "/" + parentFolderPath;
       web.lists.getByTitle(libraryname)
         .renderListDataAsStream({
@@ -1628,8 +1724,8 @@ export class SharePointDataProvider implements IDataProvider {
                   let requests: Promise<IDownloadItems>[] = [];
 
                   foldeRelativePath.forEach((relPath) => {
-                    parentFolderPath = this.utility.GetParentFolderPath(relPath);
-                    folderName = this.utility.GetLeafName(relPath);
+                    parentFolderPath = this.utilities.GetParentFolderPath(relPath);
+                    folderName = this.utilities.GetLeafName(relPath);
                     path = webRelativeUrl + "/" + parentFolderPath;
                     requests.push(this.getDownloadItem(libraryname, relPath, webRelativeUrl));
                   });
@@ -1661,8 +1757,8 @@ export class SharePointDataProvider implements IDataProvider {
     pagingText?: string): Promise<IDownloadItems> {
     return new Promise<IDownloadItems>((resolve) => {
       let web = new Web(this._absoluteUrl);
-      let parentFolderPath = this.utility.GetParentFolderPath(foldeRelativePath);
-      let folderName = this.utility.GetLeafName(foldeRelativePath);
+      let parentFolderPath = this.utilities.GetParentFolderPath(foldeRelativePath);
+      let folderName = this.utilities.GetLeafName(foldeRelativePath);
       let path = webRelativeUrl + "/" + parentFolderPath;
       web.lists.getByTitle(libraryname)
         .renderListDataAsStream({
