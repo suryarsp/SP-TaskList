@@ -307,7 +307,7 @@ export class SharePointDataProvider implements IDataProvider {
             GUID: element.GUID,
             Category:element.Category,
             SubCategory:element.SubCategory,
-            TaskStatus:element.taskStatusName,
+            TaskStatus:element[taskStatusName],
             Responsible:element.Responsible,
             Comments:element.Comments ? element.Comments : [],
             children:[]
