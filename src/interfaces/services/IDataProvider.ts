@@ -36,8 +36,9 @@ export interface IDataProvider {
   deleteListField?: (listName:string,fieldName:string)=>Promise<boolean>;
 
   getTaskListItem?: (listName:string)=>Promise<ITaskList[]>;
-  insertTaskListItem?:(listName:string,taskItem:ITaskList)=>Promise<ITaskList>;
-  updateTaskListItem?:(listName:string,taskItem:ITaskList,itemId:number)=>Promise<boolean>;
-  getTaskListItemById?:(listName:string,itemId:number)=>Promise<ITaskList>;
-  bulkInsertGroupFieldItem?:(listName: string, item: Group[]) => Promise<Group[]>;
+  insertTaskListItem?: (listName:string,taskItem:ITaskList)=>Promise<ITaskList>;
+  updateTaskListItem?: (listName:string,taskItem:ITaskList,itemId:number)=>Promise<boolean>;
+  getTaskListItemById?: (listName:string,itemId:number)=>Promise<ITaskList>;
+  bulkUpdateCategoryItem?: (listName: string, items: ICategory[],groupItemId:number) => Promise<boolean>;
+  bulkUpdateTaskItem?: (listName: string, items: ITaskList[],groupItemId:number) => Promise<boolean>;
 }

@@ -95,7 +95,7 @@ export default class CategorySettingsPanel extends React.Component<ICategorySett
           this.setState({
             categories: newCategories,
             allCategories: newCategories
-          });
+          }, () => TaskDataProvider.categories = newCategories);
         }
     }).
     catch((error) => {

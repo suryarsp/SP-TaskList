@@ -1,4 +1,4 @@
-import { IDataProvider, IGroup, IStatus, ICategory, IColumn, IResponsibleParty, IComment, IDocument, ICreateFolder, ITaskList, Group } from "../interfaces/index";
+import { IDataProvider, IGroup, IStatus, ICategory, IColumn, IResponsibleParty, IComment, IDocument, ICreateFolder, ITaskList, Group, Category } from "../interfaces/index";
 
 import { IWebPartContext } from "@microsoft/sp-webpart-base";
 
@@ -243,7 +243,7 @@ export class SharePointDataProvider implements IDataProvider {
     let web: Web = new Web(this._absoluteUrl);
     let CategoryListColl: ICategory[] = [];
     return new Promise<ICategory[]>(resolve => {
-      web.lists.configure(this.configOptions).getByTitle(listname).items.select(selectItem.toString()).expand(expandItem.toString()).top(5000).get().then((categoryitems: ICategory[]) => {
+      web.lists.configure(this.configOptions).getByTitle(listname).items.select(selectItem.toString()).expand(expandItem.toString()).top(5000).orderBy("ParentId",true).get().then((categoryitems: ICategory[]) => {
         console.log("category : ", categoryitems);
         console.log("category JSON : ", JSON.stringify(categoryitems));
         categoryitems.map(element => {
@@ -286,8 +286,8 @@ export class SharePointDataProvider implements IDataProvider {
 
   public getTaskListItem(listName:string):Promise<ITaskList[]>{
     let taskStatusName = this.utilities.GetFieldInteralName("Task Status");
-    let selectItem = ["Title", "ID", "SortOrder", "Parent/Title", "Parent/Id", "GUID","Comments/Id","Category/Id","Category/Title","Responsible/Id","Responsible/Title",taskStatusName+"/Id",taskStatusName+"/Title"];
-    let expandItem = ["Parent",taskStatusName,"Responsible","Category","Comments"];
+    let selectItem = ["Title", "ID", "SortOrder", "Parent/Title", "Parent/Id", "GUID","SubCategory/Id","Comments/Id","Category/Id","Category/Title","Responsible/Id","Responsible/Title",taskStatusName+"/Id",taskStatusName+"/Title"];
+    let expandItem = ["Parent",taskStatusName,"Responsible","Category","Comments","SubCategory"];
     if(TaskDataProvider.listNames.groupListName && TaskDataProvider.isGroupingEnabled) {
       selectItem.push("Group/Title", "Group/Id");
       expandItem.push("Group");
@@ -306,7 +306,8 @@ export class SharePointDataProvider implements IDataProvider {
             Parent: element.Parent,
             GUID: element.GUID,
             Category:element.Category,
-            TaskStatus:element.taskStatusName,
+            SubCategory:element.SubCategory,
+            TaskStatus:element[taskStatusName],
             Responsible:element.Responsible,
             Comments:element.Comments ? element.Comments : [],
             children:[]
@@ -323,8 +324,8 @@ export class SharePointDataProvider implements IDataProvider {
 
   public getTaskListItemById(listName:string,itemId:number):Promise<ITaskList>{
     let taskStatusName = this.utilities.GetFieldInteralName("Task Status");
-    let selectItem = ["Title", "ID", "SortOrder", "Parent/Title", "Parent/Id", "GUID","Comments/Id","Category/Id","Category/Title","Responsible/Id","Responsible/Title",taskStatusName+"/Id",taskStatusName+"/Title"];
-    let expandItem = ["Parent",taskStatusName,"Responsible","Category","Comments"];
+    let selectItem = ["Title", "ID", "SortOrder", "Parent/Title", "Parent/Id", "GUID","SubCategory/Id","Comments/Id","Category/Id","Category/Title","Responsible/Id","Responsible/Title",taskStatusName+"/Id",taskStatusName+"/Title"];
+    let expandItem = ["Parent",taskStatusName,"Responsible","Category","Comments","SubCategory"];
     if(TaskDataProvider.listNames.groupListName && TaskDataProvider.isGroupingEnabled) {
       selectItem.push("Group/Title", "Group/Id");
       expandItem.push("Group");
@@ -341,6 +342,7 @@ export class SharePointDataProvider implements IDataProvider {
             Parent: taskresult.Parent,
             GUID: taskresult.GUID,
             Category:taskresult.Category,
+            SubCategory:taskresult.SubCategory,
             TaskStatus:taskresult.taskStatusName,
             Responsible:taskresult.Responsible,
             Comments:taskresult.Comments ? taskresult.Comments : [],
@@ -373,8 +375,9 @@ export class SharePointDataProvider implements IDataProvider {
       obj["Title"] = taskItem.Title;
       obj["SortOrder"] = taskItem.SortOrder;
       obj["CategoryId"] = taskItem.Category.Id;
+      obj["SubCategoryId"] = taskItem.SubCategory ? taskItem.SubCategory.Id:null;
       obj["ResponsibleId"] = taskItem.Responsible.Id;
-      obj["CommentsId"] = { results : taskItem.CommentsId};
+      obj["CommentsId"] = taskItem.CommentsId ? { results : taskItem.CommentsId}:null;
       obj[taskStatusName+"Id"] = taskItem.TaskStatus.Id;
 
       this.web.lists.getByTitle(listName).items.add(obj).then((insertTask)=>{
@@ -393,6 +396,9 @@ export class SharePointDataProvider implements IDataProvider {
             GUID: insertTask.data.GUID,
             Category:{
               Id:insertTask.data.CategoryId
+            },
+            SubCategory:{
+              Id:insertTask.data.SubCategoryId
             },
             Responsible:{
               Id:insertTask.data.ResponsibleId
@@ -415,28 +421,50 @@ export class SharePointDataProvider implements IDataProvider {
     });
   }
 
+  public async bulkUpdateTaskItem(listName: string, items: ITaskList[],groupItemId:number): Promise<boolean> {
+    let requests: Array<Promise<boolean>> = new Array();
+    await items.map((element)=>{
+      if(groupItemId){
+        element.Group = {Id: groupItemId};
+      }
+      
+       let commentID:number[] = [];
+        element.Comments.filter(c=> {
+          if(c.Id){
+            let commentIdItem:number = c.Id;
+            commentID.push(commentIdItem);
+          }
+        });
+       element.CommentsId = commentID;
+      requests.push(this.updateTaskListItem(listName, element,element.ID));
+    });
+
+    let results: boolean;
+    await Promise.all(requests).then(listsCollection => {
+      listsCollection.forEach((lists) => {
+        results = lists;
+      });
+      return results;
+    });
+
+    return new Promise<boolean>((resolve) => {
+      resolve(true);
+    });    
+  }
+
   public updateTaskListItem(listName:string,taskItem:ITaskList,itemId:number):Promise<boolean>{
     return new Promise<boolean>((response)=>{
       let taskStatusName = this.utilities.GetFieldInteralName("Task Status");
       let obj = {};
-      if(taskItem.Group && taskItem.Parent){
-        obj["ParentId"] = taskItem.Parent.Id;
-        obj["GroupId"] = taskItem.Group.Id;
-      }
-      if(taskItem.Group)
-      {
-        obj["GroupId"] = taskItem.Group.Id;
-      }
-      else if(taskItem.Parent){
-        obj["ParentId"] = taskItem.Parent.Id;
-      }
-
       obj["Title"] = taskItem.Title;
       obj["SortOrder"] = taskItem.SortOrder;
       obj["CategoryId"] = taskItem.Category.Id;
+      obj["SubCategoryId"] = taskItem.SubCategory ? taskItem.SubCategory.Id:null;
       obj["ResponsibleId"] = taskItem.Responsible.Id;
-      obj["CommentsId"] = { results : taskItem.CommentsId};
-      obj[taskStatusName+"Id"] = taskItem.TaskStatus.Id;
+      obj["CommentsId"] = taskItem.CommentsId ? { results : taskItem.CommentsId}:null;
+      obj[taskStatusName+"Id"] =taskItem.TaskStatus? taskItem.TaskStatus.Id:null;
+      obj["ParentId"] = taskItem.Parent? taskItem.Parent.Id:null;
+      obj["GroupId"] = taskItem.Group ? taskItem.Group.Id :null;
 
       this.web.lists.getByTitle(listName).items.getById(itemId).update(obj).then((insertTask)=>{
         if (insertTask) {
@@ -505,7 +533,6 @@ export class SharePointDataProvider implements IDataProvider {
     });
   }
   //Group List Methods end
-
   //Common delete method for Group, Responaible, Status, Category, Comment, Task and Document.
   public deleteItem(listname: string, itemId: number): Promise<boolean> {
     return new Promise<boolean>((response) => {
@@ -685,29 +712,24 @@ export class SharePointDataProvider implements IDataProvider {
     });
   }
 
-  public bulkInsertGroupFieldItem(listName: string, item: Group[]): Promise<Group[]> {
-    let groupFieldCollection : Group[] =[];
-    return new Promise<Group[]>((response) => {
-      const batch = this.web.createBatch();
-      item.map(element =>{        
-        let obj = {};
-        obj["GroupId"] = element.Id;       
-      
-        this.web.lists.configure(this.configOptions).getByTitle(listName).items.inBatch(batch).add(obj).then(insertGroupField => {
-          if (insertGroupField) {
-            console.log("Insert "+listName+" item : ", insertGroupField);
-            let field : Group = {
-              Id:insertGroupField.data.GroupId                        
-            }; 
-            groupFieldCollection.push(field);         
-          }        
-        }).catch(error => {
-          console.log("Insert category item error message :", error);
-          groupFieldCollection.push(null);    
-        });
-      });
-      response(groupFieldCollection);
+  public async bulkUpdateCategoryItem(listName: string, items: ICategory[],groupItemId:number): Promise<boolean> {
+    let requests: Array<Promise<boolean>> = new Array();
+    await items.map((element)=>{
+      element.Group = {Id: groupItemId};
+      requests.push(this.updateCategoryItem(listName, element.ID,element));
     });
+
+    let results: boolean;
+    await Promise.all(requests).then(listsCollection => {
+      listsCollection.forEach((lists) => {
+        results = lists;
+      });
+      return results;
+    });
+
+    return new Promise<boolean>((resolve) => {
+      resolve(true);
+    });    
   }
 
   public updateCategoryItem(listName: string, itemId: number, items: ICategory): Promise<boolean> {

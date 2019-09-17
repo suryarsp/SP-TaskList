@@ -2,6 +2,7 @@ import { ISubTaskList } from "../..";
 
 export interface ITaskList {
   Category: Category;
+  SubCategory:SubCategory;
   TaskStatus: TaskStatus;
   Responsible: Responsible;
   Group ?: Group;
@@ -17,10 +18,15 @@ export interface ITaskList {
 }
 
 export interface Comments{
-  Id:number[];
+  Id:number;
 }
 
 export interface Category {
+  Id: number;
+  Title?: string;
+}
+
+export interface SubCategory {
   Id: number;
   Title?: string;
 }
