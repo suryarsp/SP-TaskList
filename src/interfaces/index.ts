@@ -36,6 +36,7 @@ export * from './components/taskListPanelConatiner/taskList/ITaskListDetailsProp
 export * from './components/taskListPanelConatiner/taskList/ITaskListDetailsState';
 export * from './components/taskListPanelConatiner/taskCommandBar/slideOutPanels/colorPicker/IColorPickerProps';
 export * from './components/taskListPanelConatiner/taskCommandBar/slideOutPanels/colorPicker/IColorPickerState';
+export * from './components/header/statusBarChart/BarChart/IBarChartSeriesBar';
 
 
 // Services

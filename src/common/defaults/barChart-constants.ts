@@ -6,7 +6,6 @@ export const barChartConstants:
     seriesBar:IBarChartSeriesBar[];
 } = {
     optionsBar: {
-      
         tooltip: {
             enabled: true,
           },

@@ -286,6 +286,7 @@ export class SharePointDataProvider implements IDataProvider {
 
   public getTaskListItem(listName:string):Promise<ITaskList[]>{
     let taskStatusName = this.utilities.GetFieldInteralName("Task Status");
+    console.log(taskStatusName);    
     let selectItem = ["Title", "ID", "SortOrder", "Parent/Title", "Parent/Id", "GUID","SubCategory/Id","Comments/Id","Category/Id","Category/Title","Responsible/Id","Responsible/Title",taskStatusName+"/Id",taskStatusName+"/Title"];
     let expandItem = ["Parent",taskStatusName,"Responsible","Category","Comments","SubCategory"];
     if(TaskDataProvider.listNames.groupListName && TaskDataProvider.isGroupingEnabled) {
