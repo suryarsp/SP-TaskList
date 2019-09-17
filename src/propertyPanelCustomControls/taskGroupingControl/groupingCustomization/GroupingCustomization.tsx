@@ -167,6 +167,7 @@ export default class GroupingCustomization extends React.Component<IGroupingCust
                       .then(
                         (isTaskMapping) => {
                           if(isTaskMapping){
+                            
                             this.setState({
                               isButtonDisabled: true,
                               creationSuccess: true,

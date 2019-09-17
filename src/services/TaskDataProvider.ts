@@ -2,7 +2,7 @@
 import { Environment, EnvironmentType } from "@microsoft/sp-core-library";
 import { MockupDataProvider } from "./MockupDataProvider";
 import { SharePointDataProvider } from "./SharePointDataProvider";
-import { IDataProvider, ICategory, IGroup, IResponsibleParty, IStatus } from "../interfaces/index";
+import { IDataProvider, ICategory, IGroup, IResponsibleParty, IStatus, ITaskList } from "../interfaces/index";
 import { IWebPartContext } from "@microsoft/sp-webpart-base";
 import { IPermissions } from "./permissions/IPermissions";
 // import { ICategoryExpandPosition } from "../interfaces/ICategoryExpandPosition";
@@ -17,6 +17,7 @@ export default class TaskDataProvider  {
   public static groups: IGroup[] = [];
   public static responsibleParties: IResponsibleParty[] = [];
   public static statuses: IStatus[] = [];
+  public static tasks:ITaskList[]=[];
   public static isCategoryUniqueEnabled: boolean;
   public static listNames : {
     taskListName: string,

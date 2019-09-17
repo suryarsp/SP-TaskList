@@ -4,9 +4,15 @@ import { TaskCommandBar } from '../taskListPanelContainer/taskCommandBar/TaskCom
 import { ITaskListPanelContainerProps, ITaskListPanelContainerState, IDataProvider, ITaskList } from '../../../../interfaces/index';
 import TaskDataProvider from '../../../../services/TaskDataProvider';
 import { IPermissions } from '../../../../services';
+import TaskInProgressPieChart from '../../components/header/taskInProgressPieChart/TaskInProgressPieChart';
+import StatusBarChart from '../../components/header/statusBarChart/StatusBarChart';
+import TaskFilter from '../../components/header/taskFilter/TaskFilter';
+import { ChartDataConstant } from '../../../../common/defaults/chartData-constants';
+import { css } from '@uifabric/utilities';
+
 export default class TaskListPanelContainer extends React.Component< ITaskListPanelContainerProps, ITaskListPanelContainerState> {
   private dataProvider: IDataProvider;
-
+  private taskListName = TaskDataProvider.listNames.taskListName;
   constructor(props) {
     super(props);
     this.state = {
@@ -26,30 +32,72 @@ export default class TaskListPanelContainer extends React.Component< ITaskListPa
     let promises = new Array<Promise<IPermissions[]>>(this.dataProvider.getPermissions(listNames.taskListName), this.dataProvider.getPermissions(libraryName));
     Promise.all(promises)
     .then((values) => {
+      this.setState({
+        listPermissions: values[0],
+        libraryPermissions: values[1]
+      });
+      this.dataProvider.getTaskListItem(this.taskListName).then((tasks) => {
+        console.log("Get Task items : ", tasks);
         this.setState({
-          listPermissions: values[0],
-          libraryPermissions: values[1]
+          allItems: tasks
         });
+        TaskDataProvider.tasks = tasks;
+      }).
+        catch((error) => {
+          console.log("Get Groups", error);
+        });
+        
     }).catch((e) => console.log(e));
+  }
+
+  public onClickDoughnutChart(party:string){
+    console.log(party);  
   }
 
 
   public render(): React.ReactElement<ITaskListPanelContainerProps> {
     const { listPermissions, libraryPermissions, selectedItemCount, isAllItemsSeleced, selectedItem, totalItemCount}  = this.state;
     return (
-      <TaskCommandBar
-      selectedCount={selectedItemCount}
-      isAllItemsSelected={isAllItemsSeleced}
-      onCancelSelection={this.onCancelSelection.bind(this)}
-      onClickDelete={this.onClickDelete.bind(this)}
-      onRefreshPage={this.onRefreshPage.bind(this)}
-      totalItemCount={totalItemCount}
-      uniqueToGroupEnabled = {this.props.uniqueToGroupEnabled }
-      isGroupingEnabled = {this.props.isGroupingEnabled }
-      selectedItem = {selectedItem}
-      listPermissions = {listPermissions}
-      libraryPermissions = {libraryPermissions}
-    />
+      <div className={css("ms-Fabric",styles.taskListWrapper)}>
+        <div className={css("ms-Grid")}>
+          <div className={css("ms-Grid-row")} >
+            <div className={css("ms-Grid-col ms-sm6")}>
+              <div className={styles.statusBarChart}>
+                <StatusBarChart/>
+              </div>
+
+              <div className={styles.TaskFilter}>
+                <TaskFilter/>
+              </div>
+            </div>
+            <div className={css("ms-Grid-col ms-sm2")}>
+
+            </div>
+            <div className={css("ms-Grid-col ms-sm4")}>
+              <div className="TaskInProgressPieChart">
+                <TaskInProgressPieChart
+                      chartData = {ChartDataConstant.chartData}
+                      onClickChartView={this.onClickDoughnutChart.bind(this)}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        <TaskCommandBar
+          selectedCount={selectedItemCount}
+          isAllItemsSelected={isAllItemsSeleced}
+          onCancelSelection={this.onCancelSelection.bind(this)}
+          onClickDelete={this.onClickDelete.bind(this)}
+          onRefreshPage={this.onRefreshPage.bind(this)}
+          totalItemCount={totalItemCount}
+          uniqueToGroupEnabled = {this.props.uniqueToGroupEnabled }
+          isGroupingEnabled = {this.props.isGroupingEnabled }
+          selectedItem = {selectedItem}
+          listPermissions = {listPermissions}
+          libraryPermissions = {libraryPermissions}
+        />
+      </div>
+     
     );
   }
 

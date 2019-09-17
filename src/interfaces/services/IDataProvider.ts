@@ -1,5 +1,5 @@
 import { PermissionKind } from "sp-pnp-js";
-import { IGroup, IResponsibleParty, IStatus, IColumn, ICategory, IComment, ITaskList } from "../index";
+import { IGroup, IResponsibleParty, IStatus, IColumn, ICategory, IComment, ITaskList, Group } from "../index";
 
 export interface IDataProvider {
   getPermissions?:(listTitle: string) => Promise<Array<{ permission: PermissionKind, allowed: boolean }>>;
@@ -39,4 +39,5 @@ export interface IDataProvider {
   insertTaskListItem?:(listName:string,taskItem:ITaskList)=>Promise<ITaskList>;
   updateTaskListItem?:(listName:string,taskItem:ITaskList,itemId:number)=>Promise<boolean>;
   getTaskListItemById?:(listName:string,itemId:number)=>Promise<ITaskList>;
+  bulkInsertGroupFieldItem?:(listName: string, item: Group[]) => Promise<Group[]>;
 }

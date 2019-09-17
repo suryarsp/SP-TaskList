@@ -5,12 +5,10 @@ import { ITaskListState, IDataProvider } from '../../../interfaces/index';
 import {  css } from 'office-ui-fabric-react';
 import TaskDataProvider from '../../../services/TaskDataProvider';
 import { Spinner, SpinnerSize } from 'office-ui-fabric-react';
-import TaskInProgressPieChart from '../components/header/taskInProgressPieChart/TaskInProgressPieChart';
-import StatusBarChart from '../components/header/statusBarChart/StatusBarChart';
-import TaskFilter from '../components/header/taskFilter/TaskFilter';
+
 
 import TaskListPanelContainer from '../components/taskListPanelContainer/TaskListPanelContainer';
-import { ChartDataConstant } from '../../../common/defaults/chartData-constants';
+
 export default class TaskList extends React.Component<ITaskListProps, ITaskListState> {
   private dataProvider: IDataProvider;
 
@@ -75,9 +73,7 @@ export default class TaskList extends React.Component<ITaskListProps, ITaskListS
          });
 }
 
-public onClickDoughnutChart(party:string){
-  console.log(party);  
-}
+
 
   public render(): React.ReactElement<ITaskListProps> {
     if (this.state.isLoading) {
@@ -116,37 +112,11 @@ public onClickDoughnutChart(party:string){
 
       );
  } else {
-    return (
-      <div className={css("ms-Fabric",styles.taskListWrapper)}>
-        <div className={css("ms-Grid")}>
-          <div className={css("ms-Grid-row")} >
-            <div className={css("ms-Grid-col ms-sm6")}>
-              <div className={styles.statusBarChart}>
-                <StatusBarChart/>
-              </div>
-
-              <div className={styles.TaskFilter}>
-                <TaskFilter/>
-              </div>
-            </div>
-            <div className={css("ms-Grid-col ms-sm2")}>
-
-            </div>
-            <div className={css("ms-Grid-col ms-sm4")}>
-              <div className="TaskInProgressPieChart">
-                <TaskInProgressPieChart
-                      chartData = {ChartDataConstant.chartData}
-                      onClickChartView={this.onClickDoughnutChart.bind(this)}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-        <TaskListPanelContainer
-        uniqueToGroupEnabled =  { this.props.isCategoryUniqueEnabled }
-        isGroupingEnabled = { this.props.isGroupingEnabled }
-        />
-      </div>
+    return (      
+      <TaskListPanelContainer
+      uniqueToGroupEnabled =  { this.props.isCategoryUniqueEnabled }
+      isGroupingEnabled = { this.props.isGroupingEnabled }
+      />      
     );
   }
 }

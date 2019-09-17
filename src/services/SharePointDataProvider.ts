@@ -1,4 +1,4 @@
-import { IDataProvider, IGroup, IStatus, ICategory, IColumn, IResponsibleParty, IComment, IDocument, ICreateFolder, ITaskList } from "../interfaces/index";
+import { IDataProvider, IGroup, IStatus, ICategory, IColumn, IResponsibleParty, IComment, IDocument, ICreateFolder, ITaskList, Group } from "../interfaces/index";
 
 import { IWebPartContext } from "@microsoft/sp-webpart-base";
 
@@ -685,6 +685,31 @@ export class SharePointDataProvider implements IDataProvider {
     });
   }
 
+  public bulkInsertGroupFieldItem(listName: string, item: Group[]): Promise<Group[]> {
+    let groupFieldCollection : Group[] =[];
+    return new Promise<Group[]>((response) => {
+      const batch = this.web.createBatch();
+      item.map(element =>{        
+        let obj = {};
+        obj["GroupId"] = element.Id;       
+      
+        this.web.lists.configure(this.configOptions).getByTitle(listName).items.inBatch(batch).add(obj).then(insertGroupField => {
+          if (insertGroupField) {
+            console.log("Insert "+listName+" item : ", insertGroupField);
+            let field : Group = {
+              Id:insertGroupField.data.GroupId                        
+            }; 
+            groupFieldCollection.push(field);         
+          }        
+        }).catch(error => {
+          console.log("Insert category item error message :", error);
+          groupFieldCollection.push(null);    
+        });
+      });
+      response(groupFieldCollection);
+    });
+  }
+
   public updateCategoryItem(listName: string, itemId: number, items: ICategory): Promise<boolean> {
     return new Promise<boolean>((response) => {
       this.web.lists.configure(this.configOptions).getByTitle(listName).items.getById(itemId).update({
@@ -1163,6 +1188,24 @@ export class SharePointDataProvider implements IDataProvider {
                   '<Field Type="Lookup" DisplayName="Category" Name="Category" Required="TRUE" List="' +
                   this.categoryListGUID +
                   '" ShowField="Title" RelationshipDeleteBehavior="None"/>'
+                );
+            });
+
+            await this.web.lists.configure(this.configOptions)
+            .getByTitle(listName)
+            .fields.getByInternalNameOrTitle("SubCategory")
+            .get()
+            .then(isItem => {
+            })
+            .catch(error => {
+              console.log("isisItem Error : ", error);
+              this.web.lists.configure(this.configOptions)
+                .getByTitle(listName)
+                .fields.inBatch(batch)
+                .createFieldAsXml(
+                  '<Field Type="Lookup" DisplayName="SubCategory" Name="SubCategory" Required="TRUE" List="' +
+                  this.categoryListGUID +
+                  '" ShowField="ID" RelationshipDeleteBehavior="None"/>'
                 );
             });
 
