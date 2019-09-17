@@ -322,7 +322,7 @@ export class TaskCommandBar extends React.Component<
     }
 
     if (this.props.isGroupingEnabled) {
-      adminSettings.subMenuProps.items.push(groupSettings);
+      adminSettings.subMenuProps.items.push(groupSettings,categorySettings, statusSettings, partySettings);
     } else {
       adminSettings.subMenuProps.items.push(categorySettings, statusSettings, partySettings);
     }

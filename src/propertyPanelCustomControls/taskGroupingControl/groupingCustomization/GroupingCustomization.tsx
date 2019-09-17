@@ -167,14 +167,28 @@ export default class GroupingCustomization extends React.Component<IGroupingCust
                       .then(
                         (isTaskMapping) => {
                           if(isTaskMapping){
-                            
-                            this.setState({
-                              isButtonDisabled: true,
-                              creationSuccess: true,
-                              isCreationInProgress: false
+                            this.dataProvider.getCategories(categoryListName).then(categoryresult =>{
+                              if(categoryresult){                             
+                               this.dataProvider.bulkUpdateCategoryItem(categoryListName,categoryresult,insertGroupItem.ID).then((fieldResults)=>{
+                                  console.log(fieldResults);
+                                  this.dataProvider.getTaskListItem(taskListName).then((taskresults)=>{
+                                    if(taskresults){
+                                      this.dataProvider.bulkUpdateTaskItem(taskListName,taskresults,insertGroupItem.ID).then((updateresults)=>{
+                                       if(updateresults){
+                                        this.setState({
+                                          isButtonDisabled: true,
+                                          creationSuccess: true,
+                                          isCreationInProgress: false
+                                        });
+                                        this.props.onChangeGroupListName(this.state.groupListName);
+                                        this.props.onEnableOrDisableGroup(true);
+                                       }
+                                      });
+                                    } 
+                                  });
+                               });
+                              }
                             });
-                            this.props.onChangeGroupListName(this.state.groupListName);
-                            this.props.onEnableOrDisableGroup(true);
                           }
                         }).catch(() => {
                           this.setErrorState();

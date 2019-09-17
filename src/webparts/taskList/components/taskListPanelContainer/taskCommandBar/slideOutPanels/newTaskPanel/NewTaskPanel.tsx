@@ -1,6 +1,6 @@
 import * as React from 'react';
 import styles from './NewTaskPanel.module.scss';
-import { INewTaskPanelProps, INewTaskPanelState, ITaskList, IGroup, ICategory, IResponsibleParty, IStatus } from '../../../../../../../interfaces/index';
+import { INewTaskPanelProps, INewTaskPanelState, ITaskList, IGroup, ICategory, IResponsibleParty, IStatus, IDataProvider } from '../../../../../../../interfaces/index';
 import { Panel, PanelType } from 'office-ui-fabric-react/lib/Panel';
 import { PrimaryButton, DefaultButton } from 'office-ui-fabric-react/lib/Button';
 import { TextField } from 'office-ui-fabric-react/lib/TextField';
@@ -8,9 +8,10 @@ import { Toggle } from 'office-ui-fabric-react/lib/Toggle';
 import { Dropdown } from 'office-ui-fabric-react/lib/Dropdown';
 import TaskDataProvider from '../../../../../../../services/TaskDataProvider';
 export default class NewTaskPanel extends React.Component<INewTaskPanelProps, INewTaskPanelState> {
-
+  public dataProvider: IDataProvider;
   private isDirty: boolean;
   private item: ITaskList;
+  private taskListName = TaskDataProvider.listNames.taskListName;
   constructor(props) {
     super(props);
     /// TODO : should come from props if a task has been selected
@@ -19,10 +20,12 @@ export default class NewTaskPanel extends React.Component<INewTaskPanelProps, IN
       currentItem : {
         Title: '',
         Category: null,
+        SubCategory:null,
         Parent: null,
         SortOrder: 1,
         Responsible: null,
         TaskStatus: null,
+        CommentsId :[1],
         children: []
       },
       groups: [],
@@ -35,13 +38,19 @@ export default class NewTaskPanel extends React.Component<INewTaskPanelProps, IN
   }
 
   public componentDidMount() {
+    this.dataProvider = TaskDataProvider.Instance;
     const { groups, categories, responsibleParties, statuses}  = TaskDataProvider;
-    this.setState({
-      groups: groups,
-      categories: categories,
-      parties: responsibleParties,
-      statuses: statuses
-    });
+   // this.dataProvider.getCategories(TaskDataProvider.listNames.categoryListName).then((categoryresults)=> {
+      //TaskDataProvider.categories = categoryresults;
+      this.setState({
+        groups: groups,
+        categories: categories,
+        parties: responsibleParties,
+        statuses: statuses,
+        subCategories : categories
+      });
+   // });
+   
   }
 
 
@@ -102,11 +111,34 @@ export default class NewTaskPanel extends React.Component<INewTaskPanelProps, IN
   private onChangeSubCategory(option) {
     const selectedGroup: ICategory = option;
     const currentItem = this.state.currentItem;
+    currentItem.SubCategory = {
+      Id:selectedGroup.ID
+    };
+    this.setState({
+      currentItem : currentItem
+    });
   }
 
   private onChangeParentTask(option) {
     const selectedTask: ITaskList = option;
     const currentItem = this.state.currentItem;
+  }
+
+  public OnTaskNameChange(newValue){
+    const currentItem = this.state.currentItem;
+    currentItem.Title = newValue;
+    this.setState({
+      currentItem : currentItem
+    });
+    console.log("New Value : ",newValue, this.state.currentItem);
+  } 
+
+  public OnSaveCloseClick(){
+    const {currentItem} = this.state;
+    console.log("Save Close : ",this.state.currentItem);
+    this.dataProvider.insertTaskListItem(this.taskListName,currentItem).then(results=>{
+      console.log("Results : ",results);
+    });
   }
 
   public render(): React.ReactElement<INewTaskPanelProps> {
@@ -120,14 +152,13 @@ export default class NewTaskPanel extends React.Component<INewTaskPanelProps, IN
           type={PanelType.smallFluid}
           onDismiss={() => { this.props.hidePanel(this.isDirty); }}
           headerText="Add new task"
-          closeButtonAriaLabel="Close"
-          onRenderFooterContent={this._onRenderFooterContent}
+          closeButtonAriaLabel="Close"         
         >
           <TextField
             label="Task list name"
             styles={{ root: { width: 300 } }}
+            onChange={(e, newValue) => this.OnTaskNameChange(newValue)}
           />
-            required />
 
           <Dropdown
             label="Group"
@@ -142,7 +173,6 @@ export default class NewTaskPanel extends React.Component<INewTaskPanelProps, IN
           <Dropdown
             label="Category"
             required={true}
-            selectedKey={""}
             onChange={(e, option) => {this.onChangeCategory(option);}}
             placeholder="Select an option"
             options={categories}
@@ -152,8 +182,7 @@ export default class NewTaskPanel extends React.Component<INewTaskPanelProps, IN
 
           <Dropdown
             label="Responsible party"
-            required={true}
-            selectedKey={""}
+            required={true}            
             onChange={(e, option) => {this.onChangeResponsibleParty(option);}}
             placeholder="Select an option"
             options = {parties}
@@ -163,7 +192,6 @@ export default class NewTaskPanel extends React.Component<INewTaskPanelProps, IN
           <Dropdown
             label="Status"
             required={true}
-            selectedKey={""}
             onChange={(e, option) => {this.onChangeStatus(option);}}
             placeholder="Select an option"
             options={statuses}
@@ -173,7 +201,6 @@ export default class NewTaskPanel extends React.Component<INewTaskPanelProps, IN
 
             <Dropdown
             label="Sub category"
-            selectedKey={""}
             onChange={(e,option) => {this.onChangeSubCategory(option);}}
             placeholder="Select an option"
             options={ subCategories}
@@ -199,22 +226,16 @@ export default class NewTaskPanel extends React.Component<INewTaskPanelProps, IN
           />
             ) : null
           }
-
+          <div>
+            <PrimaryButton style={{ marginRight: '8px' }}>
+              Save & Add another
+            </PrimaryButton>
+            <PrimaryButton style={{ marginRight: '8px' }} onClick={this.OnSaveCloseClick.bind(this)}>
+              Save & Close
+            </PrimaryButton>
+            <DefaultButton >Cancel</DefaultButton>
+          </div>
         </Panel>
-      </div>
-    );
-  }
-
-  private _onRenderFooterContent() {
-    return (
-      <div>
-        <PrimaryButton style={{ marginRight: '8px' }}>
-          Save & Add another
-        </PrimaryButton>
-        <PrimaryButton style={{ marginRight: '8px' }}>
-          Save & Close
-        </PrimaryButton>
-        <DefaultButton >Cancel</DefaultButton>
       </div>
     );
   }
