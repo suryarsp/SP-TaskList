@@ -296,7 +296,7 @@ export class SharePointDataProvider implements IDataProvider {
     return new Promise<ITaskList[]>((resolve)=>{
       this.web.lists.getByTitle(listName).items.top(5000).select(selectItem.toString()).expand(expandItem.toString()).get().then(taskresult=>{
         console.log("Task List : ", taskresult);
-        console.log("Task List JSON : ", JSON.stringify(taskresult));
+        //console.log("Task List JSON : ", JSON.stringify(taskresult));
         taskresult.map(element => {
           let items: ITaskList = {
             ID: element.ID,

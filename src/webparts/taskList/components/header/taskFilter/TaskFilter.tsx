@@ -44,7 +44,7 @@ export default class TaskFilter extends React.Component<ITaskFilterProps ,ITaskF
     private onChangeGroup(event: React.FormEvent<HTMLDivElement>, option?: IDropdownOption, index?: number){        
         this.setState({
             selectedGroup:option
-        })       
+        });       
     }
 
     private onClearSearchText() {

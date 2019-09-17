@@ -31,20 +31,17 @@ export default class TaskListPanelContainer extends React.Component< ITaskListPa
     const { listNames, libraryName} = TaskDataProvider;
     let promises = new Array<Promise<IPermissions[]>>(this.dataProvider.getPermissions(listNames.taskListName), this.dataProvider.getPermissions(libraryName));
     Promise.all(promises)
-    .then((values) => {
-      this.setState({
-        listPermissions: values[0],
-        libraryPermissions: values[1]
-      });
+    .then((values) => {     
       this.dataProvider.getTaskListItem(this.taskListName).then((tasks) => {
-        console.log("Get Task items : ", tasks);
+        console.log("Get Task items : ",tasks);
         this.setState({
-          allItems: tasks
-        });
-        TaskDataProvider.tasks = tasks;
+          allItems: tasks,
+          listPermissions: values[0],
+          libraryPermissions: values[1]
+        },()=>TaskDataProvider.tasks = tasks);
       }).
         catch((error) => {
-          console.log("Get Groups", error);
+          console.log("Get Groups", error); 
         });
         
     }).catch((e) => console.log(e));
@@ -56,49 +53,73 @@ export default class TaskListPanelContainer extends React.Component< ITaskListPa
 
 
   public render(): React.ReactElement<ITaskListPanelContainerProps> {
-    const { listPermissions, libraryPermissions, selectedItemCount, isAllItemsSeleced, selectedItem, totalItemCount}  = this.state;
-    return (
-      <div className={css("ms-Fabric",styles.taskListWrapper)}>
-        <div className={css("ms-Grid")}>
-          <div className={css("ms-Grid-row")} >
-            <div className={css("ms-Grid-col ms-sm6")}>
-              <div className={styles.statusBarChart}>
-                <StatusBarChart/>
+    const { listPermissions, libraryPermissions, selectedItemCount, isAllItemsSeleced, selectedItem, totalItemCount,allItems}  = this.state;
+    
+    if(this.state.allItems.length>0){
+      return (
+        <div className={css("ms-Fabric",styles.taskListWrapper)}>
+        
+          <div className={css("ms-Grid")}>
+            <div className={css("ms-Grid-row")} >
+              <div className={css("ms-Grid-col ms-sm6")}>
+                <div className={styles.statusBarChart}>
+                  <StatusBarChart
+                      data={this.state.allItems}
+                  />
+                </div>
+                <div className={styles.TaskFilter}>
+                  <TaskFilter/>
+                </div>
               </div>
-
-              <div className={styles.TaskFilter}>
-                <TaskFilter/>
+              <div className={css("ms-Grid-col ms-sm2")}>
+  
               </div>
-            </div>
-            <div className={css("ms-Grid-col ms-sm2")}>
-
-            </div>
-            <div className={css("ms-Grid-col ms-sm4")}>
-              <div className="TaskInProgressPieChart">
-                <TaskInProgressPieChart
-                      chartData = {ChartDataConstant.chartData}
-                      onClickChartView={this.onClickDoughnutChart.bind(this)}
-                />
+              <div className={css("ms-Grid-col ms-sm4")}>
+                <div className="TaskInProgressPieChart">
+                  <TaskInProgressPieChart
+                        chartData = {ChartDataConstant.chartData}
+                        onClickChartView={this.onClickDoughnutChart.bind(this)}
+                  />
+                </div>
               </div>
             </div>
           </div>
+          <TaskCommandBar
+            selectedCount={selectedItemCount}
+            isAllItemsSelected={isAllItemsSeleced}
+            onCancelSelection={this.onCancelSelection.bind(this)}
+            onClickDelete={this.onClickDelete.bind(this)}
+            onRefreshPage={this.onRefreshPage.bind(this)}
+            totalItemCount={totalItemCount}
+            uniqueToGroupEnabled = {this.props.uniqueToGroupEnabled }
+            isGroupingEnabled = {this.props.isGroupingEnabled }
+            selectedItem = {selectedItem}
+            listPermissions = {listPermissions}
+            libraryPermissions = {libraryPermissions}
+          />
         </div>
-        <TaskCommandBar
-          selectedCount={selectedItemCount}
-          isAllItemsSelected={isAllItemsSeleced}
-          onCancelSelection={this.onCancelSelection.bind(this)}
-          onClickDelete={this.onClickDelete.bind(this)}
-          onRefreshPage={this.onRefreshPage.bind(this)}
-          totalItemCount={totalItemCount}
-          uniqueToGroupEnabled = {this.props.uniqueToGroupEnabled }
-          isGroupingEnabled = {this.props.isGroupingEnabled }
-          selectedItem = {selectedItem}
-          listPermissions = {listPermissions}
-          libraryPermissions = {libraryPermissions}
-        />
-      </div>
-     
-    );
+      );
+    }
+    else
+    {
+      return (
+        <div className={css("ms-Fabric",styles.taskListWrapper)}>        
+          <TaskCommandBar
+            selectedCount={selectedItemCount}
+            isAllItemsSelected={isAllItemsSeleced}
+            onCancelSelection={this.onCancelSelection.bind(this)}
+            onClickDelete={this.onClickDelete.bind(this)}
+            onRefreshPage={this.onRefreshPage.bind(this)}
+            totalItemCount={totalItemCount}
+            uniqueToGroupEnabled = {this.props.uniqueToGroupEnabled }
+            isGroupingEnabled = {this.props.isGroupingEnabled }
+            selectedItem = {selectedItem}
+            listPermissions = {listPermissions}
+            libraryPermissions = {libraryPermissions}
+          />
+        </div>
+      );
+    }
   }
 
 
