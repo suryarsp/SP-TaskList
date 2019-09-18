@@ -24,7 +24,9 @@ export default class TaskListPanelContainer extends React.Component< ITaskListPa
       selectedItem: null,
       selectedItemCount: 0,
       totalItemCount: 0,
-      allItems: []
+      allItems: [],
+      filteredItems:[],
+      showFilter:false
     };
   }
 
@@ -83,12 +85,19 @@ export default class TaskListPanelContainer extends React.Component< ITaskListPa
   }
 
   public onClickDoughnutChart(party:string){
-    console.log(party);  
+    console.log("Filter Part Name",party);  
+    const {allItems} = this.state
+    const inProgressValue= ChartDataConstant.inProgressValue;
+    const filteredItems= allItems.filter(eachItem=> eachItem.Responsible.Title === party && eachItem.TaskStatus.Title === inProgressValue);
+    this.setState({
+      filteredItems:filteredItems,
+      showFilter:true
+    },()=> console.log("Filtered Items-",this.state.filteredItems));
   }
 
 
   public render(): React.ReactElement<ITaskListPanelContainerProps> {
-    const { listPermissions, libraryPermissions, selectedItemCount, isAllItemsSeleced, selectedItem, totalItemCount,allItems}  = this.state;
+    const { listPermissions, libraryPermissions, selectedItemCount, isAllItemsSeleced, selectedItem, totalItemCount,allItems,showFilter}  = this.state;
     
     if(allItems.length > 0){
       return (
@@ -120,6 +129,7 @@ export default class TaskListPanelContainer extends React.Component< ITaskListPa
             </div>
           </div>
           <TaskCommandBar
+            showFilter={showFilter}
             selectedCount={selectedItemCount}
             isAllItemsSelected={isAllItemsSeleced}
             onCancelSelection={this.onCancelSelection.bind(this)}
@@ -140,6 +150,7 @@ export default class TaskListPanelContainer extends React.Component< ITaskListPa
       return (
         <div className={css("ms-Fabric",styles.taskListWrapper)}>        
           <TaskCommandBar
+            showFilter={showFilter}
             selectedCount={selectedItemCount}
             isAllItemsSelected={isAllItemsSeleced}
             onCancelSelection={this.onCancelSelection.bind(this)}

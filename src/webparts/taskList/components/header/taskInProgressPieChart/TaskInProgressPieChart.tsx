@@ -14,7 +14,7 @@ export default class TaskInProgressPieChart extends React.Component< ITaskInProg
   constructor(props : ITaskInProgressPieChartProps){
     super(props); 
     this.state=({
-      doughnutChartData:[]      
+      doughnutChartData:null      
     });
   }
   
@@ -27,68 +27,69 @@ export default class TaskInProgressPieChart extends React.Component< ITaskInProg
     const label:string[]=[];
     const backgroundColors:string[]=[];
     const groupedResponsible=_.groupBy(inProgressDataArray,"Responsible.Title");    
-    console.log("Grouped Responsible Party-",groupedResponsible);
-    this.dataProvider.getResponsibleParties(this.responsibleListName).then(responsibleListItems=>{
-        Object.keys(groupedResponsible).map(eachGroup=>{
-        console.log(eachGroup,groupedResponsible[eachGroup].length);
-          data.push(groupedResponsible[eachGroup].length);
-          label.push(eachGroup); 
-        });
-        if(label.length>0){
-          label.map(eachLabel=>{
-            let colors=responsibleListItems.filter(res=> res.Title===eachLabel);
-            if(colors.length>0){
-              backgroundColors.push(colors[0]["FillColor"]);
-            }          
-          }); 
-        }          
-        console.log("Data[]",data,"label[]",label,"backgroundColors[]",backgroundColors);
-        const datasets: IDoughnutChartDataSet[]= [
-          {
-            data:data ? data:[],
-            backgroundColor:backgroundColors ? backgroundColors : [],
-            hoverBackgroundColor:backgroundColors ? backgroundColors : []
-          }
-        ];
-        const doughnutChartData:IDoughnutChartData[] = [{
-          labels:label ? label : [],
-          datasets:datasets ? datasets : []
-        }];
+    console.log("Grouped Responsible Party-",groupedResponsible);    
+      Object.keys(groupedResponsible).map(eachGroup=>{
+      console.log(eachGroup,groupedResponsible[eachGroup].length);
+        data.push(groupedResponsible[eachGroup].length);
+        label.push(eachGroup); 
+      });
+      if(label.length>0){
+        label.map(eachLabel=>{
+          let colors=TaskDataProvider.responsibleParties.filter(res=> res.Title===eachLabel);
+          if(colors.length>0){
+            backgroundColors.push(colors[0]["FillColor"]);
+          }          
+        }); 
+      }          
+      console.log("Data[]",data,"label[]",label,"backgroundColors[]",backgroundColors);
+      const datasets: IDoughnutChartDataSet[]= [
+        {
+          data:data ? data:[],
+          backgroundColor:backgroundColors ? backgroundColors : [],
+          hoverBackgroundColor:backgroundColors ? backgroundColors : []
+        }
+      ];
+      const doughnutChartData:IDoughnutChartData = {
+        labels:label ? label : [],
+        datasets:datasets ? datasets : []
+      };
     this.setState({
       doughnutChartData: doughnutChartData
-    });
-    console.log("Doughnut State",this.state.doughnutChartData);    
-    });
+    }, () => console.log("Doughnut State",this.state.doughnutChartData));
+    
   }
+
   public componentDidMount(){
     this.generateChartData();
+       
   }
 
   public componentWillReceiveProps(){
     this.generateChartData();
   }
 
+  public _onClickChart(items){
+    if(!items && !Array.isArray(items)) {
+      return;
+    }
+    const item = items[0];  
+    if(item) {
+    const view = item._view;
+      if(view && view['label']) {
+          this.props.onClickChartView(view.label);
+      } 
+    }
+  }
   public render(): React.ReactElement<ITaskInProgressPieChartProps> { 
     return (
       <div>
         <h4>Task In Progress by Responsible Party</h4>
         <Doughnut 
-            data={this.state.doughnutChartData[0]} 
+            data={this.state.doughnutChartData} 
             width={100} 
             height={40}               
             options={{
-              onClick:(event, items) =>{
-                if(!items && !Array.isArray(items)) {
-                  return;
-                }
-                const item = items[0];  
-                if(item) {
-                const view = item._view;
-                  if(view && view['label']) {
-                      this.props.onClickChartView(view.label);
-                  } 
-                }
-              },
+              onClick:(event, items) =>{this._onClickChart(items);},
               legend: {
                 display: true,
                 maintainAspectRatio: true,

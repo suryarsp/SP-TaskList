@@ -25,39 +25,25 @@ export default class StatusBarChart extends React.Component< IStatusBarChartProp
     console.log(props);
   }
 
-  
-
-  public statusSplit(items:ITaskList[]){
-    this.dataProvider = TaskDataProvider.Instance;
-    this.dataProvider.getStatuses(this.statusListName).then((statusListItems)=>{
-      this.generateChartData(items).then((chartData:IBarChartSeriesBar[])=>{ 
-        const options=barChartConstants.optionsBar;   
-        options['colors']= [];  
-        chartData.map(chartDataElement=>{
-          let colors = statusListItems.filter(s=>s.Title === chartDataElement.name);
-          console.log(colors);
-          if(colors.length > 0){
-            options['colors'].push(colors[0]["FillColor"]);
-          }
-          else{
-            options['colors'].push("#ffffff");
-          }
-        });
-        console.log(options);
-       // options['colors']=['#F44336', '#E91E63', '#9C27B0','#000000'];
-        //console.log(options);
-        //const seriesBars=barChartConstants.seriesBar;
-        //
-        this.setState({
-          taskItems:items,
-          seriesBars:chartData, 
-          optionalBars:options
-        });
+  public statusSplit(items:ITaskList[]){   
+    this.generateChartData(items).then((chartData:IBarChartSeriesBar[])=>{ 
+      const options=barChartConstants.optionsBar;   
+      options['colors']= [];  
+      chartData.map(chartDataElement=>{
+        let colors = TaskDataProvider.statuses.filter(s=>s.Title === chartDataElement.name);
+        if(colors.length > 0){
+          options['colors'].push(colors[0]["FillColor"]);
+        }
+        else{
+          options['colors'].push("#ffffff");
+        }
       });
-    }).catch(error=>{
-      console.log(error);
+      this.setState({
+        taskItems:items,
+        seriesBars:chartData, 
+        optionalBars:options
+      });
     });
-   
   }
 
   public componentDidMount(){ 
