@@ -15,6 +15,8 @@ export interface ITaskList {
   Comments?:Comments[];
   CommentsId?:number[];
   children : ISubTaskList[];
+  key:string;
+  text:string;
 }
 
 export interface Comments{
