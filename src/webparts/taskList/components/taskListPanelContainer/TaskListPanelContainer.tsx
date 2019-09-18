@@ -29,6 +29,7 @@ export default class TaskListPanelContainer extends React.Component< ITaskListPa
   public componentDidMount() {
     this.dataProvider = TaskDataProvider.Instance;
     const { listNames, libraryName} = TaskDataProvider;
+    this.getAdminSetting();
     let promises = new Array<Promise<IPermissions[]>>(this.dataProvider.getPermissions(listNames.taskListName), this.dataProvider.getPermissions(libraryName));
     Promise.all(promises)
     .then((values) => {     
@@ -47,6 +48,27 @@ export default class TaskListPanelContainer extends React.Component< ITaskListPa
     }).catch((e) => console.log(e));
   }
 
+  public async getAdminSetting(){
+    const {groupListName, statusListName, responsibleListName, categoryListName} = TaskDataProvider.listNames;
+    let { groups, categories, responsibleParties, statuses}  = TaskDataProvider;
+    
+    if(categories.length === 0){
+      categories =  await this.dataProvider.getCategories(categoryListName);
+    }
+
+    if(groups.length === 0){
+      groups = await this.dataProvider.getGroups(groupListName);
+    }
+
+    if(responsibleParties.length === 0){
+     responsibleParties = await this.dataProvider.getResponsibleParties(responsibleListName);
+    }
+
+    if(statuses.length === 0){
+     statuses = await this.dataProvider.getStatuses(statusListName);
+    }
+  }
+
   public onClickDoughnutChart(party:string){
     console.log(party);  
   }
@@ -55,7 +77,7 @@ export default class TaskListPanelContainer extends React.Component< ITaskListPa
   public render(): React.ReactElement<ITaskListPanelContainerProps> {
     const { listPermissions, libraryPermissions, selectedItemCount, isAllItemsSeleced, selectedItem, totalItemCount,allItems}  = this.state;
     
-    if(this.state.allItems.length>0){
+    if(allItems.length > 0){
       return (
         <div className={css("ms-Fabric",styles.taskListWrapper)}>
         
