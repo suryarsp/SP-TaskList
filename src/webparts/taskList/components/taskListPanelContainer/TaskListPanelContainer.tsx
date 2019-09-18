@@ -77,7 +77,7 @@ export default class TaskListPanelContainer extends React.Component< ITaskListPa
               <div className={css("ms-Grid-col ms-sm4")}>
                 <div className="TaskInProgressPieChart">
                   <TaskInProgressPieChart
-                        chartData = {ChartDataConstant.chartData}
+                        chartData = {allItems}
                         onClickChartView={this.onClickDoughnutChart.bind(this)}
                   />
                 </div>

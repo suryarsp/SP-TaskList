@@ -1,10 +1,13 @@
 import { IBarChartSeriesBar } from "../../interfaces/components/header/statusBarChart/BarChart/IBarChartSeriesBar";
+import { string } from "prop-types";
 
 export const barChartConstants: 
 {
+    
     optionsBar:{};
     seriesBar:IBarChartSeriesBar[];
 } = {
+    
     optionsBar: {
         tooltip: {
             enabled: true,
