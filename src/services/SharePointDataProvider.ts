@@ -312,7 +312,9 @@ export class SharePointDataProvider implements IDataProvider {
             TaskStatus:element[taskStatusName],
             Responsible:element.Responsible,
             Comments:element.Comments ? element.Comments : [],
-            children:[]
+            children:[],
+            key:element.ID,
+            text:element.Title ? element.Title :""
           };
           TaskListColl.push(items);
         });
@@ -348,7 +350,9 @@ export class SharePointDataProvider implements IDataProvider {
             TaskStatus:taskresult.taskStatusName,
             Responsible:taskresult.Responsible,
             Comments:taskresult.Comments ? taskresult.Comments : [],
-            children:[]
+            children:[],
+            key:taskresult.ID,
+            text:taskresult.Title ? taskresult.Title :""
           };
         resolve(items);
       }).catch(error=>{
@@ -409,7 +413,9 @@ export class SharePointDataProvider implements IDataProvider {
               Id:insertTask.data.Task_x0020_Status
             },
             Comments:insertTask.data.CommentsId,
-            children:[]
+            children:[],
+            key:insertTask.data.ID,
+            text:insertTask.data.Title
           };
           response(taskList);
         }

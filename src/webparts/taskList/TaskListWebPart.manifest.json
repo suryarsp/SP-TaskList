@@ -26,7 +26,7 @@
       "defaultTaskCategory": "LOAN DOCUMENTS",
       "alwaysDownloadAllDocuments": false,
       "itemsPerPage": 20,
-      "isGroupingEnabled": false,
+      "isGroupingEnabled": true,
       "isCategoryUniqueEnabled": false,
       "selectedViewType": "list",
       "groupListName" : "Group",

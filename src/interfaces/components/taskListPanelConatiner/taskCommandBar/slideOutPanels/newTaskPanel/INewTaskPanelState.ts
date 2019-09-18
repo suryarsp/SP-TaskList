@@ -8,4 +8,16 @@ export interface INewTaskPanelState {
   parties: IResponsibleParty[];
   statuses: IStatus[];
   subCategories: ICategory[];
+  taskCollections:ITaskList[];
+  status: NewTaskComponentStatus;
+  isSaveClick:boolean;
+}
+
+export enum NewTaskComponentStatus {
+  Loading = 0,
+  None = 1,
+  Saving = 2,
+  ErrorOnSave = 3,
+  FilesUploadInProgress = 4,
+  FileUploadAccessDenied = 5
 }
