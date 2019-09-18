@@ -221,13 +221,17 @@ export default class GroupingCustomization extends React.Component<IGroupingCust
     this.dataProvider.deleteList(this.props.groupListName)
       .then((isDeleted) => {
         if (isDeleted) {
-          this.setState({
-            isGroupingEnabled: false,
-            isListPresent: false
+          this.dataProvider.deleteListField(TaskDataProvider.listNames.categoryListName,this.props.groupListName).then(groupCatdeleted=>{
+            this.dataProvider.deleteListField(TaskDataProvider.listNames.taskListName,this.props.groupListName).then(groupTaskdeleted=>{
+              this.setState({
+                isGroupingEnabled: false,
+                isListPresent: false
+              });
+              this.props.onChangeGroupListName("");
+              this.props.onEnableOrDisableGroup(false);
+              this.props.onEnableOrDisableUniqueCategory(false);
+            });
           });
-          this.props.onChangeGroupListName("");
-          this.props.onEnableOrDisableGroup(false);
-          this.props.onEnableOrDisableUniqueCategory(false);
         }
       });
   }

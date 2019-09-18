@@ -41,6 +41,8 @@ export default class TaskList extends React.Component<ITaskListProps, ITaskListS
 
   public checkIfListAndLibraryPresent(props: ITaskListProps) {
     const { groupListName, responsibleListName, statusListName, categoryListName, commentsListName, libraryName, taskListName, isGroupingEnabled } = props;
+    TaskDataProvider.isGroupingEnabled = isGroupingEnabled;
+    TaskDataProvider.isCategoryUniqueEnabled = this.props.isCategoryUniqueEnabled;
     let promises = new Array<Promise<boolean>>();
     promises = [
       this.dataProvider.libraryExists(libraryName),
@@ -50,7 +52,7 @@ export default class TaskList extends React.Component<ITaskListProps, ITaskListS
       this.dataProvider.listExists(commentsListName),
       this.dataProvider.listExists(taskListName)
     ];
-    if(isGroupingEnabled && groupListName) {
+    if(isGroupingEnabled && groupListName) {     
       promises.push(this.dataProvider.listExists(groupListName));      
     }
       Promise.all(promises).then((values) => {

@@ -302,7 +302,7 @@ export default class StatusSettingsPanel extends React.Component<IStatusSettings
             status: statuses,
             statusMessage: TaskListConstants.errorMessages.saveSuccess,
             statusType: ProgressStatusType.SUCCESS
-          });
+          }, () => TaskDataProvider.statuses = statuses);
           this.resetStatus();
         }).catch(() => {
           this.setState({
@@ -349,7 +349,7 @@ export default class StatusSettingsPanel extends React.Component<IStatusSettings
               status: statuses,
               statusMessage: saveError,
               statusType: ProgressStatusType.FAILURE
-            });
+            }, () => TaskDataProvider.statuses = statuses);
           }
         }).catch((error) => {
           this.setState({
@@ -405,7 +405,7 @@ export default class StatusSettingsPanel extends React.Component<IStatusSettings
             status: updatedStatus,
             statusMessage: TaskListConstants.errorMessages.sortSuccess,
             statusType: ProgressStatusType.SUCCESS
-          }, () => TaskDataProvider.statuses = statuses);
+          }, () => TaskDataProvider.statuses = updatedStatus);
           this.resetStatus();
         } else {
           this.setState({

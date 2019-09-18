@@ -37,23 +37,37 @@ export default class NewTaskPanel extends React.Component<INewTaskPanelProps, IN
     this.isDirty = false;
   }
 
-  public componentDidMount() {
-    this.dataProvider = TaskDataProvider.Instance;
-    const { groups, categories, responsibleParties, statuses}  = TaskDataProvider;
-   // this.dataProvider.getCategories(TaskDataProvider.listNames.categoryListName).then((categoryresults)=> {
-      //TaskDataProvider.categories = categoryresults;
-      this.setState({
-        groups: groups,
-        categories: categories,
-        parties: responsibleParties,
-        statuses: statuses,
-        subCategories : categories
-      });
-   // });
+  public async componentDidMount() {
    
+    const {groupListName, statusListName, responsibleListName, categoryListName,taskListName} = TaskDataProvider.listNames;
+    this.dataProvider = TaskDataProvider.Instance;
+    let { groups, categories, responsibleParties, statuses}  = TaskDataProvider;
+    if(categories.length === 0){
+      categories =  await this.dataProvider.getCategories(categoryListName);
+    }
+
+    if(groups.length === 0){
+      groups = await this.dataProvider.getGroups(groupListName);
+    }
+
+    if(responsibleParties.length === 0){
+     responsibleParties = await this.dataProvider.getResponsibleParties(responsibleListName);
+    }
+
+    if(statuses.length === 0){
+     statuses = await this.dataProvider.getStatuses(statusListName);
+    }
+   
+    this.setState({
+      groups: groups,
+      categories: categories,
+      parties: responsibleParties,
+      statuses: statuses,
+      subCategories : []
+    });  
   }
 
-
+  
   private changeToSubTask(checked: boolean) {
     this.setState({
       isSubTaskChecked: checked
@@ -143,13 +157,14 @@ export default class NewTaskPanel extends React.Component<INewTaskPanelProps, IN
 
   public render(): React.ReactElement<INewTaskPanelProps> {
     const { isSubTaskChecked, groups, categories, statuses, parties, subCategories} = this.state;
+    const {isGroupingEnabled} = TaskDataProvider;
     const defaultGroup = groups.length > 0 ? groups.filter(g => g.IsDefault)[0].Title: "";
 
     return (
       <div>
         <Panel
           isOpen={true}
-          type={PanelType.smallFluid}
+          type={PanelType.smallFixedFar}
           onDismiss={() => { this.props.hidePanel(this.isDirty); }}
           headerText="Add new task"
           closeButtonAriaLabel="Close"         
@@ -160,7 +175,7 @@ export default class NewTaskPanel extends React.Component<INewTaskPanelProps, IN
             onChange={(e, newValue) => this.OnTaskNameChange(newValue)}
           />
 
-          <Dropdown
+          {isGroupingEnabled ?  <Dropdown
             label="Group"
             required={true}
             selectedKey={defaultGroup}
@@ -168,7 +183,8 @@ export default class NewTaskPanel extends React.Component<INewTaskPanelProps, IN
             placeholder="Select an option"
             options={groups}
             styles={{ dropdown: { width: 300 } }}
-          />
+          /> : null }
+         
 
           <Dropdown
             label="Category"

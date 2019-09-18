@@ -1,7 +1,7 @@
 import * as React from 'react';
 import styles from './TaskListPanelContainer.module.scss';
 import { TaskCommandBar } from '../taskListPanelContainer/taskCommandBar/TaskCommandBar';
-import { ITaskListPanelContainerProps, ITaskListPanelContainerState, IDataProvider, ITaskList } from '../../../../interfaces/index';
+import { ITaskListPanelContainerProps, ITaskListPanelContainerState, IDataProvider, ITaskList, ICategory } from '../../../../interfaces/index';
 import TaskDataProvider from '../../../../services/TaskDataProvider';
 import { IPermissions } from '../../../../services';
 import TaskInProgressPieChart from '../../components/header/taskInProgressPieChart/TaskInProgressPieChart';
@@ -9,9 +9,11 @@ import StatusBarChart from '../../components/header/statusBarChart/StatusBarChar
 import TaskFilter from '../../components/header/taskFilter/TaskFilter';
 import { ChartDataConstant } from '../../../../common/defaults/chartData-constants';
 import { css } from '@uifabric/utilities';
+import { Utilties } from '../../../../common/helper/Utilities';
 
 export default class TaskListPanelContainer extends React.Component< ITaskListPanelContainerProps, ITaskListPanelContainerState> {
   private dataProvider: IDataProvider;
+  public utilities: Utilties;
   private taskListName = TaskDataProvider.listNames.taskListName;
   constructor(props) {
     super(props);
@@ -27,18 +29,51 @@ export default class TaskListPanelContainer extends React.Component< ITaskListPa
   }
 
   public componentDidMount() {
+    this.utilities = Utilties.Instance;
     this.dataProvider = TaskDataProvider.Instance;
-    const { listNames, libraryName} = TaskDataProvider;
+    const { listNames, libraryName} = TaskDataProvider;  
+    const {groupListName, statusListName, responsibleListName, categoryListName} = TaskDataProvider.listNames;  
+    let { groups, categories, responsibleParties, statuses, isGroupingEnabled}  = TaskDataProvider;
     let promises = new Array<Promise<IPermissions[]>>(this.dataProvider.getPermissions(listNames.taskListName), this.dataProvider.getPermissions(libraryName));
     Promise.all(promises)
-    .then((values) => {     
+    .then((values) => {  
       this.dataProvider.getTaskListItem(this.taskListName).then((tasks) => {
-        console.log("Get Task items : ",tasks);
-        this.setState({
-          allItems: tasks,
-          listPermissions: values[0],
-          libraryPermissions: values[1]
-        },()=>TaskDataProvider.tasks = tasks);
+        console.log("Get Task items : ",tasks);        
+        this.dataProvider.getCategories(categoryListName).then(categoriesItems =>{
+          let newCategories: ICategory[] = this.utilities.mapCategotyItems(categoriesItems);
+          TaskDataProvider.categories = newCategories;
+          this.dataProvider.getStatuses(statusListName).then(statusItems =>{
+            TaskDataProvider.statuses = statusItems;
+            this.dataProvider.getResponsibleParties(responsibleListName).then(responsibleItems =>{
+              TaskDataProvider.responsibleParties = responsibleItems;
+              if(isGroupingEnabled){
+                this.dataProvider.getGroups(groupListName).then(groupItems =>{
+                  TaskDataProvider.groups = groupItems;
+                  console.log("Task Data Category : ", TaskDataProvider.categories);
+                  console.log("Task Data Status : ", TaskDataProvider.statuses);
+                  console.log("Task Data Responsible : ", TaskDataProvider.responsibleParties);
+                  console.log("Task Data Group : ", TaskDataProvider.groups);
+                  this.setState({
+                    allItems: tasks,
+                    listPermissions: values[0],
+                    libraryPermissions: values[1]
+                  },()=>TaskDataProvider.tasks = tasks);
+                });
+              }
+             else{
+              console.log("Task Data Category : ", TaskDataProvider.categories);
+              console.log("Task Data Status : ", TaskDataProvider.statuses);
+              console.log("Task Data Responsible : ", TaskDataProvider.responsibleParties);
+              console.log("Task Data Group : ", TaskDataProvider.groups);
+              this.setState({
+                allItems: tasks,
+                listPermissions: values[0],
+                libraryPermissions: values[1]
+              },()=>TaskDataProvider.tasks = tasks);
+             }
+            });
+          });
+        });
       }).
         catch((error) => {
           console.log("Get Groups", error); 
@@ -55,7 +90,7 @@ export default class TaskListPanelContainer extends React.Component< ITaskListPa
   public render(): React.ReactElement<ITaskListPanelContainerProps> {
     const { listPermissions, libraryPermissions, selectedItemCount, isAllItemsSeleced, selectedItem, totalItemCount,allItems}  = this.state;
     
-    if(this.state.allItems.length>0){
+    if(allItems.length > 0){
       return (
         <div className={css("ms-Fabric",styles.taskListWrapper)}>
         
