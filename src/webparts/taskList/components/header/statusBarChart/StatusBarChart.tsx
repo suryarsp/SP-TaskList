@@ -29,12 +29,12 @@ export default class StatusBarChart extends React.Component< IStatusBarChartProp
 
   public statusSplit(items:ITaskList[]){
     this.dataProvider = TaskDataProvider.Instance;
-    this.dataProvider.getStatuses(this.statusListName).then((values)=>{
+    this.dataProvider.getStatuses(this.statusListName).then((statusListItems)=>{
       this.chartDataManifest(items).then((chartData:IBarChartSeriesBar[])=>{ 
         const options=barChartConstants.optionsBar;   
         options['colors']= [];  
-        chartData.map(element=>{
-          let colors = values.filter(s=>s.Title === element.name);
+        chartData.map(chartDataElement=>{
+          let colors = statusListItems.filter(s=>s.Title === chartDataElement.name);
           console.log(colors);
           if(colors.length > 0){
             options['colors'].push(colors[0]["FillColor"]);
