@@ -91,14 +91,14 @@ export default class ResponsiblePartySettingsPanel extends React.Component<IResp
         this.canDeleteItem = true;
       }
 
-      this.dataProvider.getResponsibleParties(this.responsibleListName).then((responsbiles) => {
+      this.dataProvider.getResponsibleParties(this.responsibleListName).then((responsibles) => {
         this.setState({
-          responsibles: responsbiles
-        });
-        TaskDataProvider.responsibleParties = responsbiles;
+          responsibles: responsibles
+        },()=> TaskDataProvider.responsibleParties = responsibles);
+       
       }).
         catch((error) => {
-          console.log("Get responsbiles", error);
+          console.log("Get responsibles", error);
         });
     });
   }
@@ -298,7 +298,7 @@ export default class ResponsiblePartySettingsPanel extends React.Component<IResp
             responsibles: responsibles,
             responsibleMessage: TaskListConstants.errorMessages.saveSuccess,
             responsibleType: ProgressStatusType.SUCCESS
-          });
+          },()=> TaskDataProvider.responsibleParties = responsibles);
           this.resetResponsible();
         }).catch(() => {
           this.setState({
