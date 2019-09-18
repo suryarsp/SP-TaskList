@@ -89,7 +89,7 @@ export default class TaskInProgressPieChart extends React.Component< ITaskInProg
             width={100} 
             height={40}               
             options={{
-              onClick:(event, items) =>{this._onClickChart(items)},
+              onClick:(event, items) =>{this._onClickChart(items);},
               legend: {
                 display: true,
                 maintainAspectRatio: true,

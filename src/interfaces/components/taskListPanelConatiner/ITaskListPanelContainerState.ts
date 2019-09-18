@@ -9,4 +9,6 @@ export interface ITaskListPanelContainerState {
   totalItemCount: number;
   selectedItem: ITaskList;
   allItems: ITaskList[];
+  filteredItems: ITaskList[];
+  showFilter:boolean;
 }

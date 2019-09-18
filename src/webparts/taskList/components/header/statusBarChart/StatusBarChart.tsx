@@ -24,14 +24,13 @@ export default class StatusBarChart extends React.Component< IStatusBarChartProp
   
     console.log(props);
   }
-  
+
   public statusSplit(items:ITaskList[]){   
     this.generateChartData(items).then((chartData:IBarChartSeriesBar[])=>{ 
       const options=barChartConstants.optionsBar;   
       options['colors']= [];  
       chartData.map(chartDataElement=>{
         let colors = TaskDataProvider.statuses.filter(s=>s.Title === chartDataElement.name);
-        console.log(colors);
         if(colors.length > 0){
           options['colors'].push(colors[0]["FillColor"]);
         }
