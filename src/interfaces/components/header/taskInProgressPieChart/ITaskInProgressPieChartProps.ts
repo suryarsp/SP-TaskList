@@ -1,6 +1,7 @@
-import { IDoughnutChartData } from "./DoughnutChart/IDoughnutChartData";
+
+import { ITaskList } from "../../../services/response/ITaskList";
 
 export interface ITaskInProgressPieChartProps {
-    chartData: IDoughnutChartData;
+    chartData: ITaskList[];
     onClickChartView: (party:string) => void;
 }

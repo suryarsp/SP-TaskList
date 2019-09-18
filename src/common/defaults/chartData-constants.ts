@@ -2,9 +2,11 @@ import { IDoughnutChartData } from "../../interfaces/index";
 
 export const ChartDataConstant:
     {
+        inProgressValue:string;
         chartData: IDoughnutChartData,
 
     } = {
+        inProgressValue:"In Progress",
         chartData: {
             datasets: [{
                 data: [10, 20, 30, 40, 10],
