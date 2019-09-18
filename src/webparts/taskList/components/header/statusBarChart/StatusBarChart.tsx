@@ -30,7 +30,7 @@ export default class StatusBarChart extends React.Component< IStatusBarChartProp
   public statusSplit(items:ITaskList[]){
     this.dataProvider = TaskDataProvider.Instance;
     this.dataProvider.getStatuses(this.statusListName).then((statusListItems)=>{
-      this.chartDataManifest(items).then((chartData:IBarChartSeriesBar[])=>{ 
+      this.generateChartData(items).then((chartData:IBarChartSeriesBar[])=>{ 
         const options=barChartConstants.optionsBar;   
         options['colors']= [];  
         chartData.map(chartDataElement=>{
@@ -70,17 +70,17 @@ export default class StatusBarChart extends React.Component< IStatusBarChartProp
     this.statusSplit(this.props.data);
   }
 
-  public chartDataManifest(items):Promise<IBarChartSeriesBar[]>{
+  public generateChartData(items):Promise<IBarChartSeriesBar[]>{
     return new Promise<IBarChartSeriesBar[]>((resolve)=>{
-      const temp= _.groupBy(items,"TaskStatus.Title");
+      const groupedStatusList= _.groupBy(items,"TaskStatus.Title");
       let chartData:IBarChartSeriesBar[] = [];
-      Object.keys(temp).map(element=>{
-        console.log(element);
-        console.log(temp[element].length);
+      Object.keys(groupedStatusList).map(statusGroup=>{
+        console.log(statusGroup);
+        console.log(groupedStatusList[statusGroup].length);
         let item:IBarChartSeriesBar = {
-          name: element,
-          data: [temp[element].length]
-        }
+          name: statusGroup,
+          data: [groupedStatusList[statusGroup].length]
+        };
         chartData.push(item);
       });
       console.log(_.groupBy(items,"TaskStatus.Title"));
