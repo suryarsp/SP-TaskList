@@ -208,7 +208,7 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
         .then((isUpdated) => {
           if (isUpdated) {
             updatedGroup.isExisting = false;
-            groups = groups.map(g => {
+            let updatedGroups = groups.map(g => {
               if (g.ID === group.ID) {
                 return updatedGroup;
               }
@@ -220,7 +220,7 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
               statusMessage: updateSuccess,
               statusType: ProgressStatusType.SUCCESS
             }, () => {
-              TaskDataProvider.groups = groups;
+              TaskDataProvider.groups = updatedGroups;
             });
             this.resetStatus();
           } else {
@@ -246,7 +246,7 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
     let updatedGroups = groups.filter(g => g.GUID !== group.GUID);
     updatedGroups = updatedGroups.map((g, index) => {
       if (!g.ID) {
-        g.SortOrder = index + 1;
+        g.SortOrder = index + 1.00000000001;
         g.GUID = (index + 1).toString();
       }
       return g;
@@ -269,7 +269,7 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
         .then((newGroup) => {
           newGroup.isExisting = false;
           newGroup.isSaving = false;
-          groups = groups.map(g => {
+          let updatedGroups = groups.map(g => {
             if (g.GUID === group.GUID) {
               return newGroup;
             }
@@ -280,7 +280,7 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
             groups: groups,
             statusMessage: TaskListConstants.errorMessages.saveSuccess,
             statusType: ProgressStatusType.SUCCESS
-          });
+          }, () => TaskDataProvider.groups = updatedGroups);
           this.resetStatus();
         }).catch(() => {
           this.setState({
@@ -387,7 +387,7 @@ export default class GroupSettingsPanel extends React.Component<IGroupSettingsPa
             groups: updatedGroups,
             statusMessage: TaskListConstants.errorMessages.sortSuccess,
             statusType: ProgressStatusType.SUCCESS
-          }, () => TaskDataProvider.groups = groups);
+          }, () => TaskDataProvider.groups = updatedGroups);
           this.resetStatus();
         } else {
           this.setState({

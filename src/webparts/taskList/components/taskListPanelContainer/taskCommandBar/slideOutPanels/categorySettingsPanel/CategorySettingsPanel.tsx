@@ -89,7 +89,7 @@ export default class CategorySettingsPanel extends React.Component<ICategorySett
                   currentSelectedGroup: defaultGroup
               }, () => TaskDataProvider.categories = newCategories);
           }).catch((error) => {
-            console.log("Get Groups", error);
+            console.log("Get Categories", error);
           });
         } else {
           this.setState({
@@ -99,7 +99,7 @@ export default class CategorySettingsPanel extends React.Component<ICategorySett
         }
     }).
     catch((error) => {
-      console.log("Get Categorys", error);
+      console.log("Get Categories", error);
     });
   }
 
@@ -587,7 +587,9 @@ export default class CategorySettingsPanel extends React.Component<ICategorySett
 
   public onClickMakeSubCategory(category: ICategory, index: number) {
       const categories = _.cloneDeep(this.state.categories);
+      const allCategories = _.cloneDeep(this.state.allCategories);
       const parent = categories[index - 1];
+      const indexInAllCategories = _.findIndex(allCategories, c => c.ID === parent.ID);
       const subcategory = _.cloneDeep(category);
       subcategory.Parent = {
         Id : parent.ID,
@@ -598,16 +600,19 @@ export default class CategorySettingsPanel extends React.Component<ICategorySett
         if(isUpdated) {
           const updatedCategories = _.cloneDeep(this.state.categories);
           const [removed] = updatedCategories.splice(index, 1);
+          const [removedInAllCategory] = allCategories.splice(indexInAllCategories, 1);
           removed.Parent = {
             Id: parent.ID,
             Title:parent.Title
           };
           updatedCategories[index - 1].children.push(removed);
+          allCategories[indexInAllCategories - 1].children.push(removedInAllCategory);
           this.setState({
             statusMessage: TaskListConstants.errorMessages.updateSuccess,
             statusType: ProgressStatusType.SUCCESS,
-            categories: updatedCategories
-          });
+            categories: updatedCategories,
+            allCategories: allCategories
+          }, () => TaskDataProvider.categories = allCategories);
           this.resetStatus();
         } else {
           this.setState({
@@ -693,7 +698,7 @@ export default class CategorySettingsPanel extends React.Component<ICategorySett
     .then((isDeleted) =>  {
         if(isDeleted) {
           updatedCategories[parentIndex].children.splice(index, 1);
-          allCategories[parentIndex].children.splice(index, 1);
+          allCategories[indexInAllCategories].children.splice(index, 1);
           this.setState({
             statusMessage: TaskListConstants.errorMessages.deleteSuccess,
             statusType: ProgressStatusType.SUCCESS,
