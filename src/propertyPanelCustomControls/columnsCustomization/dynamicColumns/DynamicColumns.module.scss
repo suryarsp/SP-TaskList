@@ -1,0 +1,12 @@
+.columnContainer {
+  display: flex;
+  align-items: center;
+  margin: 10px 0px;
+  & > div {
+    margin-left: 10px;
+  }
+}
+
+.columnContainer > div {
+  margin-left: 10px;
+}

@@ -25,7 +25,7 @@ export class CreateButtonWithIndication
 	) {
 		this.targetProperty = targetProperty;
 		this.properties = {
-			 key: properties.label,
+			key: properties.label,
 			label: properties.label,
       onRender: this.onRender.bind(this),
       taskListName: properties.taskListName,
@@ -59,6 +59,8 @@ export class CreateButtonWithIndication
       commentsListName: this.properties.commentsListName,
       libraryName: this.properties.libraryName
 		});
-		ReactDom.render(element, elem);
+	  setTimeout(() => {
+      ReactDom.render(element, elem);
+ }, 500);
 	}
 }

@@ -3,39 +3,91 @@
   "id": "4c17bac0-9bb5-49d6-9b84-4f26bfb5a0ac",
   "alias": "TaskListWebPart",
   "componentType": "WebPart",
-
   // The "*" signifies that the version should be taken from the package.json
   "version": "*",
   "manifestVersion": 2,
-
   // If true, the component can only be installed on sites where Custom Script is allowed.
   // Components that allow authors to embed arbitrary script code should set this to true.
   // https://support.office.com/en-us/article/Turn-scripting-capabilities-on-or-off-1f2c515f-5d7e-448a-9fd7-835da935584f
   "requiresCustomScript": false,
-  "supportedHosts": ["SharePointWebPart", "SharePointFullPage"],
-
-  "preconfiguredEntries": [{
-    "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
-    "group": { "default": "Other" },
-    "title": { "default": "TaskList" },
-    "description": { "default": "Task List" },
-    "officeFabricIconFontName": "Page",
-    "properties": {
-      "taskListName": "Task",
-      "commentsListName": "Comments",
-      "defaultTaskCategory": "LOAN DOCUMENTS",
-      "alwaysDownloadAllDocuments": false,
-      "itemsPerPage": 20,
-      "isGroupingEnabled": false,
-      "isCategoryUniqueEnabled": false,
-      "selectedViewType": "list",
-      "groupListName" : "Group",
-      "categoryListName": "Category",
-      "statusListName": "Status",
-      "responsibleListName": "Responsible",
-      "libraryName": "Tasklist Documents",
-      "minNoOfItemsForStream": 50,
-      "defaultExpand": null
+  "supportedHosts": [
+    "SharePointWebPart",
+    "SharePointFullPage"
+  ],
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": {
+        "default": "Other"
+      },
+      "title": {
+        "default": "TaskList"
+      },
+      "description": {
+        "default": "Task List"
+      },
+      "officeFabricIconFontName": "Page",
+      "properties": {
+        "taskListName": "Task",
+        "commentsListName": "Comments",
+        "defaultTaskCategory": "LOAN DOCUMENTS",
+        "alwaysDownloadAllDocuments": false,
+        "itemsPerPage": 20,
+        "isGroupingEnabled": false,
+        "isCategoryUniqueEnabled": false,
+        "selectedViewType": "list",
+        "groupListName": "Group",
+        "categoryListName": "Category",
+        "statusListName": "Status",
+        "responsibleListName": "Responsible",
+        "libraryName": "Tasklist Documents",
+        "minNoOfItemsForStream": 50,
+        "defaultExpand": null,
+        "displayedColumns": [
+          {
+            "columnType": "Sort",
+            "label": "Order",
+            "isFixed": true,
+            "isPresentDefault": true,
+            "sortOrder": 1
+          },
+          {
+            "columnType": "Task Name",
+            "label": "Task Name",
+            "isFixed": true,
+            "isPresentDefault": true,
+            "sortOrder": 2
+          },
+          {
+            "columnType": "Responsible Party / Status",
+            "label": "Responsible Party / Status",
+            "isFixed": true,
+            "isPresentDefault": true,
+            "sortOrder": 3
+          },
+          {
+            "columnType": "Last Updated",
+            "label": "Last Updated",
+            "isFixed": false,
+            "isPresentDefault": true,
+            "sortOrder": 4
+          },
+          {
+            "columnType": "Documents",
+            "label": "Documents",
+            "isFixed": false,
+            "isPresentDefault": true,
+            "sortOrder": 5
+          },
+          {
+            "columnType": "Comments",
+            "label": "Comments",
+            "isFixed": false,
+            "isPresentDefault": true,
+            "sortOrder": 6
+          }
+        ]
+      }
     }
-  }]
+  ]
 }

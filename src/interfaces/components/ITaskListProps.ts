@@ -1,3 +1,4 @@
+import { ICustomizedColumn } from "../propertyPane/columnsCustomization/ICustomizedColumn";
 
 export interface ITaskListProps {
   defaultTaskCategory: string;
@@ -16,4 +17,5 @@ export interface ITaskListProps {
   libraryName: string;
   minNoOfItemsForStream: number;
   defaultExpand: string;
+  displayedColumns: ICustomizedColumn[];
 }

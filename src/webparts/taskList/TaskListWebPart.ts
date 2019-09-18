@@ -14,11 +14,12 @@ import {
 
 import * as strings from 'TaskListWebPartStrings';
 import TaskList from './components/TaskList';
-import { ITaskListProps, ITaskListWebPartProps } from '../../interfaces/index';
+import { ITaskListProps, ITaskListWebPartProps, ICustomizedColumn } from '../../interfaces/index';
 import { TaskListConstants } from '../../common/defaults/taskList-constants';
 import { TaskGroupingControlComponent } from '../../propertyPanelCustomControls/taskGroupingControl/TaskGroupingControl';
 import TaskDataProvider from '../../services/TaskDataProvider';
 import { CreateButtonWithIndication } from '../../propertyPanelCustomControls/CreateButtonWithIndication/CreateButtonWithIndication';
+import { ColumnsCustomization } from '../../propertyPanelCustomControls/columnsCustomization/ColumnsCustomization';
 require('../../styles/main.css');
 
 export default class TaskListWebPart extends BaseClientSideWebPart<ITaskListWebPartProps> {
@@ -41,7 +42,8 @@ export default class TaskListWebPart extends BaseClientSideWebPart<ITaskListWebP
       responsibleListName: this.properties.responsibleListName,
       libraryName: this.properties.libraryName,
       minNoOfItemsForStream: this.properties.minNoOfItemsForStream,
-      defaultExpand: this.properties.defaultExpand
+      defaultExpand: this.properties.defaultExpand,
+      displayedColumns: this.properties.displayedColumns
     }
     );
 
@@ -66,7 +68,7 @@ export default class TaskListWebPart extends BaseClientSideWebPart<ITaskListWebP
   }
 
   public onEnableOrDisableGroup(checked: boolean) {
-    this.properties.isGroupingEnabled = checked; 
+    this.properties.isGroupingEnabled = checked;
     this.render();
   }
 
@@ -83,6 +85,10 @@ export default class TaskListWebPart extends BaseClientSideWebPart<ITaskListWebP
   public onChangeGroupListName(value: string) {
     this.properties.groupListName = value;
     this.render();
+  }
+
+  public onChangeDisplayedColumns(columns: ICustomizedColumn[]) {
+    this.properties.displayedColumns = columns;
   }
 
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
@@ -227,6 +233,12 @@ export default class TaskListWebPart extends BaseClientSideWebPart<ITaskListWebP
                   label: 'Default Task Category',
                   options: TaskListConstants.columns,
                 }),
+
+                new ColumnsCustomization("DynamicColumns", {
+                  taskListName:  this.properties.taskListName,
+                  displayedColumns: this.properties.displayedColumns,
+                  onChangeColumns: this.onChangeDisplayedColumns.bind(this)
+                })
               ]
             }
           ]

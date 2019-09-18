@@ -64,6 +64,13 @@ export * from  './propertyPane/createButtonWithIndication/ICreateButtonWithIndic
 export * from  './propertyPane/createButtonWithIndication/ICreateButtonWithIndicationProps';
 export * from  './propertyPane/createButtonWithIndication/progressButton/IProgressButtonProps';
 export * from  './propertyPane/createButtonWithIndication/progressButton/IProgressButtonState';
+export * from  './propertyPane/columnsCustomization/IColumnsCustomizationInternalProps';
+export * from  './propertyPane/columnsCustomization/IColumnsCustomizationProps';
+export * from  './propertyPane/columnsCustomization/ICustomizedColumn';
+export * from  './propertyPane/columnsCustomization/dynamicColumns/IDynamicColumnProps';
+export * from  './propertyPane/columnsCustomization/dynamicColumns/IDynamicColumnState';
+
+
 // other
 export * from './other/DragDropResult';
 
