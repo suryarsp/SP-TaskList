@@ -1008,7 +1008,7 @@ export class SharePointDataProvider implements IDataProvider {
             .createFieldAsXml(
               '<Field Type="Lookup" DisplayName="Group" Name="Group" Required="FALSE" List="' +
               this.groupListGUID +
-              '" ShowField="Title" RelationshipDeleteBehavior="None"><Default>'+defaultGroup+'</Default></Field>'
+              '" ShowField="ID" RelationshipDeleteBehavior="None"></Field>'
             );
         });
 
@@ -1046,7 +1046,7 @@ export class SharePointDataProvider implements IDataProvider {
             .createFieldAsXml(
               '<Field Type="Lookup" DisplayName="Group" Name="Group" Required="TRUE" List="' +
               this.groupListGUID +
-              '" ShowField="Title" RelationshipDeleteBehavior="None"><Default>'+defaultGroup+'</Default></Field>'
+              '" ShowField="ID" RelationshipDeleteBehavior="None"></Field>'
             );
         });
 
@@ -1097,7 +1097,7 @@ export class SharePointDataProvider implements IDataProvider {
                 .createFieldAsXml(
                   '<Field Type="Lookup" DisplayName="Parent" Name="Parent" Required="FALSE" List="' +
                   this.categoryListGUID +
-                  '" ShowField="Title" RelationshipDeleteBehavior="None"/>'
+                  '" ShowField="ID" RelationshipDeleteBehavior="None"/>'
                 );
             });
 
@@ -1192,7 +1192,7 @@ export class SharePointDataProvider implements IDataProvider {
                 .createFieldAsXml(
                   '<Field Type="Lookup" DisplayName="Parent" Name="Parent" Required="FALSE" List="' +
                   this.taskListGUID +
-                  '" ShowField="Title" RelationshipDeleteBehavior="None"/>'
+                  '" ShowField="ID" RelationshipDeleteBehavior="None"/>'
                 );
             });
 
@@ -1210,7 +1210,7 @@ export class SharePointDataProvider implements IDataProvider {
                 .createFieldAsXml(
                   '<Field Type="Lookup" DisplayName="Category" Name="Category" Required="TRUE" List="' +
                   this.categoryListGUID +
-                  '" ShowField="Title" RelationshipDeleteBehavior="None"/>'
+                  '" ShowField="ID" RelationshipDeleteBehavior="None"/>'
                 );
             });
 
@@ -1246,7 +1246,7 @@ export class SharePointDataProvider implements IDataProvider {
                 .createFieldAsXml(
                   '<Field Type="Lookup" DisplayName="Task Status" Name="Task Status" Required="TRUE" List="' +
                   this.statusListGUID +
-                  '" ShowField="Title" RelationshipDeleteBehavior="None"/>'
+                  '" ShowField="ID" RelationshipDeleteBehavior="None"/>'
                 );
             });
 
@@ -1264,7 +1264,7 @@ export class SharePointDataProvider implements IDataProvider {
                 .createFieldAsXml(
                   '<Field Type="Lookup" DisplayName="Responsible" Name="Responsible" Required="TRUE" List="' +
                   this.responsibleListGUID +
-                  '" ShowField="Title" RelationshipDeleteBehavior="None"/>'
+                  '" ShowField="ID" RelationshipDeleteBehavior="None"/>'
                 );
             });
 
@@ -1286,7 +1286,7 @@ export class SharePointDataProvider implements IDataProvider {
                   this.DocumentsColumnTitle +
                   '" Required="FALSE" List="' +
                   this.documentLibraryGUID +
-                  '" ShowField="Title" RelationshipDeleteBehavior="None" Mult="TRUE" />'
+                  '" ShowField="ID" RelationshipDeleteBehavior="None" Mult="TRUE" />'
                 );
             });
 
