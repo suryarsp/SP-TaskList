@@ -51,6 +51,6 @@ export class TaskGroupingControlComponent implements IPropertyPaneField<ITaskGro
           });
           setTimeout(() => {
                ReactDom.render(element, elem);
-          }, 500);
+          }, 1000);
      }
 }

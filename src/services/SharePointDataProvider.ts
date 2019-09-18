@@ -275,7 +275,8 @@ export class SharePointDataProvider implements IDataProvider {
         taskField.map(element => {
           let fields: IColumn = {
             key: element["InternalName"],
-            text: element["Title"]
+            text: element["Title"],
+            type:element["TypeAsString"]
           };
           taskFieldsColl.push(fields);
         });
@@ -733,14 +734,32 @@ export class SharePointDataProvider implements IDataProvider {
     });    
   }
 
-  public updateCategoryItem(listName: string, itemId: number, items: ICategory): Promise<boolean> {
+  public updateCategoryItem(listName: string, itemId: number, item: ICategory): Promise<boolean> {
+    let obj = {};
+    if(item.Group && item.Parent){
+      obj["Title"] = item.Title;
+      obj["SortOrder"] = item.SortOrder;
+      obj["ParentId"] = item.Parent.Id;
+      obj["GroupId"] = item.Group.Id;
+    }
+    if(item.Group)
+    {
+      obj["Title"] = item.Title;
+      obj["SortOrder"] = item.SortOrder;
+      obj["GroupId"] = item.Group.Id;
+    }
+    else if(item.Parent){
+      obj["Title"] = item.Title;
+      obj["SortOrder"] = item.SortOrder;
+      obj["ParentId"] = item.Parent.Id;
+    }
+    else{
+      obj["Title"] = item.Title;
+      obj["SortOrder"] = item.SortOrder;
+    }
+
     return new Promise<boolean>((response) => {
-      this.web.lists.configure(this.configOptions).getByTitle(listName).items.getById(itemId).update({
-        Title: items.Title,
-        SortOrder: items.SortOrder,
-        GroupId:  items.Group ? items.Group.Id : null,
-        ParentId: items.Parent ? items.Parent.Id : null
-      }).then(updateCategory => {
+      this.web.lists.configure(this.configOptions).getByTitle(listName).items.getById(itemId).update(obj).then(updateCategory => {
         if (updateCategory) {
           console.log("Update category item : ", updateCategory);
           response(true);
