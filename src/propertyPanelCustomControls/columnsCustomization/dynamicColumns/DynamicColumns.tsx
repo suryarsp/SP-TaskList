@@ -1,6 +1,6 @@
 import * as React from "react";
 import { IDataProvider, IDynamicColumnProps, IDynamicColumnState, DragDropResult, ICustomizedColumn } from '../../../interfaces';
-import { Spinner, SpinnerSize, TextField, Checkbox, IconButton, Dropdown, DropdownMenuItemType } from "office-ui-fabric-react";
+import { Spinner, SpinnerSize, TextField, Checkbox, IconButton, Dropdown, DropdownMenuItemType, PrimaryButton, IDropdownOption, DefaultButton } from "office-ui-fabric-react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import styles from './DynamicColumns.module.scss';
 import TaskDataProvider from "../../../services/TaskDataProvider";
@@ -34,13 +34,16 @@ const getItemStyle = (isDragging, draggableStyle) => {
 
 export default class DynamicColumns extends React.Component<IDynamicColumnProps, IDynamicColumnState> {
 
-  public dataProvider: IDataProvider;
+  private dataProvider: IDataProvider;
+  private newItem: ICustomizedColumn;
 
   constructor(props: IDynamicColumnProps) {
     super(props);
     this.state ={
       isAllowed: false,
-      columns: props.displayedColumns
+      displayedColumns: props.displayedColumns,
+      isAddClicked: false,
+      columns: []
     };
   }
 
@@ -82,18 +85,59 @@ export default class DynamicColumns extends React.Component<IDynamicColumnProps,
 
   }
 
+  public onRemoveColumn(col: ICustomizedColumn) {
+
+  }
+
+  public onClickAddColumn() {
+
+    this.setState({
+      isAddClicked: true
+    });
+    this.newItem = {
+      columnType :"",
+      isFixed: false,
+      isPresentDefault: false,
+      label: "",
+      sortOrder: this.state.displayedColumns.length + 1
+    };
+  }
+
+  public onChangeNewColumnType(option: IDropdownOption) {
+      this.newItem.columnType = option.text;
+  }
+
+  public onChangeNewColumnLabel(newValue: string) {
+    this.newItem.label = newValue;
+  }
+
+  public onSaveNewColumn() {
+
+  }
+
+  public onCancelNewColumn() {
+    this.setState({
+      isAddClicked: false
+    });
+  }
+
   public render() {
-    const {isAllowed, columns} = this.state;
+    const {isAllowed, displayedColumns, isAddClicked} = this.state;
     if(isAllowed) {
       return(
-
+        <div>
+          <div className={styles.columnContainer}>
+            <div className={styles.columnHeaderValue}>Columns</div>
+            <div className={styles.columnHeaderValue}>Label</div>
+          </div>
         <DragDropContext onDragEnd={this.onDragEnd.bind(this)}>
         <Droppable droppableId="droppable">
           {(p) => (
             <div
               ref={p.innerRef}
             >
-              {columns.map((col, index) => (
+
+              {displayedColumns.map((col, index) => (
                 <Draggable
                   draggableId={col.columnType}
                   index={index}
@@ -110,57 +154,50 @@ export default class DynamicColumns extends React.Component<IDynamicColumnProps,
                       )}
                     >
                       <div className={styles.columnContainer}>
-                        <div {...provided.dragHandleProps}>
-                          <h6>Drag</h6>
+                        <div className={[styles.columnValue, styles.iconInnerWrapper].join(" ")}>
+                          <span className={styles.iconValue} {...provided.dragHandleProps}>
+                            <i className={"ms-Icon ms-Icon--Move"} aria-hidden="true"></i>
+                          </span>
+                          {
+                            col.isFixed ? (
+                                <span>
+                                  { col.columnType }
+                                </span>
+                            ) : (
+                                <Dropdown
+                                style={{width: 135}}
+                                selectedKey={ col.columnType}
+                                onChange={(e, option) => {this.onChangeColumnType(option);}}
+                                placeholder="Select type"
+                                options={[
+                                  { key: 'Sort', text: 'Sort' },
+                                  { key: 'Task Name', text: 'Task Name' },
+                                  { key: 'Responsible Party / Status', text: 'Responsible Party / Status' },
+                                  { key: 'Last Updated', text: 'Last Updated' },
+                                  { key: 'Documents', text: 'Documents' },
+                                  { key: 'Comments', text: 'Comments' }
+                                ]}
+                              />
+                            )
+                          }
                         </div>
-                        {
-                          col.isFixed ? (
-                            <span>
-                              { col.columnType }
-                            </span>
-                          ) : (
-                            <Dropdown
-                            selectedKey={ col.columnType}
-                            onChange={(e, option) => {this.onChangeColumnType(option);}}
-                            placeholder="Select type"
-                            options={[
-                              { key: 1, text: 'Sort' },
-                              { key: 2, text: 'Task Name' },
-                              { key: 3, text: 'Responsible Party / Status' },
-                              { key: 4, text: 'Last Updated' },
-                              { key: 5, text: 'Documents' },
-                              { key: 6, text: 'Comments' }
-                            ]}
-                            styles={{ dropdown: { width: 100 } }}
-                          />
+                        <div className={styles.columnValue}>
+                          <TextField
+                            value={col.label}
+                            autoFocus={true}
+                            onBlur= { (e) => { console.log(e.target.value);}}
+                            onChange={(e, newValue) => { this.onChangeColumnLabel(col, newValue); }} />
+                          </div>
+
+                        {  !col.isFixed ?
+                          (
+                            <div className={[styles.columnValue, styles.columnCancel].join(" ")}>
+                              <IconButton
+                                iconProps={{ iconName: 'Cancel' }}
+                                onClick={() => { this.onRemoveColumn(col); }} />
+                            </div>
                           )
-                        }
-
-                        <TextField
-                          value={col.label}
-                          styles={{ fieldGroup: { width: 100 } }}
-                          autoFocus={true}
-                          onBlur= { (e) => { console.log(e.target.value);}}
-                          onChange={(e, newValue) => { this.onChangeColumnLabel(col, newValue); }} />
-
-
-                        {/* {
-                          !group.IsDefault && this.canDeleteItem ? (<IconButton
-                            disabled={group.Title.trim().length === 0 || group.isSaving}
-                            iconProps={{ iconName: 'Delete' }}
-                            onClick={() => { this.onDeleteGroup(group); }} />) : null
-                        }
-
-                        {  group.isNew ?
-                          (<IconButton
-                             iconProps={{ iconName: 'Cancel' }}
-                             onClick={() => { this.onClickCancel(group); }} />)
-                             : null}
-                        {
-                            group.isSaving ?
-                            (<Spinner
-                            size={SpinnerSize.medium}/>) : null
-                        } */}
+                          : null}
                       </div>
                     </div>
                   )}
@@ -171,6 +208,48 @@ export default class DynamicColumns extends React.Component<IDynamicColumnProps,
           )}
         </Droppable>
       </DragDropContext>
+
+
+
+
+    {/* Add Column Container */}
+    {
+      isAddClicked ? (<div>
+        <Dropdown
+            onChange={(e, option) => {this.onChangeNewColumnType(option);}}
+            placeholder="Select type"
+            options={[
+              { key: 1, text: 'Sort' },
+              { key: 2, text: 'Task Name' },
+              { key: 3, text: 'Responsible Party / Status' },
+              { key: 4, text: 'Last Updated' },
+              { key: 5, text: 'Documents' },
+              { key: 6, text: 'Comments' }
+            ]}
+          />
+
+        <TextField
+          autoFocus={true}
+          onBlur= { (e) => { console.log(e.target.value);}}
+          onChange={(e, newValue) => { this.onChangeNewColumnLabel(newValue); }} />
+
+          {/* Button */}
+          <div>
+        <PrimaryButton
+        onClick={this.onSaveNewColumn.bind(this)}>
+          Save
+        </PrimaryButton>
+        <DefaultButton
+        onClick={this.onCancelNewColumn.bind(this)}>
+          Cancel
+        </DefaultButton>
+      </div>
+      </div>) :
+      (<PrimaryButton
+        text="Add column"
+        onClick={ this.onClickAddColumn.bind(this)}
+        allowDisabledFocus />) }
+      </div>
 
       );
     } else {

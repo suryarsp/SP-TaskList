@@ -1,12 +1,18 @@
 .columnContainer {
   display: flex;
   align-items: center;
-  margin: 10px 0px;
-  & > div {
-    margin-left: 10px;
+  .columnHeaderValue, .columnValue {
+    width: 165px;
+    padding: 0px 5px;
   }
-}
-
-.columnContainer > div {
-  margin-left: 10px;
+  .columnCancel {
+    width: 30px;
+  }
+  .iconInnerWrapper {
+    display: flex;
+    padding: 0px 5px;
+    .iconValue {
+      margin-right: 15px;
+    }
+  }
 }
