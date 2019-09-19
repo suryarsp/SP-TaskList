@@ -23,6 +23,7 @@
     "@types/webpack-env": "1.13.1",
     "apexcharts": "^3.8.6",
     "chart.js": "^2.8.0",
+    "guid-typescript": "^1.0.9",
     "hex-to-rgba": "^2.0.1",
     "office-ui-fabric-react": "6.143.0",
     "react": "16.7.0",

@@ -1,5 +1,9 @@
+import { FieldTypes } from "sp-pnp-js";
+
 export interface IColumn{
-    key:string;    
+    key:string;
     text:string;
-    type:string;    
+    InternalName ?: string;
+    FieldTypeKind ?: FieldTypes;
+    ID ?: string;
 }

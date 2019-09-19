@@ -33,16 +33,16 @@ export default class TaskListPanelContainer extends React.Component< ITaskListPa
   public componentDidMount() {
     this.utilities = Utilties.Instance;
     this.dataProvider = TaskDataProvider.Instance;
-    const { listNames, libraryName} = TaskDataProvider;  
-    const {groupListName, statusListName, responsibleListName, categoryListName} = TaskDataProvider.listNames;  
+    const { listNames, libraryName} = TaskDataProvider;
+    const {groupListName, statusListName, responsibleListName, categoryListName} = TaskDataProvider.listNames;
     let { groups, categories, responsibleParties, statuses, isGroupingEnabled}  = TaskDataProvider;
     let promises = new Array<Promise<IPermissions[]>>(this.dataProvider.getPermissions(listNames.taskListName), this.dataProvider.getPermissions(libraryName));
     Promise.all(promises)
-    .then((values) => {  
+    .then((values) => {
       this.dataProvider.getTaskListItem(this.taskListName).then((tasks) => {
-        console.log("Get Task items : ",tasks);        
+        console.log("Get Task items : ",tasks);
         this.dataProvider.getCategories(categoryListName).then(categoriesItems =>{
-          let newCategories: ICategory[] = this.utilities.mapCategotyItems(categoriesItems);
+          let newCategories: ICategory[] = this.utilities.mapCategoryItems(categoriesItems);
           TaskDataProvider.categories = newCategories;
           this.dataProvider.getStatuses(statusListName).then(statusItems =>{
             TaskDataProvider.statuses = statusItems;
@@ -78,15 +78,15 @@ export default class TaskListPanelContainer extends React.Component< ITaskListPa
         });
       }).
         catch((error) => {
-          console.log("Get Groups", error); 
+          console.log("Get Groups", error);
         });
-        
+
     }).catch((e) => console.log(e));
   }
 
   public onClickDoughnutChart(party:string){
-    console.log("Filter Part Name",party);  
-    const {allItems} = this.state
+    console.log("Filter Part Name",party);
+    const {allItems} = this.state;
     const inProgressValue= ChartDataConstant.inProgressValue;
     const filteredItems= allItems.filter(eachItem=> eachItem.Responsible.Title === party && eachItem.TaskStatus.Title === inProgressValue);
     this.setState({
@@ -98,11 +98,11 @@ export default class TaskListPanelContainer extends React.Component< ITaskListPa
 
   public render(): React.ReactElement<ITaskListPanelContainerProps> {
     const { listPermissions, libraryPermissions, selectedItemCount, isAllItemsSeleced, selectedItem, totalItemCount,allItems,showFilter}  = this.state;
-    
+
     if(allItems.length > 0){
       return (
         <div className={css("ms-Fabric",styles.taskListWrapper)}>
-        
+
           <div className={css("ms-Grid")}>
             <div className={css("ms-Grid-row")} >
               <div className={css("ms-Grid-col ms-sm6")}>
@@ -116,7 +116,7 @@ export default class TaskListPanelContainer extends React.Component< ITaskListPa
                 </div>
               </div>
               <div className={css("ms-Grid-col ms-sm2")}>
-  
+
               </div>
               <div className={css("ms-Grid-col ms-sm4")}>
                 <div className="TaskInProgressPieChart">
@@ -148,7 +148,7 @@ export default class TaskListPanelContainer extends React.Component< ITaskListPa
     else
     {
       return (
-        <div className={css("ms-Fabric",styles.taskListWrapper)}>        
+        <div className={css("ms-Fabric",styles.taskListWrapper)}>
           <TaskCommandBar
             showFilter={showFilter}
             selectedCount={selectedItemCount}

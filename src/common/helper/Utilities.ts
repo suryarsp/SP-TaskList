@@ -1,5 +1,6 @@
-import { ICategory } from "../../interfaces";
+import { ICategory, IColumn } from "../../interfaces";
 import _ from "lodash";
+import { FieldTypes } from "sp-pnp-js";
 
 export class Utilties {
      public static instance: Utilties;
@@ -38,9 +39,9 @@ export class Utilties {
           return this.GetImgUrlByFileExtension(fileExtenstion);
      }
 
-     public GetFieldInteralName(fileName:string):string{          
+     public GetFieldInteralName(fileName:string):string{
           if(fileName){
-               return fileName.toString().replace(" ", "_x0020_");     
+               return fileName.toString().replace(" ", "_x0020_");
           }
      }
 
@@ -275,7 +276,7 @@ export class Utilties {
           }
      }
 
-     public mapCategotyItems(categories: ICategory[]) {
+     public mapCategoryItems(categories: ICategory[]) {
        let newCategories: ICategory[] = [];
        categories.map((category) => {
         if(category.Parent) {
@@ -287,5 +288,22 @@ export class Utilties {
       });
 
        return newCategories;
+     }
+
+     public filterColumnsByType(columns: IColumn[]) {
+        let filteredColumns: IColumn[] = [];
+        debugger;
+        filteredColumns  = columns.filter((col) =>
+          (col.FieldTypeKind === FieldTypes.DateTime ||
+          col.FieldTypeKind === FieldTypes.Choice ||
+          col.FieldTypeKind === FieldTypes.Integer ||
+          col.FieldTypeKind === FieldTypes.MultiChoice ||
+          col.FieldTypeKind === FieldTypes.Text ||
+          col.FieldTypeKind === FieldTypes.User ||
+          col.FieldTypeKind === FieldTypes.Boolean ||
+          col.FieldTypeKind === FieldTypes.Note ||
+          col.FieldTypeKind === FieldTypes.Number) && col.InternalName !== "SortOrder" && col.InternalName !== "Title"
+        );
+        return filteredColumns;
      }
 }

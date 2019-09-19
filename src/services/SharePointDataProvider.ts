@@ -269,14 +269,17 @@ export class SharePointDataProvider implements IDataProvider {
     let web: Web = new Web(this._absoluteUrl);
     let taskFieldsColl: IColumn[] = [];
     return new Promise<IColumn[]>(resolve => {
-      web.lists.configure(this.configOptions).getByTitle(listname).fields.get().then((taskField: IColumn[]) => {
-        console.log("Task List Field : ", taskField);
-        console.log("Task List Field JSON : ", JSON.stringify(taskField));
-        taskField.map(element => {
+      web.lists.configure(this.configOptions).getByTitle(listname).fields
+      .filter("Hidden eq false and ReadOnlyField eq false")
+      .get()
+      .then((results) => {
+        results.map(element => {
           let fields: IColumn = {
-            key: element["InternalName"],
+            ID: element["Id"],
+            key: element["Title"],
             text: element["Title"],
-            type:element["TypeAsString"]
+            FieldTypeKind: element["FieldTypeKind"],
+            InternalName :  element["InternalName"]
           };
           taskFieldsColl.push(fields);
         });
@@ -287,7 +290,7 @@ export class SharePointDataProvider implements IDataProvider {
 
   public getTaskListItem(listName:string):Promise<ITaskList[]>{
     let taskStatusName = this.utilities.GetFieldInteralName("Task Status");
-    console.log(taskStatusName);    
+    console.log(taskStatusName);
     let selectItem = ["Title", "ID", "SortOrder", "Parent/Title", "Parent/Id", "GUID","SubCategory/Id","Comments/Id","Category/Id","Category/Title","Responsible/Id","Responsible/Title",taskStatusName+"/Id",taskStatusName+"/Title"];
     let expandItem = ["Parent",taskStatusName,"Responsible","Category","Comments","SubCategory"];
     if(TaskDataProvider.listNames.groupListName && TaskDataProvider.isGroupingEnabled) {
@@ -435,7 +438,7 @@ export class SharePointDataProvider implements IDataProvider {
       if(groupItemId){
         element.Group = {Id: groupItemId};
       }
-      
+
        let commentID:number[] = [];
         element.Comments.filter(c=> {
           if(c.Id){
@@ -457,7 +460,7 @@ export class SharePointDataProvider implements IDataProvider {
 
     return new Promise<boolean>((resolve) => {
       resolve(true);
-    });    
+    });
   }
 
   public updateTaskListItem(listName:string,taskItem:ITaskList,itemId:number):Promise<boolean>{
@@ -737,7 +740,7 @@ export class SharePointDataProvider implements IDataProvider {
 
     return new Promise<boolean>((resolve) => {
       resolve(true);
-    });    
+    });
   }
 
   public updateCategoryItem(listName: string, itemId: number, item: ICategory): Promise<boolean> {

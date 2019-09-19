@@ -76,7 +76,7 @@ export default class CategorySettingsPanel extends React.Component<ICategorySett
     this.groupListName = TaskDataProvider.listNames.groupListName;
     this.isCategoryUniqueEnabled = TaskDataProvider.isCategoryUniqueEnabled;
     this.dataProvider.getCategories(this.categoryListName).then((categories)=> {
-      let newCategories: ICategory[] = this.utilities.mapCategotyItems(categories);
+      let newCategories: ICategory[] = this.utilities.mapCategoryItems(categories);
         if(this.props.uniqueToGroupEnabled) {
           this.dataProvider.getGroups(this.groupListName).then((groups) => {
             TaskDataProvider.groups = groups;
@@ -568,7 +568,7 @@ export default class CategorySettingsPanel extends React.Component<ICategorySett
       let displayed = [];
       if(filtered.length > 0) {
          displayed = filtered.filter(c => c.Group.Id === defaultGroup.ID);
-         newCategories = this.utilities.mapCategotyItems(displayed);
+         newCategories = this.utilities.mapCategoryItems(displayed);
       }
       this.setState({
         isUniqueToGroupChecked: true,
@@ -640,7 +640,7 @@ export default class CategorySettingsPanel extends React.Component<ICategorySett
       let displayed = [];
       if(filtered.length > 0) {
         displayed = filtered.filter(c => c.Group.Id === selectionOption.ID);
-        newCategories = this.utilities.mapCategotyItems(displayed);
+        newCategories = this.utilities.mapCategoryItems(displayed);
       }
       this.setState({
         categories: filtered.length > 0 ? newCategories : filtered,

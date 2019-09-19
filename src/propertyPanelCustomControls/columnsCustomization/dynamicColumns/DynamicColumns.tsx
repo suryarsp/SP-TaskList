@@ -1,10 +1,13 @@
 import * as React from "react";
-import { IDataProvider, IDynamicColumnProps, IDynamicColumnState, DragDropResult, ICustomizedColumn } from '../../../interfaces';
+import { IDataProvider, IDynamicColumnProps, IDynamicColumnState, DragDropResult, ICustomizedColumn, IColumn } from '../../../interfaces';
 import { Spinner, SpinnerSize, TextField, Checkbox, IconButton, Dropdown, DropdownMenuItemType, PrimaryButton, IDropdownOption, DefaultButton } from "office-ui-fabric-react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import styles from './DynamicColumns.module.scss';
 import TaskDataProvider from "../../../services/TaskDataProvider";
-import { PermissionKind } from "sp-pnp-js";
+import { PermissionKind, FieldTypes } from "sp-pnp-js";
+import _ from "lodash";
+import { Guid } from "guid-typescript";
+import { Utilties } from "../../../common/helper/Utilities";
 
 
 const getItemStyle = (isDragging, draggableStyle) => {
@@ -36,6 +39,8 @@ export default class DynamicColumns extends React.Component<IDynamicColumnProps,
 
   private dataProvider: IDataProvider;
   private newItem: ICustomizedColumn;
+  private isDirty: boolean;
+  private utilities: Utilties;
 
   constructor(props: IDynamicColumnProps) {
     super(props);
@@ -45,12 +50,68 @@ export default class DynamicColumns extends React.Component<IDynamicColumnProps,
       isAddClicked: false,
       columns: []
     };
+    this.isDirty = false;
   }
 
   public componentDidMount() {
     this.dataProvider = TaskDataProvider.Instance;
     TaskDataProvider.context = this.context;
+    this.utilities = Utilties.Instance;
     this.checkListAndPermissions().then((isAllowed) => {
+      this.dataProvider.getTaskListFields(this.props.taskListName).
+      then((columns) => {
+        let filteredColumns = this.utilities.filterColumnsByType(columns);
+        let manualItems: IColumn[] = [
+        {
+          FieldTypeKind : FieldTypes.DateTime,
+          key: 'Created',
+          text: 'Created',
+          InternalName: "Created_x0020_Date",
+          ID: "8c06beca-0777-48f7-91c7-6da68bc07b69"
+        },
+        {
+          FieldTypeKind : FieldTypes.User,
+          key: 'Created By',
+          text: 'Created By',
+          InternalName: "Created",
+          ID: "998b5cff-4a35-47a7-92f3-3914aa6aa4a2"
+        },
+        {
+          FieldTypeKind : FieldTypes.DateTime,
+          key: 'Modified',
+          text: 'Modified',
+          InternalName: "Modified",
+          ID: "28cf69c5-fa48-462a-b5cd-27b6f9d2bd5f"
+        },
+        {
+          FieldTypeKind : FieldTypes.User,
+          key: 'Modified By',
+          text: 'Modified By',
+          InternalName: "Last_x0020_Modified",
+          ID: "173f76c8-aebd-446a-9bc9-769a2bd2c18f"
+        },
+        {
+          FieldTypeKind : FieldTypes.Lookup,
+          key: 'Documents',
+          text: 'Documents',
+          InternalName: "Documents",
+          ID: "6bd9b06c-c42f-4a5c-8edb-29722bc62566"
+        },
+        {
+          FieldTypeKind : FieldTypes.Lookup,
+          key: 'Comments',
+          text: 'Comments',
+          InternalName: "Comments",
+          ID: "72a0f53f-961b-4af3-a7cb-4bd4b9af139b"
+        }
+
+      ];
+      filteredColumns.push(...manualItems);
+        this.setState({
+          columns: filteredColumns
+        });
+      });
+
       this.setState({
        isAllowed: isAllowed
       });
@@ -74,55 +135,116 @@ export default class DynamicColumns extends React.Component<IDynamicColumnProps,
   }
 
   public onDragEnd(result: DragDropResult){
-    console.log(result);
+    const { source, destination }  = result;
+    if (!result.destination) {
+      return;
+    }
+
+    let updatedColumns = this.reorder(_.cloneDeep(this.state.displayedColumns),source.index, destination.index);
+    updatedColumns = updatedColumns.map((col, index) => {
+      col.sortOrder = index + 1;
+      return col;
+    });
+
+    this.setState({
+      displayedColumns: updatedColumns
+    });
   }
 
-  public onChangeColumnType(type) {
+
+  public reorder(list: ICustomizedColumn[], startIndex: number, endIndex: number) {
+    const result = _.cloneDeep(list);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
+    return result;
+  }
+
+  public onChangeColumnType(option) {
 
   }
 
   public onChangeColumnLabel(column: ICustomizedColumn, newValue: string) {
-
+    let displayedColumns = _.cloneDeep(this.state.displayedColumns);
+    column.label = newValue;
+    displayedColumns = displayedColumns.map((col) => col.id === column.id ? column : col);
+    this.setState({
+      displayedColumns: displayedColumns
+    });
   }
 
-  public onRemoveColumn(col: ICustomizedColumn) {
-
+  public onRemoveColumn(column: ICustomizedColumn) {
+      let displayedColumns = _.cloneDeep(this.state.displayedColumns);
+      displayedColumns = displayedColumns.map((col) => {
+        if(col.id === column.id) {
+          col.disabled = true;
+        }
+        return col;
+      });
+      this.setState({
+        displayedColumns: displayedColumns
+      });
   }
 
   public onClickAddColumn() {
-
-    this.setState({
-      isAddClicked: true
-    });
     this.newItem = {
       columnType :"",
       isFixed: false,
       isPresentDefault: false,
       label: "",
+      id: Guid.create().toString(),
+      disabled: false,
       sortOrder: this.state.displayedColumns.length + 1
     };
+    this.setState({
+      isAddClicked: true
+    });
   }
 
   public onChangeNewColumnType(option: IDropdownOption) {
+      this.isDirty = true;
       this.newItem.columnType = option.text;
   }
 
   public onChangeNewColumnLabel(newValue: string) {
+    this.isDirty = true;
     this.newItem.label = newValue;
   }
 
   public onSaveNewColumn() {
+    if(!this.checkValidation()) {
+      return;
+    }
+    const displayedColumns = _.cloneDeep(this.state.displayedColumns);
+    displayedColumns.push(this.newItem);
+    this.newItem = null;
+    this.setState({
+      displayedColumns: displayedColumns,
+      isAddClicked: false
+    });
+  }
 
+  public checkValidation() {
+    let isValid = false;
+    if(!this.newItem) {
+      return true;
+    }
+
+    if(this.newItem.label.length > 0 && this.newItem.columnType.length > 0) {
+      isValid = true;
+    }
+
+    return isValid;
   }
 
   public onCancelNewColumn() {
+    this.isDirty = false;
     this.setState({
       isAddClicked: false
     });
   }
 
   public render() {
-    const {isAllowed, displayedColumns, isAddClicked} = this.state;
+    const {isAllowed, displayedColumns, isAddClicked, columns} = this.state;
     if(isAllowed) {
       return(
         <div>
@@ -131,17 +253,16 @@ export default class DynamicColumns extends React.Component<IDynamicColumnProps,
             <div className={styles.columnHeaderValue}>Label</div>
           </div>
         <DragDropContext onDragEnd={this.onDragEnd.bind(this)}>
-        <Droppable droppableId="droppable">
+        <Droppable
+        droppableId="droppable">
           {(p) => (
             <div
               ref={p.innerRef}
             >
-
-              {displayedColumns.map((col, index) => (
+              {displayedColumns.filter(c => !c.disabled).map((col, index) => (
                 <Draggable
-                  draggableId={col.columnType}
+                  draggableId={col.id}
                   index={index}
-                  isDragDisabled={ col.isFixed }
                 >
                   {(provided, snapshot) => (
                     <div
@@ -169,14 +290,7 @@ export default class DynamicColumns extends React.Component<IDynamicColumnProps,
                                 selectedKey={ col.columnType}
                                 onChange={(e, option) => {this.onChangeColumnType(option);}}
                                 placeholder="Select type"
-                                options={[
-                                  { key: 'Sort', text: 'Sort' },
-                                  { key: 'Task Name', text: 'Task Name' },
-                                  { key: 'Responsible Party / Status', text: 'Responsible Party / Status' },
-                                  { key: 'Last Updated', text: 'Last Updated' },
-                                  { key: 'Documents', text: 'Documents' },
-                                  { key: 'Comments', text: 'Comments' }
-                                ]}
+                                options={columns}
                               />
                             )
                           }
@@ -218,21 +332,17 @@ export default class DynamicColumns extends React.Component<IDynamicColumnProps,
         <Dropdown
             onChange={(e, option) => {this.onChangeNewColumnType(option);}}
             placeholder="Select type"
-            options={[
-              { key: 1, text: 'Sort' },
-              { key: 2, text: 'Task Name' },
-              { key: 3, text: 'Responsible Party / Status' },
-              { key: 4, text: 'Last Updated' },
-              { key: 5, text: 'Documents' },
-              { key: 6, text: 'Comments' }
-            ]}
+            errorMessage = { (this.newItem.columnType.length === 0 && this.isDirty) ? "You can't leave this blank": '' }
+            options={columns}
+            style={{ margin: "10px"}}
           />
 
         <TextField
+          style={{ margin: "10px"}}
           autoFocus={true}
           onBlur= { (e) => { console.log(e.target.value);}}
+          errorMessage = { (this.newItem.label.length === 0 && this.isDirty) ? "You can't leave this blank": '' }
           onChange={(e, newValue) => { this.onChangeNewColumnLabel(newValue); }} />
-
           {/* Button */}
           <div>
         <PrimaryButton

@@ -45,46 +45,59 @@
         "defaultExpand": null,
         "displayedColumns": [
           {
+            "id": "29c1e462-482e-4f58-bb4f-f94f642b1def",
             "columnType": "Sort",
             "label": "Order",
             "isFixed": true,
             "isPresentDefault": true,
-            "sortOrder": 1
+            "sortOrder": 1,
+            "disabled": false
           },
           {
+            "id": "46933d38-e875-4f46-8e67-d66aa18f13ea",
             "columnType": "Task Name",
             "label": "Task Name",
             "isFixed": true,
             "isPresentDefault": true,
-            "sortOrder": 2
+            "sortOrder": 2,
+            "disabled": false
+
           },
           {
+            "id": "6a40b40a-8b57-49b2-9d9b-e26836e990cd",
             "columnType": "Responsible Party / Status",
             "label": "Responsible Party / Status",
             "isFixed": true,
             "isPresentDefault": true,
-            "sortOrder": 3
+            "sortOrder": 3,
+            "disabled": false
           },
           {
-            "columnType": "Last Updated",
-            "label": "Last Updated",
+            "id": "ea634036-02f3-4a26-b75c-74ca0aa18039",
+            "columnType": "Modified",
+            "label": "Modified",
             "isFixed": false,
             "isPresentDefault": true,
-            "sortOrder": 4
+            "sortOrder": 4,
+            "disabled": false
           },
           {
+            "id": "da177e82-68a1-4ced-9887-06b5c11792f4",
             "columnType": "Documents",
             "label": "Documents",
             "isFixed": false,
             "isPresentDefault": true,
-            "sortOrder": 5
+            "sortOrder": 5,
+            "disabled": false
           },
           {
+            "id": "829b9029-2266-49e8-93a0-3020a401ff42",
             "columnType": "Comments",
             "label": "Comments",
             "isFixed": false,
             "isPresentDefault": true,
-            "sortOrder": 6
+            "sortOrder": 6,
+            "disabled": false
           }
         ]
       }
