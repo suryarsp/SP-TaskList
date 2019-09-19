@@ -21,9 +21,12 @@ export default class TaskListPanelContainer extends React.Component< ITaskListPa
       libraryPermissions: [],
       listPermissions: [],
       isAllItemsSeleced: false,
-      selectedItem: null,
-      selectedItemCount: 0,
-      totalItemCount: 0,
+      selectedItem: {ID:2,Title:"Task Test 0000",SortOrder:1,Group:{Title:"All tasks group",Id:1},
+                      GUID:"59a7d38e-a907-4427-8158-6a51048be787",Category:{Id:2,Title:"Category 1"},SubCategory:{Id:5,Title:"Category 4"},
+                      TaskStatus:{Id:3,Title:"In Progress"},Responsible:{Id:2,Title:"Borrower"},Comments:[],
+                      children:[],key:"Task Test 0000",text:"Task Test 0000",Parent:{Id:15,Title:"Category 1"},Documents:[],CommentsId:null},
+      selectedItemCount: 1,
+      totalItemCount: 10,
       allItems: [],
       filteredItems:[],
       showFilter:false
@@ -129,6 +132,7 @@ export default class TaskListPanelContainer extends React.Component< ITaskListPa
             </div>
           </div>
           <TaskCommandBar
+            allTaskItems ={this.state.allItems}
             showFilter={showFilter}
             selectedCount={selectedItemCount}
             isAllItemsSelected={isAllItemsSeleced}
@@ -150,6 +154,7 @@ export default class TaskListPanelContainer extends React.Component< ITaskListPa
       return (
         <div className={css("ms-Fabric",styles.taskListWrapper)}>        
           <TaskCommandBar
+            allTaskItems ={this.state.allItems}
             showFilter={showFilter}
             selectedCount={selectedItemCount}
             isAllItemsSelected={isAllItemsSeleced}

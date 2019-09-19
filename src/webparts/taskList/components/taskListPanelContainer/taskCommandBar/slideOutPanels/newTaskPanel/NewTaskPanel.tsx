@@ -67,7 +67,7 @@ export default class NewTaskPanel extends React.Component<INewTaskPanelProps, IN
 
 
   private changeToSubTask(checked: boolean) {
-    let makeSubTask: ITaskList[] = _.cloneDeep(TaskDataProvider.tasks);
+    let makeSubTask: ITaskList[] = _.cloneDeep(this.props.allTaskItems);
     const currentItem = _.cloneDeep(this.state.currentItem);
     currentItem.Parent = null;
     if(currentItem.Category){
@@ -123,7 +123,7 @@ export default class NewTaskPanel extends React.Component<INewTaskPanelProps, IN
       Title: selectedCategory.Title
     };
 
-    let makeSubTask: ITaskList[] = _.cloneDeep(TaskDataProvider.tasks);
+    let makeSubTask: ITaskList[] = _.cloneDeep(this.props.allTaskItems);
     makeSubTask =  currentItem.Category ? makeSubTask.filter(st => st.Category.Id === currentItem.Category.Id) : [];
 
     console.log(TaskDataProvider.categories);

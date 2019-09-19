@@ -1327,7 +1327,7 @@ export class SharePointDataProvider implements IDataProvider {
                 .getByTitle(listName)
                 .fields.inBatch(batch)
                 .createFieldAsXml(
-                  '<Field Type="Lookup" DisplayName="Comments" Name="Comments" Required="TRUE" List="'+
+                  '<Field Type="Lookup" DisplayName="Comments" Name="Comments" Required="FALSE" List="'+
                   this.commentListGUID+
                   '" ShowField="ID" RelationshipDeleteBehavior="None" Mult="TRUE"/>'
                 );
