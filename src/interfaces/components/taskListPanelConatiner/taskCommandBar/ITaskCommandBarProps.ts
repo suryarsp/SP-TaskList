@@ -14,4 +14,5 @@ export interface ITaskCommandBarProps {
   listPermissions: IPermissions[];
   libraryPermissions : IPermissions[];
   showFilter:boolean;
+  allTaskItems :ITaskList[];
 }

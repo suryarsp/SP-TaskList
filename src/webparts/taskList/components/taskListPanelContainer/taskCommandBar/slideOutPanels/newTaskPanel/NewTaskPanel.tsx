@@ -1,13 +1,8 @@
 import * as React from 'react';
 import styles from './NewTaskPanel.module.scss';
 import { INewTaskPanelProps, INewTaskPanelState, ITaskList, IGroup, ICategory, IResponsibleParty, IStatus, IDataProvider, NewTaskComponentStatus } from '../../../../../../../interfaces/index';
-import { Panel, PanelType } from 'office-ui-fabric-react/lib/Panel';
-import { PrimaryButton, DefaultButton, IconButton } from 'office-ui-fabric-react/lib/Button';
-import { TextField } from 'office-ui-fabric-react/lib/TextField';
-import { Toggle } from 'office-ui-fabric-react/lib/Toggle';
-import { Dropdown } from 'office-ui-fabric-react/lib/Dropdown';
 import TaskDataProvider from '../../../../../../../services/TaskDataProvider';
-import { Spinner, SpinnerSize, Layer } from 'office-ui-fabric-react';
+import { Spinner, SpinnerSize, Layer, MarqueeSelection, IconButton, TextField, Dropdown, Toggle, PrimaryButton, DefaultButton } from 'office-ui-fabric-react';
 import _ from 'lodash';
 export default class NewTaskPanel extends React.Component<INewTaskPanelProps, INewTaskPanelState> {
   public dataProvider: IDataProvider;
@@ -47,9 +42,9 @@ export default class NewTaskPanel extends React.Component<INewTaskPanelProps, IN
 
   public async componentDidMount() {
     this.dataProvider = TaskDataProvider.Instance;
-    let { groups, categories, responsibleParties, statuses, isCategoryUniqueEnabled } = TaskDataProvider;
+    let { groups, categories, responsibleParties, statuses, isCategoryUniqueEnabled, isGroupingEnabled } = TaskDataProvider;
     let categoryFilter: ICategory[] = [];
-    let currentItem = this.state.currentItem;
+    const currentItem = _.cloneDeep(this.state.currentItem);
     const defaultGroup: IGroup = groups.length > 0 ? groups.filter(g => g.IsDefault)[0] : null;
     if (isCategoryUniqueEnabled) {
       categoryFilter = categories.filter(c => c.Group.Title === defaultGroup.Title);
@@ -72,18 +67,21 @@ export default class NewTaskPanel extends React.Component<INewTaskPanelProps, IN
 
 
   private changeToSubTask(checked: boolean) {
-    let makeSubTask: ITaskList[] = _.cloneDeep(TaskDataProvider.tasks);
-    const currentItem = this.state.currentItem;
+    let makeSubTask: ITaskList[] = _.cloneDeep(this.props.allTaskItems);
+    const currentItem = _.cloneDeep(this.state.currentItem);
+    currentItem.Parent = null;
     if(currentItem.Category){
       makeSubTask = makeSubTask.filter(st => st.Category.Id === currentItem.Category.Id);       
       this.setState({
         isSubTaskChecked: checked,
-        taskCollections: makeSubTask
+        taskCollections: makeSubTask,
+        currentItem : currentItem
       });
     }
     else{      
       this.setState({
-        isSubTaskChecked: checked      
+        isSubTaskChecked: checked,
+        currentItem : currentItem 
       });
     }
   }
@@ -92,41 +90,46 @@ export default class NewTaskPanel extends React.Component<INewTaskPanelProps, IN
     let { categories, isCategoryUniqueEnabled } = TaskDataProvider;
     let categoryFilter: ICategory[] = [];
     const selectedGroup: IGroup = option;
-    const currentItem = this.state.currentItem;
+    const currentItem = _.cloneDeep(this.state.currentItem);   
+    currentItem.Category =  null;
+    currentItem.Parent = null;
+    currentItem.SubCategory = null;
     currentItem.Group = {
       Id: selectedGroup.ID,
       Title: selectedGroup.Title
     };
     if (isCategoryUniqueEnabled) {
-      categoryFilter = categories.filter(c => c.Group.Title === selectedGroup.Title);
+      categoryFilter = categories.filter(c => c.Group.Title === selectedGroup.Title);         
     }
     else {
       categoryFilter = categories;
     }
 
     this.setState({
-      categories: categories,
-      currentItem: currentItem
+      categories: categoryFilter,
+      currentItem: currentItem,
+      subCategories:[],
+      taskCollections:[]
     });
   }
 
-  private onChangeCategory(option) {
-    const selectedGroup: ICategory = option;
-    const currentItem = this.state.currentItem;
-
+  private onChangeCategory(e,option) {
+    const selectedCategory: ICategory = option;
+    const currentItem = _.cloneDeep(this.state.currentItem);
+    currentItem.Parent = null;
+    currentItem.SubCategory = null;
     currentItem.Category = {
-      Id: selectedGroup.ID,
-      Title: selectedGroup.Title
+      Id: selectedCategory.ID,
+      Title: selectedCategory.Title
     };
 
-    let makeSubTask: ITaskList[] = _.cloneDeep(TaskDataProvider.tasks);
-    makeSubTask = makeSubTask.filter(st => st.Category.Id === currentItem.Category.Id);
+    let makeSubTask: ITaskList[] = _.cloneDeep(this.props.allTaskItems);
+    makeSubTask =  currentItem.Category ? makeSubTask.filter(st => st.Category.Id === currentItem.Category.Id) : [];
 
     console.log(TaskDataProvider.categories);
     let subCategory: ICategory[] = [];
-    let categoryFilter: ICategory[] = TaskDataProvider.categories.filter(c => c.ID === selectedGroup.ID);
-    subCategory = categoryFilter[0].children;
-
+    let categoryFilter: ICategory[] = TaskDataProvider.categories.filter(c => c.ID === selectedCategory.ID);
+    subCategory = categoryFilter.length > 0 ?  categoryFilter[0].children : [];
     this.setState({
       currentItem: currentItem,
       subCategories: subCategory,
@@ -135,11 +138,11 @@ export default class NewTaskPanel extends React.Component<INewTaskPanelProps, IN
   }
 
   private onChangeResponsibleParty(option) {
-    const selectedGroup: IResponsibleParty = option;
-    const currentItem = this.state.currentItem;
+    const selectedResponsible: IResponsibleParty = option;
+    const currentItem = _.cloneDeep(this.state.currentItem);
     currentItem.Responsible = {
-      Id: selectedGroup.ID,
-      Title: selectedGroup.Title
+      Id: selectedResponsible.ID,
+      Title: selectedResponsible.Title
     };
     this.setState({
       currentItem: currentItem
@@ -147,11 +150,11 @@ export default class NewTaskPanel extends React.Component<INewTaskPanelProps, IN
   }
 
   private onChangeStatus(option) {
-    const selectedGroup: IStatus = option;
-    const currentItem = this.state.currentItem;
+    const selectedStatus: IStatus = option;
+    const currentItem = _.cloneDeep(this.state.currentItem);
     currentItem.TaskStatus = {
-      Id: selectedGroup.ID,
-      Title: selectedGroup.Title
+      Id: selectedStatus.ID,
+      Title: selectedStatus.Title
     };
     this.setState({
       currentItem: currentItem
@@ -159,10 +162,11 @@ export default class NewTaskPanel extends React.Component<INewTaskPanelProps, IN
   }
 
   private onChangeSubCategory(option) {
-    const selectedGroup: ICategory = option;
-    const currentItem = this.state.currentItem;
+    const selectedSubCategory: ICategory = option;
+    const currentItem = _.cloneDeep(this.state.currentItem);
     currentItem.SubCategory = {
-      Id: selectedGroup.ID
+      Id: selectedSubCategory.ID,
+      Title:selectedSubCategory.Title
     };
 
     this.setState({
@@ -172,11 +176,22 @@ export default class NewTaskPanel extends React.Component<INewTaskPanelProps, IN
 
   private onChangeParentTask(option) {
     const selectedTask: ITaskList = option;
-    const currentItem = this.state.currentItem;
+    const currentItem = _.cloneDeep(this.state.currentItem);
+    if(this.state.isSubTaskChecked){
+      currentItem.Parent = {
+        Id: selectedTask.ID,
+        Title:selectedTask.Title
+      };
+    }
+    
+
+    this.setState({
+      currentItem: currentItem
+    });
   }
 
   public OnTaskNameChange(newValue) {
-    const currentItem = this.state.currentItem;
+    const currentItem = _.cloneDeep(this.state.currentItem);
     currentItem.Title = newValue;
     this.setState({
       currentItem: currentItem
@@ -231,7 +246,7 @@ export default class NewTaskPanel extends React.Component<INewTaskPanelProps, IN
 
   private validateForm(): boolean {
     let currentItem = this.state.currentItem;
-    if (currentItem.Title.trim() === "" || !currentItem.Group || currentItem.Responsible || currentItem.TaskStatus || currentItem.Category || (currentItem.Parent && this.state.isSubTaskChecked)) {
+    if (currentItem.Title.trim() === "" || !currentItem.Group || !currentItem.Responsible || !currentItem.TaskStatus || !currentItem.Category || (!currentItem.Parent && this.state.isSubTaskChecked)) {
       this.setState({
         isSaveClick: true
       });
@@ -242,7 +257,7 @@ export default class NewTaskPanel extends React.Component<INewTaskPanelProps, IN
 
 
   public render(): React.ReactElement<INewTaskPanelProps> {
-    const { isSubTaskChecked, groups, categories, statuses, parties, subCategories, taskCollections, currentItem, isSaveClick } = this.state;
+    const { isSubTaskChecked, groups, categories, statuses, parties, subCategories, taskCollections, currentItem, isSaveClick } = _.cloneDeep(this.state);
     const { isGroupingEnabled } = TaskDataProvider;
 
     return (
@@ -258,15 +273,7 @@ export default class NewTaskPanel extends React.Component<INewTaskPanelProps, IN
               </div>
               <div className={styles.commentsTitle}>New Task</div>           
               <div className={styles.verticalSeperator}></div>
-            </div>
-            {/* <Panel
-          isOpen={true}
-          type={PanelType.medium}
-          onDismiss={() => { this.props.hidePanel(this.isDirty); }}
-          headerText="Add new task"
-          closeButtonAriaLabel="Close"
-          className={"newTaskItem"}
-        > */}
+            </div>            
             <div className={styles.newTaskContainer}>
               <TextField
                 value={this.currentTaskItem}
@@ -280,8 +287,9 @@ export default class NewTaskPanel extends React.Component<INewTaskPanelProps, IN
               {isGroupingEnabled ? <Dropdown
                 label="Group"
                 required={true}
+                key={1}
                 errorMessage={!currentItem.Group && isSaveClick ? "You can't leave this blank." : ""}
-                selectedKey={currentItem.Group ? currentItem.Group.Title : ""}
+                selectedKey={currentItem.Group ? currentItem.Group.Title : ''}
                 onChange={(e, option) => { this.onChangeGroup(option); }}
                 placeholder="Select an option"
                 options={groups}
@@ -291,9 +299,11 @@ export default class NewTaskPanel extends React.Component<INewTaskPanelProps, IN
 
               <Dropdown
                 label="Category"
+                key={2}
                 required={true}
+                selectedKey = {currentItem.Category ? currentItem.Category.Title : ''}
                 errorMessage={!currentItem.Category && isSaveClick ? "You can't leave this blank." : ""}
-                onChange={(e, option) => { this.onChangeCategory(option); }}
+                onChange={(e, option) => { this.onChangeCategory(e,option); }}
                 placeholder="Select an option"
                 options={categories}
                 styles={{ dropdown: { width: 300 } }}
@@ -303,6 +313,7 @@ export default class NewTaskPanel extends React.Component<INewTaskPanelProps, IN
               <Dropdown
                 label="Responsible party"
                 required={true}
+                key={3}
                 errorMessage={!currentItem.Responsible && isSaveClick ? "You can't leave this blank." : ""}
                 onChange={(e, option) => { this.onChangeResponsibleParty(option); }}
                 placeholder="Select an option"
@@ -312,6 +323,7 @@ export default class NewTaskPanel extends React.Component<INewTaskPanelProps, IN
 
               <Dropdown
                 label="Status"
+                key={4}
                 required={true}
                 errorMessage={!currentItem.TaskStatus && isSaveClick ? "You can't leave this blank." : ""}
                 onChange={(e, option) => { this.onChangeStatus(option); }}
@@ -322,7 +334,9 @@ export default class NewTaskPanel extends React.Component<INewTaskPanelProps, IN
 
 
               <Dropdown
-                label="Sub category"
+                label="Sub category"   
+                key={5}        
+                selectedKey = {currentItem.SubCategory ? currentItem.SubCategory.Title : ''}
                 onChange={(e, option) => { this.onChangeSubCategory(option); }}
                 placeholder="Select an option"
                 options={subCategories}
@@ -340,9 +354,10 @@ export default class NewTaskPanel extends React.Component<INewTaskPanelProps, IN
                   <Dropdown
                     label="Parent task"
                     required={true}
-                    errorMessage={!currentItem.Parent && isSaveClick ? "You can't leave this blank." : ""}
-                    selectedKey={""}
-                    onChange={(e, option) => { this.onChangeSubCategory(option); }}
+                    key={6}
+                    selectedKey = {currentItem.Parent ? currentItem.Parent.Title : ''}
+                    errorMessage={!currentItem.Parent && isSaveClick ? "You can't leave this blank." : ""}                    
+                    onChange={(e, option) => { this.onChangeParentTask(option); }}
                     placeholder="Select an option"
                     options={taskCollections}
                     styles={{ dropdown: { width: 300 } }}
@@ -397,8 +412,6 @@ export default class NewTaskPanel extends React.Component<INewTaskPanelProps, IN
                 Cancel
             </DefaultButton>
             </div>
-
-            {/* </Panel> */}
           </div>
         </div>
       </Layer>

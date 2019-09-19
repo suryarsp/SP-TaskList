@@ -377,6 +377,7 @@ export class TaskCommandBar extends React.Component<
 
       case CommandTypes.NewTask: {
         commands = <NewTaskPanel
+          allTaskItems={this.props.allTaskItems}
           hidePanel={this.hidePanel.bind(this).bind(this)}
         />;
         break;
@@ -384,6 +385,8 @@ export class TaskCommandBar extends React.Component<
 
       case CommandTypes.EditTask: {
         commands = <EditTaskPanel
+          allTaskItems={this.props.allTaskItems}
+          selectedItem={this.props.selectedItem}
           hidePanel={this.hidePanel.bind(this)}
         />;
         break;
