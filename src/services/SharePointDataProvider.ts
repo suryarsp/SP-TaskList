@@ -197,7 +197,7 @@ export class SharePointDataProvider implements IDataProvider {
             FontColor: element.FontColor,
             FillColor: element.FillColor,
             GUID: element.GUID,
-            key : element.ID,
+            key : element.Title ? element.Title: "",
             text :  element.Title ? element.Title : ""
           };
           ResponsibleListColl.push(items);
@@ -222,7 +222,7 @@ export class SharePointDataProvider implements IDataProvider {
             FillColor: element.FillColor,
             SortOrder: element.SortOrder,
             GUID: element.GUID,
-            key : element.ID,
+            key : element.Title ? element.Title: "",
             text :  element.Title ? element.Title : ""
           };
           StatusitemsListColl.push(items);
@@ -254,7 +254,7 @@ export class SharePointDataProvider implements IDataProvider {
             Group: element.Group,
             Parent: element.Parent,
             children: [],
-            key: element.ID.toString(),
+            key: element.Title ? element.Title: "",
             text: element.Title ? element.Title :"",
             GUID: element.GUID
           };
@@ -313,7 +313,7 @@ export class SharePointDataProvider implements IDataProvider {
             Responsible:element.Responsible,
             Comments:element.Comments ? element.Comments : [],
             children:[],
-            key:element.ID,
+            key:element.Title ? element.Title: "",
             text:element.Title ? element.Title :""
           };
           TaskListColl.push(items);
@@ -351,7 +351,7 @@ export class SharePointDataProvider implements IDataProvider {
             Responsible:taskresult.Responsible,
             Comments:taskresult.Comments ? taskresult.Comments : [],
             children:[],
-            key:taskresult.ID,
+            key:taskresult.Title ? taskresult.Title: "",
             text:taskresult.Title ? taskresult.Title :""
           };
         resolve(items);
@@ -414,7 +414,7 @@ export class SharePointDataProvider implements IDataProvider {
             },
             Comments:insertTask.data.CommentsId,
             children:[],
-            key:insertTask.data.ID,
+            key:insertTask.data.Title,
             text:insertTask.data.Title
           };
           response(taskList);
@@ -572,7 +572,7 @@ export class SharePointDataProvider implements IDataProvider {
             FillColor: insertstatus.data.FillColor,
             ID: insertstatus.data.ID,
             GUID: insertstatus.data.GUID,
-            key : insertstatus.data.ID,
+            key : insertstatus.data.Title,
             text :  insertstatus.data.Title
           };
           response(item);
@@ -626,7 +626,7 @@ export class SharePointDataProvider implements IDataProvider {
             FillColor: insertResponsible.data.FillColor,
             ID: insertResponsible.data.ID,
             GUID: insertResponsible.data.GUID,
-            key : insertResponsible.data.ID,
+            key : insertResponsible.data.Title,
             text :  insertResponsible.data.Title
           };
           response(item);
@@ -705,7 +705,7 @@ export class SharePointDataProvider implements IDataProvider {
             ID: insertCategory.data.ID,
             GUID: insertCategory.data.GUID,
             children: [],
-            key: insertCategory.data.ID,
+            key: insertCategory.data.Title,
             text: insertCategory.data.Title
           };
           response(category);

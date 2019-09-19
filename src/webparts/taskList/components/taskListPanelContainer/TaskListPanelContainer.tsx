@@ -86,7 +86,7 @@ export default class TaskListPanelContainer extends React.Component< ITaskListPa
 
   public onClickDoughnutChart(party:string){
     console.log("Filter Part Name",party);  
-    const {allItems} = this.state
+    const {allItems} = this.state;
     const inProgressValue= ChartDataConstant.inProgressValue;
     const filteredItems= allItems.filter(eachItem=> eachItem.Responsible.Title === party && eachItem.TaskStatus.Title === inProgressValue);
     this.setState({
