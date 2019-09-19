@@ -2,5 +2,7 @@ import { ICustomizedColumn } from "../ICustomizedColumn";
 
 export interface IDynamicColumnState {
   isAllowed : boolean;
-  columns: ICustomizedColumn[];
+  displayedColumns: ICustomizedColumn[];
+  isAddClicked: boolean;
+  columns: any[];
 }

@@ -9,6 +9,10 @@
   border-radius: 20px;
 }
 
+#spPropertyPaneContainer, #spPropertyPaneContainer [role="dialog"] {
+  width: 450px;
+}
+
 /* .apexcharts-grid {
   display: none;
 } */
