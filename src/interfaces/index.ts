@@ -37,6 +37,10 @@ export * from './components/taskListPanelConatiner/taskList/ITaskListDetailsStat
 export * from './components/taskListPanelConatiner/taskCommandBar/slideOutPanels/colorPicker/IColorPickerProps';
 export * from './components/taskListPanelConatiner/taskCommandBar/slideOutPanels/colorPicker/IColorPickerState';
 export * from './components/header/statusBarChart/BarChart/IBarChartSeriesBar';
+export * from './components/taskListPanelConatiner/DragAndDropContainer/IDirectory';
+export * from './components/taskListPanelConatiner/DragAndDropContainer/IFolderLink';
+export * from './components/taskListPanelConatiner/DragAndDropContainer/IDragnDropContainerProps';
+export * from './components/taskListPanelConatiner/DragAndDropContainer/IDragnDropContainerState';
 
 
 // Services
