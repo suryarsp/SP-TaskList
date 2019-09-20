@@ -19,3 +19,7 @@ export interface Editor {
      LastName: string;
      FirstName: string;
 }
+
+export interface IDocumentId{
+  Id:number[];
+}

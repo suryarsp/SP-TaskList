@@ -1,5 +1,5 @@
 import { PermissionKind } from "sp-pnp-js";
-import { IGroup, IResponsibleParty, IStatus, IColumn, ICategory, IComment, ITaskList, Group } from "../index";
+import { IGroup, IResponsibleParty, IStatus, IColumn, ICategory, IComment, ITaskList, Group, IChoiceField, IDocument, IDocumentId } from "../index";
 
 export interface IDataProvider {
   getPermissions?:(listTitle: string) => Promise<Array<{ permission: PermissionKind, allowed: boolean }>>;
@@ -41,4 +41,12 @@ export interface IDataProvider {
   getTaskListItemById?: (listName:string,itemId:number)=>Promise<ITaskList>;
   bulkUpdateCategoryItem?: (listName: string, items: ICategory[],groupItemId:number) => Promise<boolean>;
   bulkUpdateTaskItem?: (listName: string, items: ITaskList[],groupItemId:number) => Promise<boolean>;
+
+  getChoiceField?: (listname: string, fieldName: string)=> Promise<IChoiceField[]>;
+
+  getAllDocumentsForTasklist?:(listItemId: number[], doclistName: string)=>Promise<IDocument[]>;
+  deletedocumentsFromLibrary?:(listname: string, listItemId: number)=> Promise<boolean>;
+  isFileExistsByFile?:(folderRelativePath: string, file: any)=> Promise<boolean>;
+  updateDocumentIdToTaskList?:(listname: string, listItemId: number, docId: number[])=>Promise<IDocumentId>;
+  uploadFile?:(libraryName: string, folderRelativePath: string, file: File)=>Promise<string>;
 }

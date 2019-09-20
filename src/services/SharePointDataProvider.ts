@@ -1,4 +1,4 @@
-import { IDataProvider, IGroup, IStatus, ICategory, IColumn, IResponsibleParty, IComment, IDocument, ICreateFolder, ITaskList, Group, Category } from "../interfaces/index";
+import { IDataProvider, IGroup, IStatus, ICategory, IColumn, IResponsibleParty, IComment, IDocument, ICreateFolder, ITaskList, Group, Category, IChoiceField, IDocumentId } from "../interfaces/index";
 
 import { IWebPartContext } from "@microsoft/sp-webpart-base";
 
@@ -9,6 +9,7 @@ import { SPHttpClient, ISPHttpClientOptions, IHttpClientOptions, IDigestCache, D
 import IDownloadItems from "../interfaces/services/response/IDownloadItems";
 import { ListDetailsConstants } from "../common/defaults/listView-constants";
 import TaskDataProvider from "./TaskDataProvider";
+import _ from "lodash";
 
 export class SharePointDataProvider implements IDataProvider {
 
@@ -16,7 +17,7 @@ export class SharePointDataProvider implements IDataProvider {
   public _context: IWebPartContext;
   public _relativeUrl: string;
   public web: Web;
-  public utilities : Utilties;
+  public utilities: Utilties;
   public DocumentsColumnTitle: string = "Documents";
   public static globalFileDownloadIndex: number = 1;
   private groupListGUID: string;
@@ -26,7 +27,7 @@ export class SharePointDataProvider implements IDataProvider {
   private documentLibraryGUID: string;
   private taskListGUID: string;
   private commentListGUID: string;
-  private listNames =  TaskDataProvider.listNames;
+  private listNames = TaskDataProvider.listNames;
   private configOptions: ConfigOptions = {
     headers: {
       Accept: 'application/json;odata=nometadata'
@@ -170,11 +171,11 @@ export class SharePointDataProvider implements IDataProvider {
           let items: IGroup = {
             ID: element.ID,
             IsDefault: element.IsDefault,
-            Title: element.Title ? element.Title:"",
+            Title: element.Title ? element.Title : "",
             SortOrder: element.SortOrder,
             GUID: element.GUID,
-            key: element.Title ? element.Title: "",
-            text: element.Title ? element.Title: ""
+            key: element.Title ? element.Title : "",
+            text: element.Title ? element.Title : ""
           };
           GroupListColl.push(items);
         });
@@ -197,8 +198,8 @@ export class SharePointDataProvider implements IDataProvider {
             FontColor: element.FontColor,
             FillColor: element.FillColor,
             GUID: element.GUID,
-            key : element.Title ? element.Title: "",
-            text :  element.Title ? element.Title : ""
+            key: element.Title ? element.Title : "",
+            text: element.Title ? element.Title : ""
           };
           ResponsibleListColl.push(items);
         });
@@ -222,8 +223,8 @@ export class SharePointDataProvider implements IDataProvider {
             FillColor: element.FillColor,
             SortOrder: element.SortOrder,
             GUID: element.GUID,
-            key : element.Title ? element.Title: "",
-            text :  element.Title ? element.Title : ""
+            key: element.Title ? element.Title : "",
+            text: element.Title ? element.Title : ""
           };
           StatusitemsListColl.push(items);
         });
@@ -236,26 +237,26 @@ export class SharePointDataProvider implements IDataProvider {
 
     let selectItem = ["Title", "ID", "SortOrder", "Parent/Title", "Parent/Id", "GUID"];
     let expandItem = ["Parent"];
-    if(TaskDataProvider.listNames.groupListName && TaskDataProvider.isGroupingEnabled) {
+    if (TaskDataProvider.listNames.groupListName && TaskDataProvider.isGroupingEnabled) {
       selectItem.push("Group/Title", "Group/Id");
       expandItem.push("Group");
     }
     let web: Web = new Web(this._absoluteUrl);
     let CategoryListColl: ICategory[] = [];
     return new Promise<ICategory[]>(resolve => {
-      web.lists.configure(this.configOptions).getByTitle(listname).items.select(selectItem.toString()).expand(expandItem.toString()).top(5000).orderBy("ParentId",true).get().then((categoryitems: ICategory[]) => {
+      web.lists.configure(this.configOptions).getByTitle(listname).items.select(selectItem.toString()).expand(expandItem.toString()).top(5000).orderBy("ParentId", true).get().then((categoryitems: ICategory[]) => {
         console.log("category : ", categoryitems);
         console.log("category JSON : ", JSON.stringify(categoryitems));
         categoryitems.map(element => {
           let items: ICategory = {
             ID: element.ID,
-            Title: element.Title ? element.Title :"",
+            Title: element.Title ? element.Title : "",
             SortOrder: element.SortOrder,
             Group: element.Group,
             Parent: element.Parent,
             children: [],
-            key: element.Title ? element.Title: "",
-            text: element.Title ? element.Title :"",
+            key: element.Title ? element.Title : "",
+            text: element.Title ? element.Title : "",
             GUID: element.GUID
           };
           CategoryListColl.push(items);
@@ -292,166 +293,165 @@ export class SharePointDataProvider implements IDataProvider {
     });
   }
 
-  public getTaskListItem(listName:string):Promise<ITaskList[]>{
+  public getTaskListItem(listName: string): Promise<ITaskList[]> {
     let taskStatusName = this.utilities.GetFieldInteralName("Task Status");
     console.log(taskStatusName);
-    let selectItem = ["Title", "ID", "SortOrder", "Parent/Title", "Parent/Id", "GUID","SubCategory/Id","Comments/Id","Category/Id","Category/Title","Responsible/Id","Responsible/Title",taskStatusName+"/Id",taskStatusName+"/Title"];
-    let expandItem = ["Parent",taskStatusName,"Responsible","Category","Comments","SubCategory"];
-    if(TaskDataProvider.listNames.groupListName && TaskDataProvider.isGroupingEnabled) {
+    let selectItem = ["Title", "ID", "SortOrder", "Parent/Title", "Parent/Id", "GUID", "SubCategory/Id", "Comments/Id", "Category/Id", "Category/Title", "Responsible/Id", "Responsible/Title", taskStatusName + "/Id", taskStatusName + "/Title"];
+    let expandItem = ["Parent", taskStatusName, "Responsible", "Category", "Comments", "SubCategory"];
+    if (TaskDataProvider.listNames.groupListName && TaskDataProvider.isGroupingEnabled) {
       selectItem.push("Group/Title", "Group/Id");
       expandItem.push("Group");
     }
     let TaskListColl: ITaskList[] = [];
-    return new Promise<ITaskList[]>((resolve)=>{
-      this.web.lists.getByTitle(listName).items.top(5000).select(selectItem.toString()).expand(expandItem.toString()).get().then(taskresult=>{
+    return new Promise<ITaskList[]>((resolve) => {
+      this.web.lists.getByTitle(listName).items.top(5000).select(selectItem.toString()).expand(expandItem.toString()).get().then(taskresult => {
         console.log("Task List : ", taskresult);
         //console.log("Task List JSON : ", JSON.stringify(taskresult));
         taskresult.map(element => {
           let items: ITaskList = {
             ID: element.ID,
-            Title: element.Title ? element.Title :"",
+            Title: element.Title ? element.Title : "",
             SortOrder: element.SortOrder,
             Group: element.Group,
             Parent: element.Parent,
             GUID: element.GUID,
-            Category:element.Category,
-            SubCategory:element.SubCategory,
-            TaskStatus:element[taskStatusName],
-            Responsible:element.Responsible,
-            Comments:element.Comments ? element.Comments : [],
-            children:[],
-            key:element.Title ? element.Title: "",
-            text:element.Title ? element.Title :""
+            Category: element.Category,
+            SubCategory: element.SubCategory,
+            TaskStatus: element[taskStatusName],
+            Responsible: element.Responsible,
+            Comments: element.Comments ? element.Comments : [],
+            children: [],
+            key: element.Title ? element.Title : "",
+            text: element.Title ? element.Title : ""
           };
           TaskListColl.push(items);
         });
         resolve(TaskListColl);
-      }).catch(error=>{
-        console.log("Get task list item error message :",error);
+      }).catch(error => {
+        console.log("Get task list item error message :", error);
         resolve(null);
       });
     });
   }
 
-  public getTaskListItemById(listName:string,itemId:number):Promise<ITaskList>{
+  public getTaskListItemById(listName: string, itemId: number): Promise<ITaskList> {
     let taskStatusName = this.utilities.GetFieldInteralName("Task Status");
-    let selectItem = ["Title", "ID", "SortOrder", "Parent/Title", "Parent/Id", "GUID","SubCategory/Id","Comments/Id","Category/Id","Category/Title","Responsible/Id","Responsible/Title",taskStatusName+"/Id",taskStatusName+"/Title"];
-    let expandItem = ["Parent",taskStatusName,"Responsible","Category","Comments","SubCategory"];
-    if(TaskDataProvider.listNames.groupListName && TaskDataProvider.isGroupingEnabled) {
+    let selectItem = ["Title", "ID", "SortOrder", "Parent/Title", "Parent/Id", "GUID", "SubCategory/Id", "Comments/Id", "Category/Id", "Category/Title", "Responsible/Id", "Responsible/Title", taskStatusName + "/Id", taskStatusName + "/Title"];
+    let expandItem = ["Parent", taskStatusName, "Responsible", "Category", "Comments", "SubCategory"];
+    if (TaskDataProvider.listNames.groupListName && TaskDataProvider.isGroupingEnabled) {
       selectItem.push("Group/Title", "Group/Id");
       expandItem.push("Group");
     }
-    return new Promise<ITaskList>((resolve)=>{
-      this.web.lists.getByTitle(listName).items.getById(itemId).select(selectItem.toString()).expand(expandItem.toString()).get().then(taskresult=>{
+    return new Promise<ITaskList>((resolve) => {
+      this.web.lists.getByTitle(listName).items.getById(itemId).select(selectItem.toString()).expand(expandItem.toString()).get().then(taskresult => {
         console.log("Task List : ", taskresult);
         console.log("Task List JSON : ", JSON.stringify(taskresult));
-          let items: ITaskList = {
-            ID: taskresult.ID,
-            Title: taskresult.Title ? taskresult.Title :"",
-            SortOrder: taskresult.SortOrder,
-            Group: taskresult.Group,
-            Parent: taskresult.Parent,
-            GUID: taskresult.GUID,
-            Category:taskresult.Category,
-            SubCategory:taskresult.SubCategory,
-            TaskStatus:taskresult.taskStatusName,
-            Responsible:taskresult.Responsible,
-            Comments:taskresult.Comments ? taskresult.Comments : [],
-            children:[],
-            key:taskresult.Title ? taskresult.Title: "",
-            text:taskresult.Title ? taskresult.Title :""
-          };
+        let items: ITaskList = {
+          ID: taskresult.ID,
+          Title: taskresult.Title ? taskresult.Title : "",
+          SortOrder: taskresult.SortOrder,
+          Group: taskresult.Group,
+          Parent: taskresult.Parent,
+          GUID: taskresult.GUID,
+          Category: taskresult.Category,
+          SubCategory: taskresult.SubCategory,
+          TaskStatus: taskresult.taskStatusName,
+          Responsible: taskresult.Responsible,
+          Comments: taskresult.Comments ? taskresult.Comments : [],
+          children: [],
+          key: taskresult.Title ? taskresult.Title : "",
+          text: taskresult.Title ? taskresult.Title : ""
+        };
         resolve(items);
-      }).catch(error=>{
-        console.log("Get task list item error message :",error);
+      }).catch(error => {
+        console.log("Get task list item error message :", error);
         resolve(null);
       });
     });
   }
 
-  public insertTaskListItem(listName:string,taskItem:ITaskList):Promise<ITaskList>{
-    return new Promise<ITaskList>((response)=>{
+  public insertTaskListItem(listName: string, taskItem: ITaskList): Promise<ITaskList> {
+    return new Promise<ITaskList>((response) => {
       let taskStatusName = this.utilities.GetFieldInteralName("Task Status");
       let obj = {};
-      if(taskItem.Group && taskItem.Parent){
+      if (taskItem.Group && taskItem.Parent) {
         obj["ParentId"] = taskItem.Parent.Id;
         obj["GroupId"] = taskItem.Group.Id;
       }
-      if(taskItem.Group)
-      {
+      if (taskItem.Group) {
         obj["GroupId"] = taskItem.Group.Id;
       }
-      else if(taskItem.Parent){
+      else if (taskItem.Parent) {
         obj["ParentId"] = taskItem.Parent.Id;
       }
 
       obj["Title"] = taskItem.Title;
       obj["SortOrder"] = taskItem.SortOrder;
       obj["CategoryId"] = taskItem.Category.Id;
-      obj["SubCategoryId"] = taskItem.SubCategory ? taskItem.SubCategory.Id:null;
+      obj["SubCategoryId"] = taskItem.SubCategory ? taskItem.SubCategory.Id : null;
       obj["ResponsibleId"] = taskItem.Responsible.Id;
-      obj["CommentsId"] = taskItem.CommentsId ? { results : taskItem.CommentsId}:null;
-      obj[taskStatusName+"Id"] = taskItem.TaskStatus.Id;
+      obj["CommentsId"] = taskItem.CommentsId ? { results: taskItem.CommentsId } : null;
+      obj[taskStatusName + "Id"] = taskItem.TaskStatus.Id;
 
-      this.web.lists.getByTitle(listName).items.add(obj).then((insertTask)=>{
+      this.web.lists.getByTitle(listName).items.add(obj).then((insertTask) => {
         if (insertTask) {
           console.log("Insert category item : ", insertTask);
-          let taskList : ITaskList = {
+          let taskList: ITaskList = {
             Title: insertTask.data.Title,
             SortOrder: insertTask.data.SortOrder,
             Group: {
-              Id:insertTask.data.GroupId
+              Id: insertTask.data.GroupId
             },
             Parent: {
-              Id:insertTask.data.ParentId
+              Id: insertTask.data.ParentId
             },
             ID: insertTask.data.ID,
             GUID: insertTask.data.GUID,
-            Category:{
-              Id:insertTask.data.CategoryId
+            Category: {
+              Id: insertTask.data.CategoryId
             },
-            SubCategory:{
-              Id:insertTask.data.SubCategoryId
+            SubCategory: {
+              Id: insertTask.data.SubCategoryId
             },
-            Responsible:{
-              Id:insertTask.data.ResponsibleId
+            Responsible: {
+              Id: insertTask.data.ResponsibleId
             },
-            TaskStatus:{
-              Id:insertTask.data.Task_x0020_Status
+            TaskStatus: {
+              Id: insertTask.data.Task_x0020_Status
             },
-            Comments:insertTask.data.CommentsId,
-            children:[],
-            key:insertTask.data.Title,
-            text:insertTask.data.Title
+            Comments: insertTask.data.CommentsId,
+            children: [],
+            key: insertTask.data.Title,
+            text: insertTask.data.Title
           };
           response(taskList);
         }
         else {
           response(null);
         }
-      }).catch(error=>{
+      }).catch(error => {
         console.log("Insert Task list item error message : ", error);
         response(null);
       });
     });
   }
 
-  public async bulkUpdateTaskItem(listName: string, items: ITaskList[],groupItemId:number): Promise<boolean> {
+  public async bulkUpdateTaskItem(listName: string, items: ITaskList[], groupItemId: number): Promise<boolean> {
     let requests: Array<Promise<boolean>> = new Array();
-    await items.map((element)=>{
-      if(groupItemId){
-        element.Group = {Id: groupItemId};
+    await items.map((element) => {
+      if (groupItemId) {
+        element.Group = { Id: groupItemId };
       }
 
-       let commentID:number[] = [];
-        element.Comments.filter(c=> {
-          if(c.Id){
-            let commentIdItem:number = c.Id;
-            commentID.push(commentIdItem);
-          }
-        });
-       element.CommentsId = commentID;
-      requests.push(this.updateTaskListItem(listName, element,element.ID));
+      let commentID: number[] = [];
+      element.Comments.filter(c => {
+        if (c.Id) {
+          let commentIdItem: number = c.Id;
+          commentID.push(commentIdItem);
+        }
+      });
+      element.CommentsId = commentID;
+      requests.push(this.updateTaskListItem(listName, element, element.ID));
     });
 
     let results: boolean;
@@ -467,21 +467,21 @@ export class SharePointDataProvider implements IDataProvider {
     });
   }
 
-  public updateTaskListItem(listName:string,taskItem:ITaskList,itemId:number):Promise<boolean>{
-    return new Promise<boolean>((response)=>{
+  public updateTaskListItem(listName: string, taskItem: ITaskList, itemId: number): Promise<boolean> {
+    return new Promise<boolean>((response) => {
       let taskStatusName = this.utilities.GetFieldInteralName("Task Status");
       let obj = {};
       obj["Title"] = taskItem.Title;
       obj["SortOrder"] = taskItem.SortOrder;
       obj["CategoryId"] = taskItem.Category.Id;
-      obj["SubCategoryId"] = taskItem.SubCategory ? taskItem.SubCategory.Id:null;
+      obj["SubCategoryId"] = taskItem.SubCategory ? taskItem.SubCategory.Id : null;
       obj["ResponsibleId"] = taskItem.Responsible.Id;
-      obj["CommentsId"] = taskItem.CommentsId ? { results : taskItem.CommentsId}:null;
-      obj[taskStatusName+"Id"] =taskItem.TaskStatus? taskItem.TaskStatus.Id:null;
-      obj["ParentId"] = taskItem.Parent? taskItem.Parent.Id:null;
-      obj["GroupId"] = taskItem.Group ? taskItem.Group.Id :null;
+      obj["CommentsId"] = taskItem.CommentsId ? { results: taskItem.CommentsId } : null;
+      obj[taskStatusName + "Id"] = taskItem.TaskStatus ? taskItem.TaskStatus.Id : null;
+      obj["ParentId"] = taskItem.Parent ? taskItem.Parent.Id : null;
+      obj["GroupId"] = taskItem.Group ? taskItem.Group.Id : null;
 
-      this.web.lists.getByTitle(listName).items.getById(itemId).update(obj).then((insertTask)=>{
+      this.web.lists.getByTitle(listName).items.getById(itemId).update(obj).then((insertTask) => {
         if (insertTask) {
           console.log("Insert category item : ", insertTask);
           response(true);
@@ -489,7 +489,7 @@ export class SharePointDataProvider implements IDataProvider {
         else {
           response(false);
         }
-      }).catch(error=>{
+      }).catch(error => {
         console.log("Insert Task list item error message : ", error);
         response(false);
       });
@@ -579,8 +579,8 @@ export class SharePointDataProvider implements IDataProvider {
             FillColor: insertstatus.data.FillColor,
             ID: insertstatus.data.ID,
             GUID: insertstatus.data.GUID,
-            key : insertstatus.data.Title,
-            text :  insertstatus.data.Title
+            key: insertstatus.data.Title,
+            text: insertstatus.data.Title
           };
           response(item);
         }
@@ -633,8 +633,8 @@ export class SharePointDataProvider implements IDataProvider {
             FillColor: insertResponsible.data.FillColor,
             ID: insertResponsible.data.ID,
             GUID: insertResponsible.data.GUID,
-            key : insertResponsible.data.Title,
-            text :  insertResponsible.data.Title
+            key: insertResponsible.data.Title,
+            text: insertResponsible.data.Title
           };
           response(item);
         }
@@ -674,24 +674,23 @@ export class SharePointDataProvider implements IDataProvider {
   //Category list method start
   public insertCategoryItem(listName: string, item: ICategory): Promise<ICategory> {
     let obj = {};
-    if(item.Group && item.Parent){
+    if (item.Group && item.Parent) {
       obj["Title"] = item.Title;
       obj["SortOrder"] = item.SortOrder;
       obj["ParentId"] = item.Parent.Id;
       obj["GroupId"] = item.Group.Id;
     }
-    if(item.Group)
-    {
+    if (item.Group) {
       obj["Title"] = item.Title;
       obj["SortOrder"] = item.SortOrder;
       obj["GroupId"] = item.Group.Id;
     }
-    else if(item.Parent){
+    else if (item.Parent) {
       obj["Title"] = item.Title;
       obj["SortOrder"] = item.SortOrder;
       obj["ParentId"] = item.Parent.Id;
     }
-    else{
+    else {
       obj["Title"] = item.Title;
       obj["SortOrder"] = item.SortOrder;
     }
@@ -702,11 +701,11 @@ export class SharePointDataProvider implements IDataProvider {
       this.web.lists.configure(this.configOptions).getByTitle(listName).items.add(obj).then(insertCategory => {
         if (insertCategory) {
           console.log("Insert category item : ", insertCategory);
-          let category : ICategory = {
+          let category: ICategory = {
             Title: insertCategory.data.Title,
             SortOrder: insertCategory.data.SortOrder,
             Group: {
-              Id:insertCategory.data.GroupId
+              Id: insertCategory.data.GroupId
             },
             Parent: insertCategory.data.Parent,
             ID: insertCategory.data.ID,
@@ -727,11 +726,11 @@ export class SharePointDataProvider implements IDataProvider {
     });
   }
 
-  public async bulkUpdateCategoryItem(listName: string, items: ICategory[],groupItemId:number): Promise<boolean> {
+  public async bulkUpdateCategoryItem(listName: string, items: ICategory[], groupItemId: number): Promise<boolean> {
     let requests: Array<Promise<boolean>> = new Array();
-    await items.map((element)=>{
-      element.Group = {Id: groupItemId};
-      requests.push(this.updateCategoryItem(listName, element.ID,element));
+    await items.map((element) => {
+      element.Group = { Id: groupItemId };
+      requests.push(this.updateCategoryItem(listName, element.ID, element));
     });
 
     let results: boolean;
@@ -749,24 +748,23 @@ export class SharePointDataProvider implements IDataProvider {
 
   public updateCategoryItem(listName: string, itemId: number, item: ICategory): Promise<boolean> {
     let obj = {};
-    if(item.Group && item.Parent){
+    if (item.Group && item.Parent) {
       obj["Title"] = item.Title;
       obj["SortOrder"] = item.SortOrder;
       obj["ParentId"] = item.Parent.Id;
       obj["GroupId"] = item.Group.Id;
     }
-    if(item.Group)
-    {
+    if (item.Group) {
       obj["Title"] = item.Title;
       obj["SortOrder"] = item.SortOrder;
       obj["GroupId"] = item.Group.Id;
     }
-    else if(item.Parent){
+    else if (item.Parent) {
       obj["Title"] = item.Title;
       obj["SortOrder"] = item.SortOrder;
       obj["ParentId"] = item.Parent.Id;
     }
-    else{
+    else {
       obj["Title"] = item.Title;
       obj["SortOrder"] = item.SortOrder;
     }
@@ -841,43 +839,43 @@ export class SharePointDataProvider implements IDataProvider {
     return new Promise<boolean>((resolve) => {
       const batch = this.web.createBatch();
       this.web.lists.configure(this.configOptions).ensure(listName, "", 100, true).then(async groupresult => {
-          console.log(groupresult.data.Id);
-          this.groupListGUID = groupresult.data.Id;
-          await this.web.lists.configure(this.configOptions)
-            .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("SortOrder")
-            .get()
-            .then(isItem => {
-            })
-            .catch(error => {
-              console.log("isisItem Error : ", error);
-              this.web.lists.configure(this.configOptions)
-                .getByTitle(listName)
-                .fields.inBatch(batch)
-                .createFieldAsXml(
-                  '<Field Type="Number" DisplayName="SortOrder" Name="SortOrder" Required="TRUE" />'
-                );
-            });
-
-          await this.web.lists.configure(this.configOptions)
-            .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("IsDefault")
-            .get()
-            .then(isItem => {
-            })
-            .catch(error => {
-              console.log("isisItem Error : ", error);
-              this.web.lists.configure(this.configOptions)
-                .getByTitle(listName)
-                .fields.inBatch(batch)
-                .createFieldAsXml(
-                  '<Field Type="Boolean" DisplayName="IsDefault" Name="IsDefault" Required="FALSE"/>'
-                );
-            });
-
-          batch.execute().then(() => {
-            resolve(true);
+        console.log(groupresult.data.Id);
+        this.groupListGUID = groupresult.data.Id;
+        await this.web.lists.configure(this.configOptions)
+          .getByTitle(listName)
+          .fields.getByInternalNameOrTitle("SortOrder")
+          .get()
+          .then(isItem => {
+          })
+          .catch(error => {
+            console.log("isisItem Error : ", error);
+            this.web.lists.configure(this.configOptions)
+              .getByTitle(listName)
+              .fields.inBatch(batch)
+              .createFieldAsXml(
+                '<Field Type="Number" DisplayName="SortOrder" Name="SortOrder" Required="TRUE" />'
+              );
           });
+
+        await this.web.lists.configure(this.configOptions)
+          .getByTitle(listName)
+          .fields.getByInternalNameOrTitle("IsDefault")
+          .get()
+          .then(isItem => {
+          })
+          .catch(error => {
+            console.log("isisItem Error : ", error);
+            this.web.lists.configure(this.configOptions)
+              .getByTitle(listName)
+              .fields.inBatch(batch)
+              .createFieldAsXml(
+                '<Field Type="Boolean" DisplayName="IsDefault" Name="IsDefault" Required="FALSE"/>'
+              );
+          });
+
+        batch.execute().then(() => {
+          resolve(true);
+        });
 
       }).catch(error => {
         console.log("Group List Exists Or Not : ", error);
@@ -906,44 +904,44 @@ export class SharePointDataProvider implements IDataProvider {
     return new Promise<boolean>((resolve) => {
       const batch = this.web.createBatch();
       this.web.lists.configure(this.configOptions).ensure(listName, "", 100, true).then(async responsibleresult => {
-          console.log(responsibleresult.data.Id);
-          this.responsibleListGUID = responsibleresult.data.Id;
+        console.log(responsibleresult.data.Id);
+        this.responsibleListGUID = responsibleresult.data.Id;
 
-          await this.web.lists.configure(this.configOptions)
-            .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("FontColor")
-            .get()
-            .then(isItem => {
-            })
-            .catch(error => {
-              console.log("isisItem Error : ", error);
-              this.web.lists.configure(this.configOptions)
-                .getByTitle(listName)
-                .fields.inBatch(batch)
-                .createFieldAsXml(
-                  '<Field Type="Text" DisplayName="FontColor" Name="FontColor" Required="TRUE"> <Default>#000000</Default></Field>'
-                );
-            });
-
-          await this.web.lists.configure(this.configOptions)
-            .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("FillColor")
-            .get()
-            .then(isItem => {
-            })
-            .catch(error => {
-              console.log("isisItem Error : ", error);
-              this.web.lists.configure(this.configOptions)
-                .getByTitle(listName)
-                .fields.inBatch(batch)
-                .createFieldAsXml(
-                  '<Field Type="Text" DisplayName="FillColor" Name="FillColor" Required="TRUE"> <Default>#ffffff</Default></Field>'
-                );
-            });
-
-          batch.execute().then(() => {
-            resolve(true);
+        await this.web.lists.configure(this.configOptions)
+          .getByTitle(listName)
+          .fields.getByInternalNameOrTitle("FontColor")
+          .get()
+          .then(isItem => {
+          })
+          .catch(error => {
+            console.log("isisItem Error : ", error);
+            this.web.lists.configure(this.configOptions)
+              .getByTitle(listName)
+              .fields.inBatch(batch)
+              .createFieldAsXml(
+                '<Field Type="Text" DisplayName="FontColor" Name="FontColor" Required="TRUE"> <Default>#000000</Default></Field>'
+              );
           });
+
+        await this.web.lists.configure(this.configOptions)
+          .getByTitle(listName)
+          .fields.getByInternalNameOrTitle("FillColor")
+          .get()
+          .then(isItem => {
+          })
+          .catch(error => {
+            console.log("isisItem Error : ", error);
+            this.web.lists.configure(this.configOptions)
+              .getByTitle(listName)
+              .fields.inBatch(batch)
+              .createFieldAsXml(
+                '<Field Type="Text" DisplayName="FillColor" Name="FillColor" Required="TRUE"> <Default>#ffffff</Default></Field>'
+              );
+          });
+
+        batch.execute().then(() => {
+          resolve(true);
+        });
       }).catch(error => {
         console.log("Responsible List Exists Or Not : ", error);
         resolve(false);
@@ -955,60 +953,60 @@ export class SharePointDataProvider implements IDataProvider {
     return new Promise<boolean>((resolve) => {
       const batch = this.web.createBatch();
       this.web.lists.configure(this.configOptions).ensure(listName, "", 100, true).then(async statusresult => {
-          console.log(statusresult.data.Id);
-          this.statusListGUID = statusresult.data.Id;
+        console.log(statusresult.data.Id);
+        this.statusListGUID = statusresult.data.Id;
 
-          await this.web.lists.configure(this.configOptions)
-            .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("SortOrder")
-            .get()
-            .then(isItem => {
-            })
-            .catch(error => {
-              console.log("isisItem Error : ", error);
-              this.web.lists.configure(this.configOptions)
-                .getByTitle(listName)
-                .fields.inBatch(batch)
-                .createFieldAsXml(
-                  '<Field Type="Number" DisplayName="SortOrder" Name="SortOrder" Required="TRUE"/>'
-                );
-            });
-
-          await this.web.lists.configure(this.configOptions)
-            .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("FontColor")
-            .get()
-            .then(isItem => {
-            })
-            .catch(error => {
-              console.log("isisItem Error : ", error);
-              this.web.lists.configure(this.configOptions)
-                .getByTitle(listName)
-                .fields.inBatch(batch)
-                .createFieldAsXml(
-                  '<Field Type="Text" DisplayName="FontColor" Name="FontColor" Required="FALSE"/>'
-                );
-            });
-
-          await this.web.lists.configure(this.configOptions)
-            .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("FillColor")
-            .get()
-            .then(isItem => {
-            })
-            .catch(error => {
-              console.log("isisItem Error : ", error);
-              this.web.lists.configure(this.configOptions)
-                .getByTitle(listName)
-                .fields.inBatch(batch)
-                .createFieldAsXml(
-                  '<Field Type="Text" DisplayName="FillColor" Name="FillColor" Required="FALSE"/>'
-                );
-            });
-
-          batch.execute().then(() => {
-            resolve(true);
+        await this.web.lists.configure(this.configOptions)
+          .getByTitle(listName)
+          .fields.getByInternalNameOrTitle("SortOrder")
+          .get()
+          .then(isItem => {
+          })
+          .catch(error => {
+            console.log("isisItem Error : ", error);
+            this.web.lists.configure(this.configOptions)
+              .getByTitle(listName)
+              .fields.inBatch(batch)
+              .createFieldAsXml(
+                '<Field Type="Number" DisplayName="SortOrder" Name="SortOrder" Required="TRUE"/>'
+              );
           });
+
+        await this.web.lists.configure(this.configOptions)
+          .getByTitle(listName)
+          .fields.getByInternalNameOrTitle("FontColor")
+          .get()
+          .then(isItem => {
+          })
+          .catch(error => {
+            console.log("isisItem Error : ", error);
+            this.web.lists.configure(this.configOptions)
+              .getByTitle(listName)
+              .fields.inBatch(batch)
+              .createFieldAsXml(
+                '<Field Type="Text" DisplayName="FontColor" Name="FontColor" Required="FALSE"/>'
+              );
+          });
+
+        await this.web.lists.configure(this.configOptions)
+          .getByTitle(listName)
+          .fields.getByInternalNameOrTitle("FillColor")
+          .get()
+          .then(isItem => {
+          })
+          .catch(error => {
+            console.log("isisItem Error : ", error);
+            this.web.lists.configure(this.configOptions)
+              .getByTitle(listName)
+              .fields.inBatch(batch)
+              .createFieldAsXml(
+                '<Field Type="Text" DisplayName="FillColor" Name="FillColor" Required="FALSE"/>'
+              );
+          });
+
+        batch.execute().then(() => {
+          resolve(true);
+        });
       }).catch(error => {
         console.log("Status List Exists Or Not : ", error);
         resolve(false);
@@ -1016,33 +1014,33 @@ export class SharePointDataProvider implements IDataProvider {
     });
   }
 
-  public async categoryMappingAfterGroup(listName:string,defaultGroup:string):Promise<boolean>{
+  public async categoryMappingAfterGroup(listName: string, defaultGroup: string): Promise<boolean> {
     if (!this.groupListGUID) {
       this.getListGUID(this.listNames.groupListName).then((value: string) => {
         this.groupListGUID = value;
       });
     }
-    return new Promise<boolean>((resolve)=>{
+    return new Promise<boolean>((resolve) => {
       const batch = this.web.createBatch();
       this.web.lists.configure(this.configOptions).ensure(listName, "", 100, true).then(async categoryresult => {
 
         await this.web.lists.configure(this.configOptions)
-        .getByTitle(listName)
-        .fields.getByInternalNameOrTitle("Group")
-        .get()
-        .then(isItem => {
-        })
-        .catch(error => {
-          console.log("isisItem Error : ", error);
-          this.web.lists.configure(this.configOptions)
-            .getByTitle(listName)
-            .fields.inBatch(batch)
-            .createFieldAsXml(
-              '<Field Type="Lookup" DisplayName="Group" Name="Group" Required="FALSE" List="' +
-              this.groupListGUID +
-              '" ShowField="ID" RelationshipDeleteBehavior="None"></Field>'
-            );
-        });
+          .getByTitle(listName)
+          .fields.getByInternalNameOrTitle("Group")
+          .get()
+          .then(isItem => {
+          })
+          .catch(error => {
+            console.log("isisItem Error : ", error);
+            this.web.lists.configure(this.configOptions)
+              .getByTitle(listName)
+              .fields.inBatch(batch)
+              .createFieldAsXml(
+                '<Field Type="Lookup" DisplayName="Group" Name="Group" Required="FALSE" List="' +
+                this.groupListGUID +
+                '" ShowField="ID" RelationshipDeleteBehavior="None"></Field>'
+              );
+          });
 
         batch.execute().then(() => {
           resolve(true);
@@ -1054,33 +1052,33 @@ export class SharePointDataProvider implements IDataProvider {
     });
   }
 
-  public async taskMappingAfterGroup(listName:string,defaultGroup:string):Promise<boolean>{
+  public async taskMappingAfterGroup(listName: string, defaultGroup: string): Promise<boolean> {
     if (!this.groupListGUID) {
       this.getListGUID(this.listNames.groupListName).then((value: string) => {
         this.groupListGUID = value;
       });
     }
-    return new Promise<boolean>((resolve)=>{
+    return new Promise<boolean>((resolve) => {
       const batch = this.web.createBatch();
       this.web.lists.configure(this.configOptions).ensure(listName, "", 107, true).then(async categoryresult => {
 
         await this.web.lists.configure(this.configOptions)
-        .getByTitle(listName)
-        .fields.getByInternalNameOrTitle("Group")
-        .get()
-        .then(isItem => {
-        })
-        .catch(error => {
-          console.log("isisItem Error : ", error);
-          this.web.lists.configure(this.configOptions)
-            .getByTitle(listName)
-            .fields.inBatch(batch)
-            .createFieldAsXml(
-              '<Field Type="Lookup" DisplayName="Group" Name="Group" Required="TRUE" List="' +
-              this.groupListGUID +
-              '" ShowField="ID" RelationshipDeleteBehavior="None"></Field>'
-            );
-        });
+          .getByTitle(listName)
+          .fields.getByInternalNameOrTitle("Group")
+          .get()
+          .then(isItem => {
+          })
+          .catch(error => {
+            console.log("isisItem Error : ", error);
+            this.web.lists.configure(this.configOptions)
+              .getByTitle(listName)
+              .fields.inBatch(batch)
+              .createFieldAsXml(
+                '<Field Type="Lookup" DisplayName="Group" Name="Group" Required="TRUE" List="' +
+                this.groupListGUID +
+                '" ShowField="ID" RelationshipDeleteBehavior="None"></Field>'
+              );
+          });
 
         batch.execute().then(() => {
           resolve(true);
@@ -1096,46 +1094,46 @@ export class SharePointDataProvider implements IDataProvider {
     return new Promise<boolean>((resolve) => {
       const batch = this.web.createBatch();
       this.web.lists.configure(this.configOptions).ensure(listName, "", 100, true).then(async categoryresult => {
-          console.log(categoryresult.data.Id);
-          this.categoryListGUID = categoryresult.data.Id;
+        console.log(categoryresult.data.Id);
+        this.categoryListGUID = categoryresult.data.Id;
 
-          await this.web.lists.configure(this.configOptions)
-            .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("SortOrder")
-            .get()
-            .then(isItem => {
-            })
-            .catch(error => {
-              console.log("isisItem Error : ", error);
-              this.web.lists.configure(this.configOptions)
-                .getByTitle(listName)
-                .fields.inBatch(batch)
-                .createFieldAsXml(
-                  '<Field Type="Number" DisplayName="SortOrder" Name="SortOrder" Required="TRUE" />'
-                );
-            });
-
-          await this.web.lists.configure(this.configOptions)
-            .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("Parent")
-            .get()
-            .then(isItem => {
-            })
-            .catch(error => {
-              console.log("isisItem Error : ", error);
-              this.web.lists.configure(this.configOptions)
-                .getByTitle(listName)
-                .fields.inBatch(batch)
-                .createFieldAsXml(
-                  '<Field Type="Lookup" DisplayName="Parent" Name="Parent" Required="FALSE" List="' +
-                  this.categoryListGUID +
-                  '" ShowField="ID" RelationshipDeleteBehavior="None"/>'
-                );
-            });
-
-          batch.execute().then(() => {
-            resolve(true);
+        await this.web.lists.configure(this.configOptions)
+          .getByTitle(listName)
+          .fields.getByInternalNameOrTitle("SortOrder")
+          .get()
+          .then(isItem => {
+          })
+          .catch(error => {
+            console.log("isisItem Error : ", error);
+            this.web.lists.configure(this.configOptions)
+              .getByTitle(listName)
+              .fields.inBatch(batch)
+              .createFieldAsXml(
+                '<Field Type="Number" DisplayName="SortOrder" Name="SortOrder" Required="TRUE" />'
+              );
           });
+
+        await this.web.lists.configure(this.configOptions)
+          .getByTitle(listName)
+          .fields.getByInternalNameOrTitle("Parent")
+          .get()
+          .then(isItem => {
+          })
+          .catch(error => {
+            console.log("isisItem Error : ", error);
+            this.web.lists.configure(this.configOptions)
+              .getByTitle(listName)
+              .fields.inBatch(batch)
+              .createFieldAsXml(
+                '<Field Type="Lookup" DisplayName="Parent" Name="Parent" Required="FALSE" List="' +
+                this.categoryListGUID +
+                '" ShowField="ID" RelationshipDeleteBehavior="None"/>'
+              );
+          });
+
+        batch.execute().then(() => {
+          resolve(true);
+        });
       }).catch(error => {
         console.log("Category List Exists Or Not : ", error);
         resolve(false);
@@ -1177,13 +1175,13 @@ export class SharePointDataProvider implements IDataProvider {
         this.categoryListGUID = value;
       });
     }
-    if(!this.documentLibraryGUID){
-      this.getListGUID(TaskDataProvider.libraryName).then((value:string)=>{
+    if (!this.documentLibraryGUID) {
+      this.getListGUID(TaskDataProvider.libraryName).then((value: string) => {
         this.documentLibraryGUID = value;
       });
     }
-    if(!this.commentListGUID){
-      this.getListGUID(this.listNames.commentsListName).then((value:string)=>{
+    if (!this.commentListGUID) {
+      this.getListGUID(this.listNames.commentsListName).then((value: string) => {
         this.commentListGUID = value;
       });
     }
@@ -1191,157 +1189,157 @@ export class SharePointDataProvider implements IDataProvider {
       const batch = this.web.createBatch();
       this.web.lists.configure(this.configOptions).ensure(listName, "", 107, true).then(async taskresult => {
 
-          console.log(taskresult.data.Id);
-          this.taskListGUID = taskresult.data.Id;
+        console.log(taskresult.data.Id);
+        this.taskListGUID = taskresult.data.Id;
 
-          await this.web.lists.configure(this.configOptions)
-            .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("SortOrder")
-            .get()
-            .then(isItem => {
-            })
-            .catch(error => {
-              console.log("isisItem Error : ", error);
-              this.web.lists.configure(this.configOptions)
-                .getByTitle(listName)
-                .fields.inBatch(batch)
-                .createFieldAsXml(
-                  '<Field Type="Number" DisplayName="SortOrder" Name="SortOrder" Required="TRUE" />'
-                );
-            });
-
-          await this.web.lists.configure(this.configOptions)
-            .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("Parent")
-            .get()
-            .then(isItem => {
-            })
-            .catch(error => {
-              console.log("isisItem Error : ", error);
-              this.web.lists.configure(this.configOptions)
-                .getByTitle(listName)
-                .fields.inBatch(batch)
-                .createFieldAsXml(
-                  '<Field Type="Lookup" DisplayName="Parent" Name="Parent" Required="FALSE" List="' +
-                  this.taskListGUID +
-                  '" ShowField="ID" RelationshipDeleteBehavior="None"/>'
-                );
-            });
-
-          await this.web.lists.configure(this.configOptions)
-            .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("Category")
-            .get()
-            .then(isItem => {
-            })
-            .catch(error => {
-              console.log("isisItem Error : ", error);
-              this.web.lists.configure(this.configOptions)
-                .getByTitle(listName)
-                .fields.inBatch(batch)
-                .createFieldAsXml(
-                  '<Field Type="Lookup" DisplayName="Category" Name="Category" Required="TRUE" List="' +
-                  this.categoryListGUID +
-                  '" ShowField="ID" RelationshipDeleteBehavior="None"/>'
-                );
-            });
-
-            await this.web.lists.configure(this.configOptions)
-            .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("SubCategory")
-            .get()
-            .then(isItem => {
-            })
-            .catch(error => {
-              console.log("isisItem Error : ", error);
-              this.web.lists.configure(this.configOptions)
-                .getByTitle(listName)
-                .fields.inBatch(batch)
-                .createFieldAsXml(
-                  '<Field Type="Lookup" DisplayName="SubCategory" Name="SubCategory" Required="TRUE" List="' +
-                  this.categoryListGUID +
-                  '" ShowField="ID" RelationshipDeleteBehavior="None"/>'
-                );
-            });
-
-          await this.web.lists.configure(this.configOptions)
-            .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("Task Status")
-            .get()
-            .then(isItem => {
-            })
-            .catch(error => {
-              console.log("isisItem Error : ", error);
-              this.web.lists.configure(this.configOptions)
-                .getByTitle(listName)
-                .fields.inBatch(batch)
-                .createFieldAsXml(
-                  '<Field Type="Lookup" DisplayName="Task Status" Name="Task Status" Required="TRUE" List="' +
-                  this.statusListGUID +
-                  '" ShowField="ID" RelationshipDeleteBehavior="None"/>'
-                );
-            });
-
-          await this.web.lists.configure(this.configOptions)
-            .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("Responsible")
-            .get()
-            .then(isItem => {
-            })
-            .catch(error => {
-              console.log("isisItem Error : ", error);
-              this.web.lists.configure(this.configOptions)
-                .getByTitle(listName)
-                .fields.inBatch(batch)
-                .createFieldAsXml(
-                  '<Field Type="Lookup" DisplayName="Responsible" Name="Responsible" Required="TRUE" List="' +
-                  this.responsibleListGUID +
-                  '" ShowField="ID" RelationshipDeleteBehavior="None"/>'
-                );
-            });
-
-          await this.web.lists.configure(this.configOptions)
-            .getByTitle(listName)
-            .fields.getByInternalNameOrTitle(this.DocumentsColumnTitle)
-            .get()
-            .then(isItem => {
-            })
-            .catch(error => {
-              console.log("isisItem Error : ", error);
-              this.web.lists.configure(this.configOptions)
-                .getByTitle(listName)
-                .fields.inBatch(batch)
-                .createFieldAsXml(
-                  '<Field Type="Lookup" DisplayName="' +
-                  this.DocumentsColumnTitle +
-                  '" Name="' +
-                  this.DocumentsColumnTitle +
-                  '" Required="FALSE" List="' +
-                  this.documentLibraryGUID +
-                  '" ShowField="ID" RelationshipDeleteBehavior="None" Mult="TRUE" />'
-                );
-            });
-
-            await this.web.lists.configure(this.configOptions)
-            .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("Comments")
-            .get()
-            .then(isItem => {
-            })
-            .catch(error => {
-              console.log("isisItem Error : ", error);
-              this.web.lists.configure(this.configOptions)
-                .getByTitle(listName)
-                .fields.inBatch(batch)
-                .createFieldAsXml(
-                  '<Field Type="Lookup" DisplayName="Comments" Name="Comments" Required="FALSE" List="'+
-                  this.commentListGUID+
-                  '" ShowField="ID" RelationshipDeleteBehavior="None" Mult="TRUE"/>'
-                );
-            });
-          batch.execute().then(() => {
-            resolve(true);
+        await this.web.lists.configure(this.configOptions)
+          .getByTitle(listName)
+          .fields.getByInternalNameOrTitle("SortOrder")
+          .get()
+          .then(isItem => {
+          })
+          .catch(error => {
+            console.log("isisItem Error : ", error);
+            this.web.lists.configure(this.configOptions)
+              .getByTitle(listName)
+              .fields.inBatch(batch)
+              .createFieldAsXml(
+                '<Field Type="Number" DisplayName="SortOrder" Name="SortOrder" Required="TRUE" />'
+              );
           });
+
+        await this.web.lists.configure(this.configOptions)
+          .getByTitle(listName)
+          .fields.getByInternalNameOrTitle("Parent")
+          .get()
+          .then(isItem => {
+          })
+          .catch(error => {
+            console.log("isisItem Error : ", error);
+            this.web.lists.configure(this.configOptions)
+              .getByTitle(listName)
+              .fields.inBatch(batch)
+              .createFieldAsXml(
+                '<Field Type="Lookup" DisplayName="Parent" Name="Parent" Required="FALSE" List="' +
+                this.taskListGUID +
+                '" ShowField="ID" RelationshipDeleteBehavior="None"/>'
+              );
+          });
+
+        await this.web.lists.configure(this.configOptions)
+          .getByTitle(listName)
+          .fields.getByInternalNameOrTitle("Category")
+          .get()
+          .then(isItem => {
+          })
+          .catch(error => {
+            console.log("isisItem Error : ", error);
+            this.web.lists.configure(this.configOptions)
+              .getByTitle(listName)
+              .fields.inBatch(batch)
+              .createFieldAsXml(
+                '<Field Type="Lookup" DisplayName="Category" Name="Category" Required="TRUE" List="' +
+                this.categoryListGUID +
+                '" ShowField="ID" RelationshipDeleteBehavior="None"/>'
+              );
+          });
+
+        await this.web.lists.configure(this.configOptions)
+          .getByTitle(listName)
+          .fields.getByInternalNameOrTitle("SubCategory")
+          .get()
+          .then(isItem => {
+          })
+          .catch(error => {
+            console.log("isisItem Error : ", error);
+            this.web.lists.configure(this.configOptions)
+              .getByTitle(listName)
+              .fields.inBatch(batch)
+              .createFieldAsXml(
+                '<Field Type="Lookup" DisplayName="SubCategory" Name="SubCategory" Required="TRUE" List="' +
+                this.categoryListGUID +
+                '" ShowField="ID" RelationshipDeleteBehavior="None"/>'
+              );
+          });
+
+        await this.web.lists.configure(this.configOptions)
+          .getByTitle(listName)
+          .fields.getByInternalNameOrTitle("Task Status")
+          .get()
+          .then(isItem => {
+          })
+          .catch(error => {
+            console.log("isisItem Error : ", error);
+            this.web.lists.configure(this.configOptions)
+              .getByTitle(listName)
+              .fields.inBatch(batch)
+              .createFieldAsXml(
+                '<Field Type="Lookup" DisplayName="Task Status" Name="Task Status" Required="TRUE" List="' +
+                this.statusListGUID +
+                '" ShowField="ID" RelationshipDeleteBehavior="None"/>'
+              );
+          });
+
+        await this.web.lists.configure(this.configOptions)
+          .getByTitle(listName)
+          .fields.getByInternalNameOrTitle("Responsible")
+          .get()
+          .then(isItem => {
+          })
+          .catch(error => {
+            console.log("isisItem Error : ", error);
+            this.web.lists.configure(this.configOptions)
+              .getByTitle(listName)
+              .fields.inBatch(batch)
+              .createFieldAsXml(
+                '<Field Type="Lookup" DisplayName="Responsible" Name="Responsible" Required="TRUE" List="' +
+                this.responsibleListGUID +
+                '" ShowField="ID" RelationshipDeleteBehavior="None"/>'
+              );
+          });
+
+        await this.web.lists.configure(this.configOptions)
+          .getByTitle(listName)
+          .fields.getByInternalNameOrTitle(this.DocumentsColumnTitle)
+          .get()
+          .then(isItem => {
+          })
+          .catch(error => {
+            console.log("isisItem Error : ", error);
+            this.web.lists.configure(this.configOptions)
+              .getByTitle(listName)
+              .fields.inBatch(batch)
+              .createFieldAsXml(
+                '<Field Type="Lookup" DisplayName="' +
+                this.DocumentsColumnTitle +
+                '" Name="' +
+                this.DocumentsColumnTitle +
+                '" Required="FALSE" List="' +
+                this.documentLibraryGUID +
+                '" ShowField="ID" RelationshipDeleteBehavior="None" Mult="TRUE" />'
+              );
+          });
+
+        await this.web.lists.configure(this.configOptions)
+          .getByTitle(listName)
+          .fields.getByInternalNameOrTitle("Comments")
+          .get()
+          .then(isItem => {
+          })
+          .catch(error => {
+            console.log("isisItem Error : ", error);
+            this.web.lists.configure(this.configOptions)
+              .getByTitle(listName)
+              .fields.inBatch(batch)
+              .createFieldAsXml(
+                '<Field Type="Lookup" DisplayName="Comments" Name="Comments" Required="FALSE" List="' +
+                this.commentListGUID +
+                '" ShowField="ID" RelationshipDeleteBehavior="None" Mult="TRUE"/>'
+              );
+          });
+        batch.execute().then(() => {
+          resolve(true);
+        });
       }).catch(error => {
         console.log("Task List Exists Or Not : ", error);
         resolve(false);
@@ -1358,28 +1356,28 @@ export class SharePointDataProvider implements IDataProvider {
     return new Promise<boolean>((resolve) => {
       const batch = this.web.createBatch();
       this.web.lists.configure(this.configOptions).ensure(listName, "", 100, true).then(async commentresult => {
-          console.log(commentresult.data.Id);
-          this.commentListGUID = commentresult.data.Id;
+        console.log(commentresult.data.Id);
+        this.commentListGUID = commentresult.data.Id;
 
-          await this.web.lists.configure(this.configOptions)
-            .getByTitle(listName)
-            .fields.getByInternalNameOrTitle("Comment")
-            .get()
-            .then(isItem => {
-            })
-            .catch(error => {
-              console.log("isisItem Error : ", error);
-              this.web.lists.configure(this.configOptions)
-                .getByTitle(listName)
-                .fields.inBatch(batch)
-                .createFieldAsXml(
-                  '<Field Type="Note" DisplayName="Comment" Name="Comment" Required="TRUE"/>'
-                );
-            });
-
-          batch.execute().then(() => {
-            resolve(true);
+        await this.web.lists.configure(this.configOptions)
+          .getByTitle(listName)
+          .fields.getByInternalNameOrTitle("Comment")
+          .get()
+          .then(isItem => {
+          })
+          .catch(error => {
+            console.log("isisItem Error : ", error);
+            this.web.lists.configure(this.configOptions)
+              .getByTitle(listName)
+              .fields.inBatch(batch)
+              .createFieldAsXml(
+                '<Field Type="Note" DisplayName="Comment" Name="Comment" Required="TRUE"/>'
+              );
           });
+
+        batch.execute().then(() => {
+          resolve(true);
+        });
       }).catch(error => {
         console.log("Comments List Exists Or Not : ", error);
         resolve(false);
@@ -1725,23 +1723,23 @@ export class SharePointDataProvider implements IDataProvider {
 
   //List Delete start
 
-  public deleteList(listName:string):Promise<boolean>{
-    return new Promise<boolean>((resolve)=>{
-      this.web.lists.getByTitle(listName).delete().then(deleteresult =>{
+  public deleteList(listName: string): Promise<boolean> {
+    return new Promise<boolean>((resolve) => {
+      this.web.lists.getByTitle(listName).delete().then(deleteresult => {
         resolve(true);
-      }).catch(error =>{
-        console.log("List delete error message : ",error);
+      }).catch(error => {
+        console.log("List delete error message : ", error);
       });
     });
   }
 
-  public deleteListField(listName:string,fieldName:string):Promise<boolean>{
-    return new Promise<boolean>((resolve)=>{
-      this.web.lists.getByTitle(listName).fields.getByTitle(fieldName).delete().then((deletefield)=>{
-        console.log("Delete field : ",deletefield);
+  public deleteListField(listName: string, fieldName: string): Promise<boolean> {
+    return new Promise<boolean>((resolve) => {
+      this.web.lists.getByTitle(listName).fields.getByTitle(fieldName).delete().then((deletefield) => {
+        console.log("Delete field : ", deletefield);
         resolve(true);
-      }).catch(error=>{
-        console.log("Field deleted error message : ",error);
+      }).catch(error => {
+        console.log("Field deleted error message : ", error);
         resolve(false);
       });
     });
@@ -2156,37 +2154,91 @@ export class SharePointDataProvider implements IDataProvider {
 
   public async listExists(listname: string): Promise<boolean> {
     return new Promise<boolean>((resolve) => {
-         this.web.lists.filter("Title eq '" + listname + "'")
-              .get()
-              .then((islistExists) => {
-                   if (islistExists.length > 0) {
-                        TaskDataProvider.documentLibraryUniqueID = islistExists[0].Id;
-                        resolve(true);
-                   }
-                   else {
-                        resolve(false);
-                   }
-              }).catch(error => {
-                   console.log("Closing CheckList Exists Or Not : ", error);
-                   resolve(false);
-              });
+      this.web.lists.filter("Title eq '" + listname + "'")
+        .get()
+        .then((islistExists) => {
+          if (islistExists.length > 0) {
+            TaskDataProvider.documentLibraryUniqueID = islistExists[0].Id;
+            resolve(true);
+          }
+          else {
+            resolve(false);
+          }
+        }).catch(error => {
+          console.log("Closing CheckList Exists Or Not : ", error);
+          resolve(false);
+        });
     });
   }
 
   public async libraryExists(libraryName: string): Promise<boolean> {
-      return new Promise<boolean>((resolve) => {
-          this.web.lists.filter("Title eq '" + libraryName + "'").get().then((islibraryExists) => {
-                if (islibraryExists.length > 0) {
-                    resolve(true);
-                }
-                else {
-                    resolve(false);
-                }
-          }).catch(error => {
-                console.log("Document Library Exists Or Not : ", error);
-                resolve(false);
-          });
+    return new Promise<boolean>((resolve) => {
+      this.web.lists.filter("Title eq '" + libraryName + "'").get().then((islibraryExists) => {
+        if (islibraryExists.length > 0) {
+          resolve(true);
+        }
+        else {
+          resolve(false);
+        }
+      }).catch(error => {
+        console.log("Document Library Exists Or Not : ", error);
+        resolve(false);
       });
+    });
   }
 
+  public async deletedocumentsFromLibrary(listname: string, listItemId: number): Promise<boolean> {
+    return new Promise<boolean>((resolve) => {
+         this.web.lists.getByTitle(listname).items.getById(listItemId).delete().then(() => {
+              resolve(true);
+         }).catch(error => {
+              console.log("Delete Tasks List Item : ", error);
+              return resolve(false);
+         });
+    });
+  }
+
+  public async updateDocumentIdToTaskList(listname: string, listItemId: number, docId: number[]): Promise<IDocumentId> {
+    return new Promise<IDocumentId>((resolve) => {
+         let obj = {};
+         obj[this.DocumentsColumnTitle + "Id"] = {
+              results: docId
+         };
+         this.web.lists.getByTitle(listname)
+              .items
+              .getById(listItemId)
+              .update(obj)
+              .then((results: any) => {
+                   resolve(results);
+              }).catch(error => {
+                   console.log("Insert Task item : ", error);
+                   resolve(error);
+              });
+    });
+}
+
+  // Get choice field alphabetically
+  public async getChoiceField(listname: string, fieldName: string): Promise<IChoiceField[]> {
+    let choiceFieldCollection: IChoiceField[] = [];
+    return new Promise<IChoiceField[]>((resolve) => {
+      this.web.lists.getByTitle(listname)
+        .fields
+        .filter("EntityPropertyName eq '" + fieldName + "'")
+        .get().then((choiceItem: IChoiceField) => {
+          choiceItem[0].Choices.map((choice: any, index: number) => {
+            let item: IChoiceField = {
+              key: choice,
+              text: choice,
+              isSelected: false
+            };
+            choiceFieldCollection.push(item);
+          });
+          const sortedChoice = _.orderBy(choiceFieldCollection, s => s.key, 'asc');
+          resolve(sortedChoice);
+        }).catch(error => {
+          console.log("Get choice field : ", error);
+          return resolve([]);
+        });
+    });
+  }
 }

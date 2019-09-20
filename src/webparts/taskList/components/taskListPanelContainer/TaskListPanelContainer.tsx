@@ -24,7 +24,7 @@ export default class TaskListPanelContainer extends React.Component< ITaskListPa
       selectedItem: {ID:2,Title:"Task Test 0000",SortOrder:1,Group:{Title:"All tasks group",Id:1},
                       GUID:"59a7d38e-a907-4427-8158-6a51048be787",Category:{Id:2,Title:"Category 1"},SubCategory:{Id:5,Title:"Category 4"},
                       TaskStatus:{Id:3,Title:"In Progress"},Responsible:{Id:2,Title:"Borrower"},Comments:[],
-                      children:[],key:"Task Test 0000",text:"Task Test 0000",Parent:{Id:15,Title:"Category 1"},Documents:[],CommentsId:null},
+                      children:[],key:"Task Test 0000",text:"Task Test 0000",Parent:{Id:15,Title:"Category 1"},Documents:[],CommentsId:[]},
       selectedItemCount: 1,
       totalItemCount: 10,
       allItems: [],
