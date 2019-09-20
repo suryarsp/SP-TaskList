@@ -36,6 +36,7 @@ JavascriptTimeAgo.locale(en);
 import ReactTimeAgo from "react-time-ago";
 import { Utilties } from '../../../../../../../common/helper/Utilities';
 import TaskDataProvider from '../../../../../../../services/TaskDataProvider';
+import DragnDropContainer from '../../DragnDropContainer/DragnDropContainer';
 
 const DocumentDeleteErrorMessage: string = "Sorry, something went wrong while deleting the document(s).";
 const CommandTypes = {
@@ -415,19 +416,278 @@ export default class TaskDocumentsPanel extends React.Component<ITaskDocumentsPa
     });
   }
 
+  public openDocument(document: IDocument) {
+    let file = document.File;
+    if (document.DocIcon !== "url") {
+      if (this.props.alwaysDownloadFiles && document.DocIcon !== "one") {
+        if (isMobile) {
+          window.open(file.ServerRelativeUrl, "_blank");
+        } else {
+          saveAs(file.ServerRelativeUrl, file.Name);
+        }
+      }
+      else {
+        window.open(this.Utilities.GetOfficeEditUrl(TaskDataProvider.documentLibraryUniqueID, document.UniqueId,
+          "edit", document.File.Name,
+          this.props.WebPartContext.pageContext.web.absoluteUrl,
+          document.File.ServerRelativeUrl,
+          document.ID.toString()), '_blank');
+      }
+    } else {
+      if (isMobile) {
+        window.open(file.ServerRelativeUrl, "_blank");
+      } else {
+        saveAs(file.ServerRelativeUrl, file.Name);
+      }
+    }
+  }
+
+  public displayExistingFiles(): IActivityItem[] {
+    const existingFiles: IActivityItem[] = [];
+    if (this.currentItem.Files && this.currentItem.Files.length > 0) {
+      this.currentItem.Files.forEach((f, index) => {
+        const file: IActivityItem = {
+          key: index,
+          activityDescription: [
+            <div className={styles.fileDetails}>
+              <span
+                key={index}
+                className={styles.docFileName}
+              >
+                <a onClick={() => this.openDocument(f)}> {f.File.Name} </a>
+              </span>
+              <span
+                key={index}
+                className={styles.docFileActions}
+              >
+                {
+                  !(isMobile && isChrome) ? (<Icon
+                    iconName="Download"
+                    onClick={() => {
+                      this.downloadExisitingFile(f);
+                    }}
+                    style={{
+                      cursor: "pointer"
+                    }}
+                  />) : null
+                }
+
+                <Icon
+                  iconName="Delete"
+                  style={{
+                    cursor: "pointer"
+                  }}
+                  onClick={() =>
+                    this.setState({
+                      currentCommandType: CommandTypes.DocumentDeleteConfirmation,
+                      currentDocument: f
+                    })
+                  }
+                />
+              </span>
+            </div>
+          ],
+          activityIcon: (
+            <img src={this.Utilities.GetImgUrl(f.File.Name)} />
+          ),
+          comments: [
+            <React.Fragment>
+              <span key={index} className={styles.modifiedDoc}>
+                Modified: {(f.Editor.LastName.trim() !== "" ? (f.Editor.LastName + ", ") : "") + f.Editor.FirstName + " - "}
+                {f.Modified ? (
+                  <ReactTimeAgo locale="en" date={new Date(f.Modified.toString())} />
+                ) : null}
+              </span>
+            </React.Fragment>
+          ]
+        };
+        existingFiles.push(file);
+      });
+    }
+    return existingFiles;
+  }
+
 
   public render(): React.ReactElement<ITaskDocumentsPanelProps> {
-    return (
-      <div>
-        <Panel
-          isOpen={true}
-          type={PanelType.medium}
-          onDismiss={() => { this.props.hideDocumentsPanel(this.isDirty); }}
-          headerText="Documents"
-          closeButtonAriaLabel="Close"
+    let commands: JSX.Element = null;
+    switch (this.state.currentCommandType) {
+      case CommandTypes.DocumentDeleteInProgress:
+      case CommandTypes.DocumentDeleteError:
+      case CommandTypes.DocumentDeleteConfirmation: {
+        commands = (<Dialog
+          className="deleteDialog"
+          hidden={false}
+          onDismiss={this.onCancelDialogs.bind(this)}
+          dialogContentProps={{
+            type: DialogType.normal,
+            title: this.state.currentCommandType === CommandTypes.DocumentDeleteInProgress ? "Deleting" : "Delete",
+            subText: "Are you sure you want to send the item(s) to the site Recycle Bin?"
+          }}
+          modalProps={{
+            titleAriaId: 'myLabelId',
+            subtitleAriaId: 'mySubTextId',
+            isBlocking: false,
+            containerClassName: 'ms-dialogMainOverride'
+          }}
         >
-        </Panel>
-      </div>
+          <Icon iconName="FileTemplate" className="ms-IconExample" />
+          {this.state.currentCommandType === CommandTypes.DocumentDeleteError ? (
+            <label className={styles.errorInfo} >
+              {this.state.errorMessage}
+            </label>
+          ) : null}
+          <DialogFooter>
+            <DefaultButton onClick={this.onCancelDialogs.bind(this)} text="Cancel" />
+            <DefaultButton
+              className="ms-Button--danger"
+              disabled={
+                this.state.currentCommandType === CommandTypes.DocumentDeleteInProgress
+              }
+              onClick={this.onDeleteExistingFile.bind(this)} text="Delete" >
+              {this.state.currentCommandType === CommandTypes.DocumentDeleteInProgress ? (
+                <div className="ms-Grid-col">
+                  <Spinner size={SpinnerSize.medium} />
+                </div>
+              ) : null}
+            </DefaultButton>
+          </DialogFooter>
+        </Dialog>);
+      }
+    }
+
+    let conflictElements: JSX.Element = null;
+    if (this.state.conflictFiles.length > 0) {
+      conflictElements = (
+        <div className="UploadFileContainer">
+          <label className="ReplaceFileHead">{this.state.conflictFiles.length} item(s) wasn't uploaded</label>
+          <div className={styles.textRight}>
+            <DefaultButton onClick={this._onCancelAllDocuments.bind(this)} text="Cancel All" />
+          </div>
+          <hr />
+          {
+            this.state.conflictFiles.map((item: any) => {
+              return <div className={styles.replaceContainer}>
+                <label className={styles.FileNameLabel}>{item.Name}</label>
+
+                <label className={styles.errorInfo} >
+                  A file with this name already exists. Would you like to replace the existing one?
+                                        </label>
+                <div className={styles.FileActionBtn}>
+                  <DefaultButton onClick={() => { this._onReplaceDocument(item); }} text="Replace" />
+                  <DefaultButton onClick={() => { this._onCancelReplaceDocument(item, false); }} text="Cancel" />
+                </div>
+                <hr />
+              </div>;
+            })
+          }
+        </div>
+      );
+    }
+
+    const files: Array<JSX.Element> = [];
+    if (!this.state.isLoading) {
+      const displayedFiles = this.displayExistingFiles();
+      displayedFiles.forEach((item: { key: string | number }) => {
+        const props = item;
+        files.push(
+          <ActivityItem
+            {...props}
+            key={item.key}
+          />
+        );
+      });
+    }
+    return (
+      <Layer>
+        <div className={styles.slidePaneloverlay}>
+          <div className={styles.commentspanel}>
+            <div className={styles.header}>
+              <div className={styles.closeButton}>
+                <IconButton iconProps={{ iconName: 'Cancel' }} onClick={() =>
+                  this.props.hideDocumentsPanel(this.isDirty)} />
+              </div>
+              <div className={styles.commentsTitle}>
+                {this.currentItem.Files.length > 0 ? "Documents (" +
+                  this.currentItem.Files.length + ")" : "Documents"}
+
+              </div>
+            </div>
+            <div className={styles.commentspanelInnerWrapper}>
+
+              <div className={styles.groupTitle}>
+                {this.currentItem.Group.Title.toUpperCase()}
+              </div>
+
+              <div className={styles.modifiedcontainer}>
+                <span className={styles.modifiedtitleicon}>
+                  <span className={styles.modifiedtitle}
+                    dangerouslySetInnerHTML={{ __html: this.props.currentItem.Title }} />
+                </span>
+                <div className={styles.verticalSeperator}></div>
+              </div>
+
+              {/* Container */}
+              {this.state.isLoading ? (
+                <div className={styles.spinnerWrapper}>
+                  <Spinner className={styles.spinnerWheel} label="loading..." />
+                </div>
+              ) : null}
+              {(this.currentItem.Files.length > 0) && !(isMobile && isChrome) ? (
+                <span className={styles.downloadAllDocument}
+                  onClick={() =>
+                    this.props.onClickDownloadAllDocuments(this.currentItem)}>
+                  <i className={"ms-Icon ms-Icon--TextDocument"} aria-hidden="true"></i>
+                  <span>Download all</span>
+                </span>
+              ) : null}
+              {this.state.currentCommandType === CommandTypes.FilesUploadInProgress ? (
+                <div>
+                  <ProgressIndicator barHeight={5} progressHidden={false} label="Upload progress"
+                    description={this.state.uploadProgressstatus}
+                    percentComplete={this.state.completionPercentage} />
+                  {conflictElements}
+                </div>
+              ) : null}
+              {this.currentItem.Files.length > 0 ? (
+                <div className={styles.documentScrollContent}>
+                  {files}
+                </div>
+              ) : (
+                  <div className={styles.documentScrollContent}>
+                    <div className={styles.boldText}>
+                      No documents attached to this task.
+                                        </div>
+                  </div>
+                )}
+              {/* Files Drop Section */}
+              <div className={styles.DropZone}>
+                <DragnDropContainer onDirectoryDrop={this.onDirectoryDrop.bind(this)}
+                      onDrop={this.onDrop.bind(this)}>
+                      <div className={styles.notification}>
+                          {!isMobile ?
+                                <div className={styles["emptyFoldersubText"]}>
+                                    <span>Drag files here to upload (or)</span>
+                                </div> : null
+                          }
+                          <div className={styles["emptyFoldersubText"]}>
+                                <span><a href="javascript:void(0);"
+                                    onClick={this.onClickBrowseFiles.bind(this)}>
+                                    Click here to browse</a></span>
+                          </div>
+                      </div>
+                </DragnDropContainer>
+              </div>
+              {commands}
+              <div className={styles.hidden}>
+                <input type="file" className={styles.inputHide} multiple ref={this.fileInput}
+                  onChange={(event) => this._onFileUpload(event)} />
+              </div>
+              {/* End of container */}
+            </div>
+          </div>
+        </div>
+      </Layer>
     );
   }
+
 }

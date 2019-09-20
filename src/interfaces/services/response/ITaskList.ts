@@ -50,7 +50,7 @@ export interface Responsible{
     Title?:string;
 }
 
-export interface Group{
+export interface Group{  
     Id:number;
     Title?:string;
 }
