@@ -1,7 +1,8 @@
 import { ICustomizedColumn } from "../ICustomizedColumn";
+import { IColumn } from "../../../services/response/IColumn";
 
 export interface IDynamicColumnProps {
   taskListName: string;
-  displayedColumns: ICustomizedColumn[];
-  onChangeColumns: (columns: ICustomizedColumn[]) => void;
+  displayedColumns: IColumn[];
+  onChangeColumns: (columns: IColumn[]) => void;
 }

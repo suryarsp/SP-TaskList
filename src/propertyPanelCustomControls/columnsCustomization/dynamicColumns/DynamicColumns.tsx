@@ -38,7 +38,7 @@ const getItemStyle = (isDragging, draggableStyle) => {
 export default class DynamicColumns extends React.Component<IDynamicColumnProps, IDynamicColumnState> {
 
   private dataProvider: IDataProvider;
-  private newItem: ICustomizedColumn;
+  private newItem: IColumn;
   private isDirty: boolean;
   private utilities: Utilties;
 
@@ -67,46 +67,41 @@ export default class DynamicColumns extends React.Component<IDynamicColumnProps,
           key: 'Created',
           text: 'Created',
           InternalName: "Created_x0020_Date",
-          ID: "8c06beca-0777-48f7-91c7-6da68bc07b69"
+          ID: "8c06beca-0777-48f7-91c7-6da68bc07b69",
+          isUserDefined : false,
+          disabled: false,
+          isFixed: false,
+          label: "Created"
         },
         {
           FieldTypeKind : FieldTypes.User,
           key: 'Created By',
           text: 'Created By',
           InternalName: "Created",
-          ID: "998b5cff-4a35-47a7-92f3-3914aa6aa4a2"
-        },
-        {
-          FieldTypeKind : FieldTypes.DateTime,
-          key: 'Modified',
-          text: 'Modified',
-          InternalName: "Modified",
-          ID: "28cf69c5-fa48-462a-b5cd-27b6f9d2bd5f"
+          ID: "998b5cff-4a35-47a7-92f3-3914aa6aa4a2",
+          isUserDefined : false,
+          disabled: false,
+          isFixed: false,
+          label: "Created By"
         },
         {
           FieldTypeKind : FieldTypes.User,
           key: 'Modified By',
           text: 'Modified By',
           InternalName: "Last_x0020_Modified",
-          ID: "173f76c8-aebd-446a-9bc9-769a2bd2c18f"
-        },
-        {
-          FieldTypeKind : FieldTypes.Lookup,
-          key: 'Documents',
-          text: 'Documents',
-          InternalName: "Documents",
-          ID: "6bd9b06c-c42f-4a5c-8edb-29722bc62566"
-        },
-        {
-          FieldTypeKind : FieldTypes.Lookup,
-          key: 'Comments',
-          text: 'Comments',
-          InternalName: "Comments",
-          ID: "72a0f53f-961b-4af3-a7cb-4bd4b9af139b"
+          ID: "173f76c8-aebd-446a-9bc9-769a2bd2c18f",
+          isUserDefined : false,
+          disabled: false,
+          isFixed: false,
+          label: "Modified By"
         }
-
       ];
       filteredColumns.push(...manualItems);
+      let disabledItems = this.props.displayedColumns.filter(c => c.isUserDefined).map((i)=> {
+        i.disabled = true;
+        return i;
+      });
+      filteredColumns.push(...disabledItems);
         this.setState({
           columns: filteredColumns
         });
@@ -140,7 +135,7 @@ export default class DynamicColumns extends React.Component<IDynamicColumnProps,
       return;
     }
 
-    let updatedColumns = this.reorder(_.cloneDeep(this.state.displayedColumns),source.index, destination.index);
+    let updatedColumns = this.reorder(_.cloneDeep(this.state.displayedColumns.filter(c => !c.isDisabledInColumn)),source.index, destination.index);
     updatedColumns = updatedColumns.map((col, index) => {
       col.sortOrder = index + 1;
       return col;
@@ -149,78 +144,164 @@ export default class DynamicColumns extends React.Component<IDynamicColumnProps,
     this.setState({
       displayedColumns: updatedColumns
     });
+    this.props.onChangeColumns(updatedColumns);
   }
 
 
-  public reorder(list: ICustomizedColumn[], startIndex: number, endIndex: number) {
+  public reorder(list: IColumn[], startIndex: number, endIndex: number) {
     const result = _.cloneDeep(list);
     const [removed] = result.splice(startIndex, 1);
     result.splice(endIndex, 0, removed);
     return result;
   }
 
-  public onChangeColumnType(option) {
+  public onChangeColumnType(option, column: IColumn) {
+    const selectedOption: IColumn = option;
+    let displayedColumns = _.cloneDeep(this.state.displayedColumns);
+    let columns = _.cloneDeep(this.state.columns);
+    displayedColumns = displayedColumns.map(dc => {
+      if(dc.ID === column.ID) {
+        return selectedOption;
+      }
+      return dc;
+    });
+    columns = columns.map((c) => {
+      if(_.findIndex(displayedColumns.filter(dc => !dc.isDisabledInColumn), dc => dc.ID === c.ID) >= 0) {
+        c.disabled = true;
+      } else {
+        c.disabled = false;
+      }
+      return c;
+    });
 
+    this.setState({
+      displayedColumns: displayedColumns,
+      columns: columns
+    });
+    this.props.onChangeColumns(displayedColumns);
   }
 
-  public onChangeColumnLabel(column: ICustomizedColumn, newValue: string) {
+  public onChangeColumnLabel(column: IColumn, newValue: string) {
     let displayedColumns = _.cloneDeep(this.state.displayedColumns);
     column.label = newValue;
-    displayedColumns = displayedColumns.map((col) => col.id === column.id ? column : col);
+    displayedColumns = displayedColumns.map((col) => col.ID === column.ID ? column : col);
     this.setState({
       displayedColumns: displayedColumns
     });
+    this.props.onChangeColumns(displayedColumns);
   }
 
-  public onRemoveColumn(column: ICustomizedColumn) {
+  public onRemoveColumn(column: IColumn) {
       let displayedColumns = _.cloneDeep(this.state.displayedColumns);
-      displayedColumns = displayedColumns.map((col) => {
-        if(col.id === column.id) {
-          col.disabled = true;
+      let columns = _.cloneDeep(this.state.columns);
+      displayedColumns = displayedColumns.map((dc) => {
+        if(dc.ID === column.ID) {
+          dc.isDisabledInColumn = true;
         }
-        return col;
+        return dc;
+      });
+      columns  = columns.map((c) => {
+        if( _.findIndex(displayedColumns.filter(dc => dc.isDisabledInColumn), dc => dc.ID === c.ID)) {
+          c.disabled = false;
+        }
+        return c;
       });
       this.setState({
-        displayedColumns: displayedColumns
+        displayedColumns: displayedColumns,
+        columns: columns
       });
+      this.props.onChangeColumns(displayedColumns);
   }
 
   public onClickAddColumn() {
     this.newItem = {
-      columnType :"",
+      FieldTypeKind : 0,
       isFixed: false,
-      isPresentDefault: false,
+      isUserDefined: true,
       label: "",
-      id: Guid.create().toString(),
+      ID: Guid.create().toString(),
       disabled: false,
-      sortOrder: this.state.displayedColumns.length + 1
+      sortOrder: this.state.displayedColumns.length + 1,
+      key: "",
+      text: ""
     };
     this.setState({
       isAddClicked: true
     });
   }
 
-  public onChangeNewColumnType(option: IDropdownOption) {
+  public onChangeNewColumnType(option) {
+      const selectedOption: IColumn = option;
+      let columns = _.cloneDeep(this.state.columns);
+      let displayedColumns = _.cloneDeep(this.state.displayedColumns);
       this.isDirty = true;
-      this.newItem.columnType = option.text;
+      this.newItem = selectedOption;
+      this.newItem.disabled = false;
+      this.newItem.isUserDefined = true;
+      this.newItem.isFixed = false;
+      this.newItem.sortOrder = displayedColumns.length + 1;
+      columns = columns.map(col =>{
+        if(_.findIndex(displayedColumns.filter(c => !c.isDisabledInColumn), dc => dc.ID === col.ID) >= 0) {
+          col.disabled = true;
+        } else {
+          col.disabled = false;
+        }
+
+        if(col.ID === selectedOption.ID) {
+          col.disabled = true;
+        }
+        return col;
+      });
+      this.setState({
+        columns: columns
+      });
+
   }
 
   public onChangeNewColumnLabel(newValue: string) {
     this.isDirty = true;
     this.newItem.label = newValue;
+    // setTimeout(() => {
+    //   this.forceUpdate();
+    // }, 500);
   }
 
   public onSaveNewColumn() {
     if(!this.checkValidation()) {
+      this.isDirty = true;
+      this.forceUpdate();
       return;
     }
-    const displayedColumns = _.cloneDeep(this.state.displayedColumns);
-    displayedColumns.push(this.newItem);
+    let columns = _.cloneDeep(this.state.columns);
+    let displayedColumns = _.cloneDeep(this.state.displayedColumns);
+    this.newItem.sortOrder = displayedColumns.length + 1;
+    if(_.findIndex(displayedColumns.filter(c => !c.isDisabledInColumn), dc => dc.ID === this.newItem.ID) >= 0) {
+      displayedColumns = displayedColumns.map((dc) => {
+        if(dc.ID === this.newItem.ID) {
+          return this.newItem;
+        }
+        return dc;
+      });
+      displayedColumns = _.orderBy(displayedColumns, s => s.sortOrder, "asc");
+    } else {
+      displayedColumns.push(this.newItem);
+    }
+    columns = columns.map(col =>{
+      if(_.findIndex(displayedColumns.filter(c => !c.isDisabledInColumn), dc => dc.ID === col.ID) >= 0) {
+        col.disabled = true;
+      } else {
+        col.disabled = false;
+      }
+      return col;
+    });
     this.newItem = null;
+    this.isDirty = false;
     this.setState({
       displayedColumns: displayedColumns,
-      isAddClicked: false
+      isAddClicked: false,
+      columns: columns
     });
+    this.props.onChangeColumns(displayedColumns);
   }
 
   public checkValidation() {
@@ -229,7 +310,7 @@ export default class DynamicColumns extends React.Component<IDynamicColumnProps,
       return true;
     }
 
-    if(this.newItem.label.length > 0 && this.newItem.columnType.length > 0) {
+    if(this.newItem.label.length > 0 && this.newItem.FieldTypeKind !== 0) {
       isValid = true;
     }
 
@@ -238,8 +319,20 @@ export default class DynamicColumns extends React.Component<IDynamicColumnProps,
 
   public onCancelNewColumn() {
     this.isDirty = false;
+    let columns = _.cloneDeep(this.state.columns);
+    const displayedColumns = _.cloneDeep(this.state.displayedColumns);
+    this.newItem = null;
+    columns = columns.map(col =>{
+      if(_.findIndex(displayedColumns.filter(c => !c.isDisabledInColumn), dc => dc.ID === col.ID) >= 0) {
+        col.disabled = true;
+      } else {
+        col.disabled = false;
+      }
+      return col;
+    });
     this.setState({
-      isAddClicked: false
+      isAddClicked: false,
+      columns: columns
     });
   }
 
@@ -259,9 +352,9 @@ export default class DynamicColumns extends React.Component<IDynamicColumnProps,
             <div
               ref={p.innerRef}
             >
-              {displayedColumns.filter(c => !c.disabled).map((col, index) => (
+              {displayedColumns.filter(c => !c.isDisabledInColumn).map((col, index) => (
                 <Draggable
-                  draggableId={col.id}
+                  draggableId={col.ID}
                   index={index}
                 >
                   {(provided, snapshot) => (
@@ -282,13 +375,13 @@ export default class DynamicColumns extends React.Component<IDynamicColumnProps,
                           {
                             col.isFixed ? (
                                 <span>
-                                  { col.columnType }
+                                  { col.text }
                                 </span>
                             ) : (
                                 <Dropdown
                                 style={{width: 135}}
-                                selectedKey={ col.columnType}
-                                onChange={(e, option) => {this.onChangeColumnType(option);}}
+                                selectedKey={ col.key}
+                                onChange={(e, option) => {this.onChangeColumnType(option, col);}}
                                 placeholder="Select type"
                                 options={columns}
                               />
@@ -332,27 +425,28 @@ export default class DynamicColumns extends React.Component<IDynamicColumnProps,
         <Dropdown
             onChange={(e, option) => {this.onChangeNewColumnType(option);}}
             placeholder="Select type"
-            errorMessage = { (this.newItem.columnType.length === 0 && this.isDirty) ? "You can't leave this blank": '' }
+            errorMessage = { (this.newItem.FieldTypeKind === 0 && this.isDirty) ? "You can't leave this blank": '' }
             options={columns}
-            style={{ margin: "10px"}}
+            style={{  padding: "10px"}}
           />
 
         <TextField
-          style={{ margin: "10px"}}
+          style={{ padding: "10px"}}
           autoFocus={true}
+          defaultValue = { this.newItem.label}
           onBlur= { (e) => { console.log(e.target.value);}}
           errorMessage = { (this.newItem.label.length === 0 && this.isDirty) ? "You can't leave this blank": '' }
           onChange={(e, newValue) => { this.onChangeNewColumnLabel(newValue); }} />
           {/* Button */}
-          <div>
+          <div >
         <PrimaryButton
-        onClick={this.onSaveNewColumn.bind(this)}>
-          Save
-        </PrimaryButton>
+        style={{margin: '10px'}}
+        text="Save"
+        onClick={this.onSaveNewColumn.bind(this)}/>
         <DefaultButton
-        onClick={this.onCancelNewColumn.bind(this)}>
-          Cancel
-        </DefaultButton>
+        style={{margin: '10px'}}
+        text="Cancel"
+        onClick={this.onCancelNewColumn.bind(this)}/>
       </div>
       </div>) :
       (<PrimaryButton

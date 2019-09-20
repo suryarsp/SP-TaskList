@@ -1,4 +1,5 @@
 import { ICustomizedColumn } from "../propertyPane/columnsCustomization/ICustomizedColumn";
+import { IColumn } from "../services/response/IColumn";
 
 export interface ITaskListWebPartProps {
   taskListName: string;
@@ -16,5 +17,5 @@ export interface ITaskListWebPartProps {
   libraryName: string;
   minNoOfItemsForStream: number;
   defaultExpand: string;
-  displayedColumns: ICustomizedColumn[];
+  displayedColumns: IColumn[];
 }

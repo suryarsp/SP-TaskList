@@ -279,7 +279,11 @@ export class SharePointDataProvider implements IDataProvider {
             key: element["Title"],
             text: element["Title"],
             FieldTypeKind: element["FieldTypeKind"],
-            InternalName :  element["InternalName"]
+            InternalName :  element["InternalName"],
+            disabled: false,
+            isFixed: false,
+            isUserDefined: true,
+            label: element["Title"]
           };
           taskFieldsColl.push(fields);
         });

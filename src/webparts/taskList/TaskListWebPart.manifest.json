@@ -45,59 +45,76 @@
         "defaultExpand": null,
         "displayedColumns": [
           {
-            "id": "29c1e462-482e-4f58-bb4f-f94f642b1def",
-            "columnType": "Sort",
+            "FieldTypeKind" : 9,
+            "key": "Sort",
+            "text": "Sort",
+            "InternalName": "Sort",
+            "ID": "29c1e462-482e-4f58-bb4f-f94f642b1def",
+            "isUserDefined" : false,
+            "disabled": false,
+            "isFixed": true,
             "label": "Order",
-            "isFixed": true,
-            "isPresentDefault": true,
-            "sortOrder": 1,
-            "disabled": false
+            "sortOrder": 1
           },
           {
-            "id": "46933d38-e875-4f46-8e67-d66aa18f13ea",
-            "columnType": "Task Name",
+            "FieldTypeKind" : 2,
+            "key": "Task Name",
+            "text": "Task Name",
+            "InternalName": "TaskName",
+            "ID": "46933d38-e875-4f46-8e67-d66aa18f13ea",
+            "isUserDefined" : false,
+            "disabled": false,
+            "isFixed": true,
             "label": "Task Name",
-            "isFixed": true,
-            "isPresentDefault": true,
-            "sortOrder": 2,
-            "disabled": false
-
+            "sortOrder": 2
           },
           {
-            "id": "6a40b40a-8b57-49b2-9d9b-e26836e990cd",
-            "columnType": "Responsible Party / Status",
-            "label": "Responsible Party / Status",
+            "FieldTypeKind" : 7,
+            "key": "Responsible party / Status",
+            "text": "Responsible party / Status",
+            "InternalName": "Responsible party / Status",
+            "ID": "6a40b40a-8b57-49b2-9d9b-e26836e990cd",
+            "isUserDefined" : false,
+            "disabled": false,
             "isFixed": true,
-            "isPresentDefault": true,
-            "sortOrder": 3,
-            "disabled": false
+            "label": "Responsible party / Status",
+            "sortOrder": 3
           },
           {
-            "id": "ea634036-02f3-4a26-b75c-74ca0aa18039",
-            "columnType": "Modified",
+            "FieldTypeKind" : 4,
+            "key": "Modified",
+            "text": "Modified",
+            "InternalName": "Modified",
+            "ID": "28cf69c5-fa48-462a-b5cd-27b6f9d2bd5f",
+            "isUserDefined" : true,
+            "disabled": false,
+            "isFixed": false,
             "label": "Modified",
-            "isFixed": false,
-            "isPresentDefault": true,
-            "sortOrder": 4,
-            "disabled": false
+            "sortOrder": 4
           },
           {
-            "id": "da177e82-68a1-4ced-9887-06b5c11792f4",
-            "columnType": "Documents",
+            "FieldTypeKind" : 7,
+            "key": "Documents",
+            "text": "Documents",
+            "InternalName": "Documents",
+            "ID": "6bd9b06c-c42f-4a5c-8edb-29722bc62566",
+            "isUserDefined" : true,
+            "disabled": false,
+            "isFixed": false,
             "label": "Documents",
-            "isFixed": false,
-            "isPresentDefault": true,
-            "sortOrder": 5,
-            "disabled": false
+            "sortOrder": 5
           },
           {
-            "id": "829b9029-2266-49e8-93a0-3020a401ff42",
-            "columnType": "Comments",
-            "label": "Comments",
+            "FieldTypeKind" : 7,
+            "key": "Comments",
+            "text": "Comments",
+            "InternalName": "Comments",
+            "ID": "72a0f53f-961b-4af3-a7cb-4bd4b9af139b",
+            "isUserDefined" : true,
+            "disabled": false,
             "isFixed": false,
-            "isPresentDefault": true,
-            "sortOrder": 6,
-            "disabled": false
+            "label": "Comments",
+            "sortOrder": 6
           }
         ]
       }

@@ -292,7 +292,6 @@ export class Utilties {
 
      public filterColumnsByType(columns: IColumn[]) {
         let filteredColumns: IColumn[] = [];
-        debugger;
         filteredColumns  = columns.filter((col) =>
           (col.FieldTypeKind === FieldTypes.DateTime ||
           col.FieldTypeKind === FieldTypes.Choice ||

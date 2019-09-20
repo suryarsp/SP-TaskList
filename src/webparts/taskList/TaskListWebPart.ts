@@ -14,7 +14,7 @@ import {
 
 import * as strings from 'TaskListWebPartStrings';
 import TaskList from './components/TaskList';
-import { ITaskListProps, ITaskListWebPartProps, ICustomizedColumn } from '../../interfaces/index';
+import { ITaskListProps, ITaskListWebPartProps, ICustomizedColumn, IColumn } from '../../interfaces/index';
 import { TaskListConstants } from '../../common/defaults/taskList-constants';
 import { TaskGroupingControlComponent } from '../../propertyPanelCustomControls/taskGroupingControl/TaskGroupingControl';
 import TaskDataProvider from '../../services/TaskDataProvider';
@@ -87,7 +87,7 @@ export default class TaskListWebPart extends BaseClientSideWebPart<ITaskListWebP
     this.render();
   }
 
-  public onChangeDisplayedColumns(columns: ICustomizedColumn[]) {
+  public onChangeDisplayedColumns(columns: IColumn[]) {
     this.properties.displayedColumns = columns;
   }
 
@@ -225,13 +225,15 @@ export default class TaskListWebPart extends BaseClientSideWebPart<ITaskListWebP
                   onChangeGroupListName: this.onChangeGroupListName.bind(this)
                 }),
 
-                PropertyPaneLabel("Blank", {
-                  text: ""
-                }),
+          
 
                 PropertyPaneDropdown('defaultTaskListSort', {
                   label: 'Default Task Category',
                   options: TaskListConstants.columns,
+                }),
+
+                PropertyPaneLabel("Blank", {
+                  text: ""
                 }),
 
                 new ColumnsCustomization("DynamicColumns", {
