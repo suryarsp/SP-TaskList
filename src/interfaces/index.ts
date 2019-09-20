@@ -41,6 +41,8 @@ export * from './components/taskListPanelConatiner/DragAndDropContainer/IDirecto
 export * from './components/taskListPanelConatiner/DragAndDropContainer/IFolderLink';
 export * from './components/taskListPanelConatiner/DragAndDropContainer/IDragnDropContainerProps';
 export * from './components/taskListPanelConatiner/DragAndDropContainer/IDragnDropContainerState';
+export * from './components/taskListPanelConatiner/DragAndDropContainer/IFile';
+export * from './components/taskListPanelConatiner/taskCommandBar/slideOutPanels/taskDocumentsPanel/IActivityItem';
 
 
 // Services
@@ -57,6 +59,7 @@ export * from './services/response/ICreateFolder';
 export * from './services/response/IDownloadItems';
 export * from './services/response/ITaskList';
 export * from './services/response/ISubTaskList';
+export * from './services/response/IChoiceField';
 
 // Property Pane
 export * from './propertyPane/taskGroupingControl/ITaskGroupingControlComponentProps';
@@ -73,6 +76,7 @@ export * from  './propertyPane/columnsCustomization/IColumnsCustomizationProps';
 export * from  './propertyPane/columnsCustomization/ICustomizedColumn';
 export * from  './propertyPane/columnsCustomization/dynamicColumns/IDynamicColumnProps';
 export * from  './propertyPane/columnsCustomization/dynamicColumns/IDynamicColumnState';
+
 
 
 // other

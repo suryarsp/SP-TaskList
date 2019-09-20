@@ -1,4 +1,4 @@
-import { ISubTaskList } from "../..";
+import { ISubTaskList, IDirectory, IDocument } from "../..";
 
 export interface ITaskList {
   Category: Category;
@@ -17,6 +17,8 @@ export interface ITaskList {
   children : ISubTaskList[];
   key:string;
   text:string;
+  Directory?: IDirectory;
+	Files?: IDocument[];
 }
 
 export interface Comments{

@@ -3,7 +3,7 @@ import { PermissionKind } from "sp-pnp-js";
 import { ITaskList } from "../../../../..";
 
 export interface ITaskDocumentsPanelProps {
-  hidePanel: (isDirty: boolean) => void;
+  hideDocumentsPanel: (isDirty: boolean) => void;
   currentItem: ITaskList;  
   libraryName: string;
   listName: string;
